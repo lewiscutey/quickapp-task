@@ -1,0 +1,65 @@
+<html>
+    <head>
+            <title>八卦</title>
+            <style>
+            .TaiChi{
+			width: 300px;
+			height: 300px;
+			border-radius: 50%;/*确定一个圆形*/
+			position: relative;
+			/* margin: auto auto;
+			top:auto; */
+            margin: auto;
+            margin-top: 500px;
+			background-image: linear-gradient(to right,black 50%, white 50%);
+		}
+		.TaiChi::before,.TaiChi::after{
+			content: '';
+			position: absolute;
+			width: 30px;
+			height: 30px;
+			border-radius:50%;
+			left:50%;
+			transform: translateX(-50%);/*22 23实现相对父元素水平对齐*/
+		}
+		.TaiChi::before{
+			background-color: white;
+			border: 60px solid black;
+			top: 0;
+		}
+		.TaiChi::after{
+			background-color: black;
+			border: 60px solid white;
+			bottom: 0;
+		}
+
+		@-webkit-keyframes rotate{
+		from{-webkit-transform: rotate(0deg)}
+		to{-webkit-transform: rotate(360deg)}
+		}
+		@-moz-keyframes rotate{
+		from{-moz-transform: rotate(0deg)}
+		to{-moz-transform: rotate(359deg)}
+		}
+
+		@-o-keyframes rotate{
+		from{-o-transform: rotate(0deg)}
+		to{-o-transform: rotate(359deg)}
+		}
+		@keyframes rotate{
+		from{transform: rotate(0deg)}
+		to{transform: rotate(359deg)}
+		}
+		#spin{
+			-webkit-animation: rotate 3s linear infinite;
+			-moz-animation: rotate 3s linear infinite;
+			-o-animation: rotate 3s linear infinite;
+			animation: rotate 3s linear infinite;
+}
+
+ </style>
+    </head>
+    <body>
+        <div class = "TaiChi"  id="spin"></div>
+    </body>
+</html>
