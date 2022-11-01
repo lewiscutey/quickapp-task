@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .bgt{
+            margin: auto;
+            width: 100px;
+            height:200px;
+            position:absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            border-style:solid;
+            border-color:black;
+            border-width:2px 100px 2px  2px;
+            border-radius:50%;
+        }
+        .bgt::before{
+            content: "";
+            position:absolute;
+            top: 0;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            border:40px solid black;
+        }
+        .bgt::after{
+            content: "";
+            position:absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: black;
+            border-radius: 50%;
+            border:40px solid white;
+        }
+    </style>
+</head>
+<body>
+    <div class="bgt">
+
+    </div>
+
+    <script>
+        let bgt = document.querySelector(".bgt");
+        let d = 1;
+        setInterval(()=>{
+            d ++;
+            bgt.style.transform='rotate(' + d + 'deg)';
+        },20)
+        console.log("dasd");
+    </script>
+</body>
+</html>
