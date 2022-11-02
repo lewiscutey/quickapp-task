@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>旋转八卦图</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      .baguatu{
+          /* 将图片位置定位至页面中央 */
+          position:absolute;
+          margin:auto;
+          padding:0px;
+          top:0px;
+          bottom:0px;
+          left:0px;
+          right:0px;
+          /* 设置图片大小（仅包含最终太极图的上半部分） */
+          width:192px;
+          height:96px;
+          /* 通过border得到最终太极图的下半部分 */
+          border-style:solid;
+          border-color:black;
+          border-width:2px 2px 96px 2px;
+          border-radius:50%;
+          /* 通过css动画实现html元素的动画效果 */
+          animation-duration: 2s;    /* 完成动画所花费的时间（以此调节旋转速度） */
+          animation-name: ratote-div;    /* 需要绑定到选择器的keyframe名称 */
+          animation-iteration-count: infinite;    /* 规定动画播放的次数为无限 */
+          animation-timing-function: linear;    /* 规定动画播放的速度曲线为匀速 */
+      }
+      .baguatu::before{
+          /* 将圆环位置定位至图片的左中部 */
+          content: "";
+          position:absolute;
+          top:50%;
+          left:0px;
+          width:24px;
+          height:24px;
+          /* 画出外黑内白的圆环 */
+          background-color:white;
+          border:36px solid black;
+          border-radius:50%;
+      } 
+      .baguatu::after{
+          /* 将圆环位置定位至图片的右中部 */
+          content:"";
+          position:absolute;
+          top:50%;
+          right:0px;
+          width:24px;
+          height:24px;
+          /* 画出外白内黑的圆环 */
+          background-color:black;
+          border:36px solid white;
+          border-radius:50%;
+      } 
+      /* 实现旋转动画 */
+      @keyframes ratote-div {
+          100% {
+              transform: rotate(360deg)
+          }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="baguatu"></div>
+  </body>
+</html>
