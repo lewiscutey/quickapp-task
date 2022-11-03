@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            padding: 200px;
+            background: #ccc;
+        }
+
+        div {
+            width: 200px;
+            height: 400px;
+            background-color: #fff;
+            border-left: 200px solid #000;
+            border-radius: 50%;
+            color: blue;
+            position: relative;
+            transition: all 4s;
+        }
+
+
+        div::after,
+        div::before {
+            content: "";
+            display: block;
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            margin-left: -100px;
+        }
+
+        div::after {
+            background: black;
+            border: 75px solid #fff;
+        }
+
+        div::before {
+            background: #fff;
+            border: 75px solid #000;
+        }
+
+        div:hover {
+            transform: rotate(1800deg);
+        }
+    </style>
+
+</head>
+
+<body>
+    <div></div>
+
+</body>
+
+</html>
