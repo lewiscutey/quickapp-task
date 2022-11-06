@@ -53,19 +53,16 @@
 
 <body>
     <div class="taiji"> </div>
-</body>
 
-</html>
-
-<script>
-    var taiji_obj = document.querySelector(".taiji"); // 获取taiji对象
-    var deg = 0;   //旋转度数
-    // 10ms旋转1度
-    setInterval(function () {
-        deg++;    
-        taiji_obj.style.transform = 'rotate(' + deg + 'deg)'; // object.style.transform旋转div元素
-    }, 10)
-</script>
+    <script>
+        var taiji_obj = document.querySelector(".taiji"); // 获取taiji对象
+        var deg = 0;   //旋转度数
+        // 10ms旋转1度
+        setInterval(function () {
+            deg++;
+            taiji_obj.style.transform = 'rotate(' + deg + 'deg)'; // object.style.transform旋转div元素
+        }, 10)
+    </script>
 </body>
 
 </html>
