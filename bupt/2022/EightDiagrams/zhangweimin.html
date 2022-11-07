@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bagua</title>
+
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            padding: 200px;
+            background: #ccc;
+        }
+
+        div {
+            width: 200px;
+            height: 400px;
+            background-color: #fff;
+            border-left: 200px solid #000;
+            border-radius: 50%;
+
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+
+            transition: all 10s linear;
+        }
+
+
+        div::after {
+            content: "";
+            display: block;
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            margin-left: -100px;
+            background: black;
+            border: 75px solid #fff;
+        }
+
+        div::before {
+            content: "";
+            display: block;
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            margin-left: -100px;
+            background: #fff;
+            border: 75px solid #000;
+        }
+
+        div:hover {
+            transform: rotate(3600deg);
+        }
+    </style>
+</head>
+
+<body>
+    <div></div>
+</body>
+
+</html>
