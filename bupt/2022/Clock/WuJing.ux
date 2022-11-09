@@ -1,0 +1,250 @@
+<template>
+  <div class="wrapper">
+    <div class="clock-container">
+      <div class="clock">
+        <div
+          for="(idx,item) in tick"
+          class="{{item}}"
+          style="transform: rotate({{idx*360/60}}deg) translate(-50%,0)"
+        ></div>
+
+        <div
+          class="seconds tin"
+          style="transform: rotate({{second}}deg) translate(-50%, 0px)"
+        ></div>
+
+        <div
+          class="minutes tin"
+          style="transform: rotate({{minute}}deg) translate(-50%, 0px)"
+        ></div>
+
+        <div
+          class="hours tin"
+          style="transform: rotate({{hour}}deg) translate(-50%, 0px)"
+        ></div>
+
+        <div class="time-lable">
+          <div class="time-div">
+            <text class="text">{{ time }}</text>
+          </div>
+
+          <div class="date-div">
+            <text class="text">{{ date }}</text>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="number"
+        for="{{number}}"
+        style="transform: rotate({{$idx*30}}deg) translate(-50%)"
+      >
+        <text class="text number-text">{{ $item }}</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import moment from 'moment'
+
+export default {
+  private: {
+    tick: [],
+    second: 0,
+    minute: 0,
+    hour: 0,
+    time: "00:00:00",
+    date: "",
+    number: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    timer: null
+  },
+  onInit() {
+
+    for (let i = 0; i < 60; i++) {
+      if (i % 15 === 0) {
+        this.tick.push("tick tick-long");
+      } else if (i % 5 === 0) {
+        this.tick.push("tick tick-mid")
+      } else {
+        this.tick.push("tick")
+      }
+    }
+
+    this.timer = setInterval(() => {
+
+      const now = moment()
+
+      this.updateTime(now);
+      this.updateDate(now);
+
+      // 0点会更新，平常都不更新
+      if (Math.floor(now.hours()) === 0) {
+        this.updateDate(now);
+      }
+    }, 60)
+
+  },
+  onDestroy() {
+    if (this.timer != null)
+      clearInterval(this.timer)
+  },
+  updateTime(now) {
+
+    // 为了方便获取毫秒数，使用了moment包
+    let mss = now.milliseconds()
+    let ss = now.seconds() + mss / 1000;
+    let mm = now.minutes() + ss / 60;
+    let hh = now.hours() + mm / 60;
+
+    // style中动态绑定transform的rotate函数，下面分别对应三个指针的旋转角度
+    this.second = 180 + ss * 6; // 1秒6度
+    this.minute = 180 + mm * 6; // 1分钟30/60度
+    this.hour = 180 + hh * 30; // 1小时转30度
+
+
+    let hourStr = Math.floor(hh)
+    if (hourStr < 10) {
+      hourStr = `0${hourStr}`
+    }
+    let minuteStr = Math.floor(mm)
+    if (minuteStr < 10) {
+      minuteStr = `0${minuteStr}`
+    }
+    let secondStr = Math.floor(ss)
+    if (secondStr < 10) {
+      secondStr = `0${secondStr}`
+    }
+
+    this.time = `${hourStr}:${minuteStr}:${secondStr}`
+
+  },
+  updateDate(now) {
+    let day = now.daysInMonth();
+    let month = now.months();
+    // DayOfWeek，也就是所谓的utcDay
+    let utcDay = now.days()
+
+    switch (utcDay) {
+      case 1:
+        utcDay = "星期一";
+        break
+      case 2:
+        utcDay = "星期二";
+        break
+      case 3:
+        utcDay = "星期三";
+        break
+      case 4:
+        utcDay = "星期四";
+        break
+      case 5:
+        utcDay = "星期五";
+        break
+      case 6:
+        utcDay = "星期六";
+        break
+      default:
+        utcDay = "星期天"
+    }
+
+    this.date = `${month}月${day}日 ${utcDay}`
+  }
+
+}
+</script>
+
+<style lang="less">
+.clock-container {
+  position: relative;
+  width: 600px;
+  height: 600px;
+  margin: 100 auto;
+}
+
+.clock {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid black;
+  border-radius: 50%;
+  z-index: 1;
+
+  .tick {
+    position: absolute;
+    width: 0.5%;
+    height: 6%;
+    font-size: 50px;
+    background-color: grey;
+    z-index: 2;
+
+    top: 0px;
+    left: 50%;
+    transform-origin: 0 250px;
+  }
+  .tick-mid {
+    height: 8.5%;
+  }
+
+  .tick-long {
+    height: 10%;
+  }
+
+  .seconds {
+    width: 1%;
+    height: 40%;
+  }
+
+  .minutes {
+    width: 1%;
+    height: 30%;
+  }
+
+  .hours {
+    width: 1%;
+    height: 20%;
+  }
+
+  .tin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background-color: grey;
+    transform-origin: 0 0;
+  }
+
+  .time-lable {
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+    top: 60%;
+    z-index: 100;
+
+    div {
+      position: relative;
+      width: 100%;
+      height: 50;
+      line-height: 50;
+    }
+  }
+}
+
+.number {
+  position: absolute;
+  width: 50;
+  height: 50;
+  z-index: 5;
+  left: 50%;
+  /* background-color: pink; */
+  transform-origin: 0 300;
+  transform: translate(-50%);
+  text-align: center;
+}
+.text {
+  width: 100%;
+  text-align: center;
+}
+</style>
