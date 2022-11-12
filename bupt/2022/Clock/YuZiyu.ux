@@ -1,0 +1,149 @@
+<template>
+  <div class="wrapper">
+    <text class="title">{{ title }}</text>
+    <div class="clocks">
+      <canvas id="canvas" width="500" height="500"></canvas>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  private: {
+    title: 'Clock',
+  },
+
+  onInit() {
+    this.$page.setTitleBar({ text: 'ClockPage' })
+    if (this.$page.setMeta) {
+      this.$page.setMeta({
+        title: 'ClockPage',
+        description: 'show a clock model',
+      })
+    }
+  },
+  onShow() {
+    //页面加载完成后在节点上绘图
+    initialization();
+  },
+}
+//参考教程：https://www.runoob.com/w3cnote/html5-canvas-clock.html
+//绘图全局变量定义
+var canvas, ctx;
+var clockRadius = 250;
+var clockImage;
+
+//在canvas上绘图
+function drawScene() {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clear canvas
+  ctx.save();
+
+  //获取当前时间
+  var date = new Date();
+  var hour = date.getHours();
+  var minute = date.getMinutes();
+  var second = date.getSeconds();
+  hour %= 12;//24小时制->12小时制
+
+  //背景绘图
+  ctx.drawImage(clockImage, 0, 0, 500, 500);
+
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.beginPath();
+
+  //钟表数字样式、位置
+  ctx.font = '36px Arial';
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  for (var n = 1; n <= 12; n++) {
+    var theta = (n - 3) * (Math.PI * 2) / 12;
+    var x = clockRadius * 0.7 * Math.cos(theta);
+    var y = clockRadius * 0.7 * Math.sin(theta);
+    ctx.fillText(n, x, y);
+  }
+
+  //时针绘图
+  ctx.save();
+  var theta = (hour - 3) * 2 * Math.PI / 12;
+  ctx.rotate(theta);
+  ctx.beginPath();
+  ctx.moveTo(-15, -5);
+  ctx.lineTo(-15, 5);
+  ctx.lineTo(clockRadius * 0.5, 1);
+  ctx.lineTo(clockRadius * 0.5, -1);
+  ctx.fill();
+  ctx.restore();
+
+  //分针绘图
+  ctx.save();
+  var theta = (minute - 15) * 2 * Math.PI / 60;
+  ctx.rotate(theta);
+  ctx.beginPath();
+  ctx.moveTo(-15, -4);
+  ctx.lineTo(-15, 4);
+  ctx.lineTo(clockRadius * 0.8, 1);
+  ctx.lineTo(clockRadius * 0.8, -1);
+  ctx.fill();
+  ctx.restore();
+
+  //秒针绘图
+  ctx.save();
+  var theta = (second - 15) * 2 * Math.PI / 60;
+  ctx.rotate(theta);
+  ctx.beginPath();
+  ctx.moveTo(-15, -3);
+  ctx.lineTo(-15, 3);
+  ctx.lineTo(clockRadius * 0.9, 1);
+  ctx.lineTo(clockRadius * 0.9, -1);
+  ctx.fillStyle = '#0077bc';
+  ctx.fill();
+  ctx.restore();
+
+  ctx.restore();
+}
+//初始化
+function initialization() {
+  console.log('init canvas!')
+  canvas = document.getElementById('canvas');
+  ctx = canvas.getContext('2d');
+
+  clockImage = new Image();
+  //使用网络表盘图片
+  clockImage.src = 'https://static.runoob.com/images/mix/125855_nnla_89964.png';
+
+  //每秒重绘一次canvas
+  setInterval(drawScene, 1000);
+};
+</script>
+
+<style lang="less">
+@import './../../assets/styles/style.less';
+
+.wrapper {
+  .flex-box-mixins(column, center, center);
+  .title {
+    font-size: 8 * @size-factor;
+    text-align: center;
+    color: @black;
+  }
+
+  .btn {
+    width: 90 * @size-factor;
+    height: 16 * @size-factor;
+    border-radius: 8 * @size-factor;
+    background-color: @brand;
+    color: @white;
+    font-size: 30px;
+    margin-top: 16 * @size-factor;
+  }
+}
+.clocks {
+  height: 500px;
+  margin: 25px auto;
+  position: relative;
+  width: 500px;
+  border-radius: 50%;
+  background-color: #987445;
+}
+</style>
