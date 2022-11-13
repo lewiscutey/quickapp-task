@@ -1,0 +1,125 @@
+<template>
+  <div class="doc-page">
+    <div class="content">
+      <canvas class="new-canvas" id="new-canvas"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .content {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .new-canvas {
+    height: 200px;
+    width: 200px;
+    border-radius: 100px;
+    background-color: rgb(19, 67, 139);
+    border: 1px solid black;
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      drawComplete: false,
+      cw:200,
+      ch:200,
+      ctx:null,
+      canvas:null,
+      timer:null
+    },
+    onInit() {//viewmodel数据准备好，可以开始使用页面数据
+      this.$page.setTitleBar({
+        text: 'canvas实现钟表'
+      })
+    },
+    onShow() {//viewmodel模板已经编译好，可以获取DOM节点
+      if (!this.drawComplete) {
+        this.drawCanvas()
+      }
+    },
+    onDestroy() {
+    if (this.timer != null)
+      clearInterval(this.timer)
+  },
+    drawCanvas() {
+        this.canvas = this.$element('new-canvas') //获取 canvas 组件
+        this.ctx = this.canvas.getContext('2d') //获取 canvas 绘图上下文
+        this.ctx.translate(100,100)
+        this.drawComplete = true
+        this.draw_watch()
+    },
+    draw_watch() {
+            //清空Canvas所有内容
+            this.ctx.clearRect((-this.cw) / 2, (-this.ch )/ 2, this.cw, this.ch)
+            //计算指针的最大长度
+            var len = Math.min(this.cw, this.ch) / 2;
+            //绘制刻度盘
+            var tlen = len * 0.85;
+            this.ctx.font = "14px 'Arial'";
+            this.ctx.fillStyle = "white";
+            this.ctx.textAlign = "center";
+            this.ctx.textBaseLine = "middle";
+            //绘制好12个刻度
+            for (var i = 0; i < 12; i++) {
+                var tag1 = Math.PI * 2 * (3 - i) / 12;//角度
+                var tx = tlen * Math.cos(tag1);//位置
+                var ty = -tlen * Math.sin(tag1);//位置
+                this.ctx.fillText(i, tx, ty);
+            }
+            //获取当前的时分秒
+            var d = new Date();
+            var h = d.getHours();
+            var m = d.getMinutes();
+            var s = d.getSeconds();
+            if (h > 12) {
+                h = h - 12;
+            }
+ 
+            //绘制时针，根据当前时间，确定角度位置
+            var angle1 = Math.PI * 2 * (3 - (h + m / 60)) / 12;
+            var length1 = len * 0.5;
+            var width1 = 5;
+            var color1 = "#000000";
+            this.drawhand(angle1, length1, width1, color1);
+ 
+            //绘制分针
+            var angle2 = Math.PI * 2 * (15 - (m + s / 60)) / 60;
+            var length2 = len * 0.7;
+            var width2 = 3;
+            var color2 = "#555555";
+            this.drawhand(angle2, length2, width2, color2);
+ 
+            //绘制秒针
+            var angle3 = Math.PI * 2 * (15 - s) / 60;
+            var length3 = len * 0.8;
+            var width3 = 1;
+            var color3 = "#aa0000";
+            this.drawhand(angle3, length3, width3, color3);
+ 
+            //设置timer
+            this.timer=setInterval(()=>{
+                 this.draw_watch()
+               },1000) //单位是毫秒
+        },
+        drawhand(angle, len, width, color) {
+            //计算针端的坐标
+            var x = len * Math.cos(angle);
+            var y = -len * Math.sin(angle);
+            //绘制针
+            this.ctx.strokeStyle = color;
+            this.ctx.lineWidth = width;
+            this.ctx.lineCap = "round";
+            /*以下是绘制路径的过程，具体可在https://doc.quickapp.cn/tutorial/widgets/canvas-tutorial.html*/
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, 0);
+            this.ctx.lineTo(x, y);
+            this.ctx.stroke();
+            this.drawComplete = true;
+        }
+
+  }
+</script>
