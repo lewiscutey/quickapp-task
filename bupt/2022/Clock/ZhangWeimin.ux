@@ -1,0 +1,168 @@
+<template>
+  <div class="clock__container">
+    <div class="clock__circle">
+      <div
+        class="clock__hand"
+        for="12"
+        style="transform: rotate({{$idx*30}}deg)"
+      >
+        <div class="clock__hand__before"></div>
+      </div>
+      <div class="clock__hour" style="transform: rotate({{hour_h}}deg)">
+        <div class="clock__hour__before"></div>
+      </div>
+      <div class="clock__minutes" style="transform: rotate({{minutes_h}}deg)">
+        <div class="clock__minutes__before"></div>
+      </div>
+      <div class="clock__seconds" style="transform: rotate({{seconds_h}}deg)">
+        <div class="clock__seconds__before"></div>
+      </div>
+      <div class="clock__rounder__back" style="z-index: 10">
+        <div class="clock__rounder__front" style="z-index: 10"></div>
+      </div>
+    </div>
+    <div class="clock__text">
+      <text class="clock__text-hour">{{ hour_s }}:</text>
+      <text class="clock__text-minutes">{{ minutes_s }}:</text>
+      <text class="clock__text-seconds">{{ seconds_s }}</text>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  private: {
+    hour_h: 0,
+    minutes_h: 0,
+    seconds_h: 0,
+    hour_s: '',
+    minutes_s: '',
+    seconds_s: ''
+  },
+
+  onInit() {
+    const clock = () => {
+      let date = new Date()
+
+      let hour = date.getHours(),
+        minutes = date.getMinutes(),
+        seconds = date.getSeconds()
+
+      this.hour_h = hour * 30 + minutes / 60 * 30 + seconds / 3600 * 30;
+      this.minutes_h = minutes * 6 + seconds / 60 * 6;
+      this.seconds_h = seconds * 6;
+
+      if (hour < 10) { this.hour_s = `0${hour}` } else { this.hour_s = `${hour}` }
+      if (minutes < 10) { this.minutes_s = `0${minutes}` } else { this.minutes_s = `${minutes}` }
+      if (seconds < 10) { this.seconds_s = `0${seconds}` } else { this.seconds_s = `${seconds}` }
+    }
+    setInterval(clock, 1000)
+  }
+}
+</script>
+
+<style>
+.clock__container {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.clock__circle {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  background-color: hsl(240, 30%, 95%);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.clock__hand {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: 475px;
+  height: 475px;
+}
+.clock__hand__before {
+  position: absolute;
+  background-color: hsl(240, 12%, 65%);
+  width: 4px;
+  height: 50px;
+}
+.clock__rounder__back {
+  width: 40px;
+  height: 40px;
+  background-color: hsl(240, 24%, 70%);
+  border-radius: 50%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.clock__rounder__front {
+  width: 30px;
+  height: 30px;
+  background-color: hsl(240, 53%, 49%);
+  border-radius: 50%;
+}
+.clock__hour,
+.clock__minutes,
+.clock__seconds {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+}
+
+.clock__hour__before,
+.clock__minutes__before,
+.clock__seconds__before {
+  position: absolute;
+  width: 17px;
+  border-radius: 20px;
+}
+
+.clock__hour {
+  width: 200px;
+  height: 200px;
+}
+
+.clock__hour__before {
+  background-color: hsl(240, 12%, 35%);
+  height: 100px;
+}
+
+.clock__minutes {
+  width: 320px;
+  height: 320px;
+}
+
+.clock__minutes__before {
+  background-color: hsl(240, 12%, 35%);
+  height: 160px;
+}
+
+.clock__seconds {
+  width: 400px;
+  height: 400px;
+}
+
+.clock__seconds__before {
+  background-color: hsl(240, 53%, 49%);
+  height: 200px;
+}
+
+.clock__text {
+  display: flex;
+  justify-content: center;
+  /* width: 400px; */
+  height: 300px;
+}
+
+.clock__text-hour,
+.clock__text-minutes,
+.clock__text-seconds {
+  font-size: 70px;
+  font-weight: 500;
+  color: hsl(240, 53%, 15%);
+}
+</style>

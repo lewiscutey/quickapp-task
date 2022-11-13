@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>太极图</title>
+		<style>
+			
+			div{
+				width:96px;
+				height: 48px;
+				border: 2px solid #000;
+				border-bottom: 50px solid #000;
+				position: absolute;left: 0px;top: 0px;right: 0px;bottom: 0px;
+				margin: auto;
+				border-radius: 50%;
+				-webkit-transition: 5s;
+			}
+			
+			div:before{
+				content: "";
+				position: absolute;
+				left: 0%;top: 50%;
+				width: 8px;
+				height: 8px;
+				background: #000;
+				border: 20px solid #fff;
+				border-radius:50%;
+			}
+			
+			div:after{
+				content: "";
+				position: absolute;
+				right: 0%;top: 50%;
+				width: 8px;
+				height: 8px;
+				background: #fff;
+				border: 20px solid #000;
+				border-radius:50%;
+			}
+			
+			div:hover{
+				-webkit-transform: rotate(-360deg);
+			}
+			
+		</style>
+	</head>
+	<body>
+		<div>
+			
+		</div>
+	</body>
+</html>

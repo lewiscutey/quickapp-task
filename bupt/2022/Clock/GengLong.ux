@@ -1,0 +1,151 @@
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="content">
+    <canvas id='iclock' class="clock"></canvas>
+    <text class="title">{{ title }}</text>
+  </div>
+</template>
+
+<script>
+
+export default {
+  // 页面级组件的数据模型，影响传入数据的覆盖机制：private内定义的属性不允许被覆盖
+  private: {
+    title: 'Clock',
+  },
+  onInit() {
+    this.$page.setTitleBar({ text: 'myClock' })
+  },
+  onShow() {
+    // 每秒执行一次
+    setInterval(this.drawClock, 1000)
+  },
+
+  drawClock() {
+    // 设定钟表半径为canvas元素长宽的一半
+    var clockRadius = 200;
+
+    var now = new Date();
+    // const canvas = this.$element('iclock') // 获取 canvas 组件 【该命令有bug】
+    const canvas = document.getElementById('iclock');
+    const ctx = canvas.getContext('2d'); //获取 canvas 绘图上下文
+    ctx.clearRect(0, 0, clockRadius * 2, clockRadius * 2);
+
+    // 本行与最后一行 save&restore 用来保证重复运行本函数时不会出现画布bug
+    ctx.save();
+
+    // 移动原点到canvas元素中心 
+    ctx.translate(clockRadius, clockRadius);
+
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "black";
+    ctx.lineCap = "round";
+    ctx.font = '25px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Number marks
+    for (var i = 1; i <= 12; i++) {
+        var theta = (i-3) * (Math.PI * 2) / 12;
+        var x = clockRadius * 0.7 * Math.cos(theta);
+        var y = clockRadius * 0.7 * Math.sin(theta);
+        ctx.fillText(i, x, y);
+    }
+    
+    // Hour marks
+    ctx.save();
+    ctx.lineWidth = 4;
+    for(var i = 1; i <= 12; i++){
+      ctx.beginPath();
+      ctx.moveTo(clockRadius * 0.55, 0);
+      ctx.lineTo(clockRadius * 0.6, 0);
+      ctx.stroke();
+      ctx.rotate(Math.PI/6);
+    }
+    ctx.restore();
+
+    // Minute marks
+    ctx.save();
+    for(var i = 0; i < 60; i++){
+      if(i % 5 != 0){
+        ctx.beginPath();
+        ctx.arc(clockRadius * 0.57, 0, 3, 0, Math.PI*2, true);
+        ctx.fill();
+      }
+      ctx.rotate(Math.PI/30);
+    }
+    ctx.restore();
+
+    // get current time
+    var sec = now.getSeconds();
+    var min = now.getMinutes();
+    var hr  = now.getHours() % 12;
+    
+    // write Hours
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate( (Math.PI/6)*hr + (Math.PI/360)*min + (Math.PI/21600)*sec );
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-clockRadius * 0.1, 0);
+    ctx.lineTo(0, 4);
+    ctx.lineTo(clockRadius * 0.35, 0);
+    ctx.lineTo(0,-4);
+    ctx.fill();
+    ctx.restore();
+
+    // write Minutes
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate( (Math.PI/30)*min + (Math.PI/1800)*sec );
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-clockRadius * 0.12, 0);
+    ctx.lineTo(0, 3);
+    ctx.lineTo(clockRadius * 0.45, 0);
+    ctx.lineTo(0, -3);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+
+    // Write seconds
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate(sec * Math.PI/30);
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.moveTo(-clockRadius * 0.15, 0);
+    ctx.lineTo(0, 3);
+    ctx.lineTo(clockRadius * 0.55, 0);
+    ctx.lineTo(0, -3);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.restore();
+  },
+
+}
+
+</script>
+
+<style>
+
+  .content {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .title {
+    font-size: 40px;
+    text-align: center;
+    color: #000000;
+  }
+
+  .clock { 
+    width: 400px;
+    height: 400px;
+  }
+  
+</style>

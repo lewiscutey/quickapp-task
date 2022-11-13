@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>旋转太极图-tanjunyuan</title>
+    <style>
+        body {
+            background: skyblue;
+            /*设置背景为天蓝色*/
+        }
+
+        div.taiji {
+            margin: 100px auto;
+            border-radius: 50%;
+            /*将div设置为圆*/
+            width: 400px;
+            height: 400px;
+            position: relative;
+            background: linear-gradient(to bottom, #fffcfc 0%, #ffffff 50%,
+                    #000000 50%, #000000 100%);
+            /*将div背景色设为上白下黑*/
+
+        }
+
+        /*通过div伪元素before做一表框为80px，直径为200px的圆*/
+        .taiji::before {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: 100px;
+            position: absolute;
+            background: black;
+            border: 80px solid white;
+
+        }
+
+        /*通过div伪元素after做一表框为80px，直径为200px的圆*/
+        .taiji::after {
+            content: '';
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: 100px;
+            right: 0px;
+            position: absolute;
+            border: 80px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="taiji"> </div>
+
+    <script>
+        var taiji_obj = document.querySelector(".taiji"); // 获取taiji对象
+        var deg = 0;   //旋转度数
+        // 10ms旋转1度
+        setInterval(function () {
+            deg++;
+            taiji_obj.style.transform = 'rotate(' + deg + 'deg)'; // object.style.transform旋转div元素
+        }, 10)
+    </script>
+</body>
+
+</html>

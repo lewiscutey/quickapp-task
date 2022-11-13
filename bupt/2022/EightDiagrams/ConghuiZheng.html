@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>八卦图</title>
+    <style>
+        .tai-ji{
+            position: absolute;
+            margin:auto;
+            top:0;
+            bottom:0;
+            right:0;
+            left:0; /*垂直居中定位*/
+            width:192px;
+            height:96px;
+            background-color:white;
+            border-color: black;
+            border-style: solid;
+            border-width: 2px 2px 98px 2px; /*黑大半圆*/
+            border-radius: 100%;
+            animation-name: rotate-circle;   /*动画名称*/
+            animation-direction: normal; /*动画效果有反复交递等*/
+            animation-duration: 10s;   /*动画执行时间*/
+            animation-timing-function: linear; /*动画执行方法此为匀速方法*/
+            animation-iteration-count: infinite; /*执行动画的次数此为无限次数*/
+        }
+        .tai-ji:before{
+            content:'';
+            position: absolute;
+            top:50%;
+            left:0;
+            width:24px;
+            height:24px;
+            background-color: white;/*白小圈*/
+            border:36px solid black;/*黑大边框*/
+            border-radius: 100%;
+        }
+        .tai-ji:after{
+            content:'';
+            position: absolute;
+            top:50%;
+            right: 0;
+            width:24px;
+            height:24px;
+            background-color: black;
+            border:36px solid white;
+            border-radius: 100%;
+        }
+        /*旋转*/
+        @keyframes rotate-circle{
+            0%{transform: rotate(0deg);}
+            100%{transform: rotate(360deg);}
+        }
+    </style>
+</head>
+<body>
+    <div class = "tai-ji"></div>
+</body>
+</html>

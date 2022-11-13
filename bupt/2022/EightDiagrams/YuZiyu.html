@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="" content="width=device-width, initial-scale=1.0">
+    <title>Taichi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .Taichi {
+            width: 0;
+            height: 0;
+            margin: 200px; /*图像位置不能紧贴边缘*/
+            border-top: 100px solid #000;
+            border-right: 100px solid #000;
+            border-left: 100px solid #fff;
+            border-bottom: 100px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0px 0px 0px 1px #000;
+            position: relative;
+        }
+        .Taichi:before {
+            content: "";
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #000;
+            border:35px solid #fff;
+            position: absolute;
+            left: -14.5px;
+            top: -14.5px;
+        }
+        .Taichi:after {
+            content: "";
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #fff;
+            border:35px solid #000;
+            position: absolute;
+            right: -14.5px;
+            bottom: -14.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="Taichi"></div>
+</body>
+</html>

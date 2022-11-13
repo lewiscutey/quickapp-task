@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Taiji Diagram</title>
+
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+        
+        body {
+            padding: 200px;
+            background: #ccc;/*背景色*/
+        }
+        
+        div{/*div充当右边大白半圆*/
+            width: 200px;
+            height: 400px;
+            background-color: #fff;
+            border-left: 200px solid #000;/*div左边界充当左边大黑半圆 */
+            border-radius: 50%;
+            position: relative;
+        }
+
+        div::before {/*上方白色小圆*/
+            content: "";
+            display: block;/*当作块元素使用*/
+            height: 50px;
+            width: 50px;
+            border: 75px solid #000;
+            border-radius: 50%;/*before元素的边界形成上方黑色圆*/
+            margin-left: -100px;
+            background: #fff;
+        }
+
+        div::after {/*下方黑色小圆*/
+            content: "";
+            display: block;/*当作块元素使用，在before下一行*/
+            height: 50px;
+            width: 50px;
+            border: 75px solid #fff;
+            border-radius: 50%;/*after元素的边界形成下方白色圆*/
+            margin-left: -100px;
+            background: black;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div></div>
+
+</body>
+
+</html>
