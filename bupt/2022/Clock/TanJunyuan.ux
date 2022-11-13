@@ -1,0 +1,179 @@
+<template>
+  <div class="wrapper">
+    <text class="title">{{ title }}</text>
+    <canvas id="canvas"></canvas>
+  </div>
+</template>
+<script>
+export default {
+    private: {
+        title: '快应用时钟',
+    },
+
+    onInit() {
+        this.$page.setTitleBar({ text: '时钟' })
+        if (this.$page.setMeta) {
+            this.$page.setMeta({
+                title: '快应用时钟',
+                description: '一个基于快应用框架的Canvas的时钟',
+            })
+        }
+    },
+    onShow() {
+        //页面加载完成后在节点上绘图
+        initialization();
+
+    },
+}
+
+
+function getDatetime() {
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+    let da = new Date();
+    let hours = da.getHours();
+    hours = hours > 12 ? hours - 12 : hours;
+    let minute = da.getMinutes();
+    let second = da.getSeconds();
+    return [hours, minute, second];
+}
+
+// 绘制刻度函数
+function scaleRender(deg, start, end, bw, color) {
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.rotate(deg);        // 旋转
+    ctx.moveTo(start, 0);
+    ctx.lineTo(end, 0);
+    ctx.lineWidth = bw;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+    ctx.save();
+}
+function initClockBasicInfo() {
+    // 圆的中心的 x 坐标,圆的中心的 y 坐标,圆的半径,起始角，以弧度计,结束角，以弧度计。可选。规定应该逆时针还是顺时针绘图。False = 顺时针，true = 逆时针
+    // ctx.arc(400,300,200,0,2*Math.PI)
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.arc(0, 0, 200, 0, 2 * Math.PI)
+    ctx.strokeStyle = "darkgrey";
+    ctx.lineWidth = 10;
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.restore();
+    ctx.save();
+
+    // 绘制分钟刻度
+    for (let j = 0; j < 60; j++) {
+        ctx.rotate(Math.PI / 30)
+        ctx.beginPath();
+        ctx.moveTo(180, 0);
+        ctx.lineTo(190, 0);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "orangered"
+        ctx.stroke()
+        ctx.closePath();
+    }
+
+    ctx.restore();
+    ctx.save();
+
+    // 绘制时钟刻度
+    for (let i = 0; i < 12; i++) {
+        ctx.rotate(Math.PI / 6)
+        ctx.beginPath();
+        ctx.moveTo(180, 0);
+        ctx.lineTo(200, 0);
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = "darkgray"
+        ctx.stroke()
+        ctx.closePath();
+    }
+
+    ctx.restore();
+    ctx.save();
+
+    // 绘制时钟刻度数字
+    for (let i = 1; i <= 12; i++) {
+        ctx.rotate((Math.PI / 6));
+        ctx.save();
+        ctx.beginPath();
+        ctx.translate(165, -4);
+        ctx.rotate(Math.PI / 2 - (Math.PI / 6) * i);
+        ctx.strokeStyle = "skyblue"
+        // ctx.strokeText((i,150,0)
+        ctx.fillText(i, 0, 0);
+        // ctx.stroke(); 
+        ctx.closePath();
+
+        ctx.restore();
+    }
+    ctx.restore();
+    ctx.save();
+}
+
+// 初始化时钟
+function initClock() {
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, 800, 600);
+    ctx.save();
+    // 将画布移动画布中央
+    ctx.translate(400, 300);
+    ctx.rotate(-Math.PI / 2)
+    ctx.save();
+
+    initClockBasicInfo();
+
+    let time = getDatetime();
+
+    // 绘制秒针
+    scaleRender(Math.PI / 30 * time[2], -30, 170, 2, "coral");
+    // 绘制分针
+    scaleRender(Math.PI / 30 * time[1] + 2 * Math.PI / 3600 * time[2], -20, 150, 3, "darkblue");// 根据分针的时间进行旋转
+    // 绘制时针
+    scaleRender(Math.PI / 6 * time[0] + 2 * Math.PI / (12 * 60) * time[1] + 2 * Math.PI / (12 * 3600) * time[2],
+        -10, 140, 3, "darkslategray");// 根据时针的时间进行旋转
+
+    // 
+    ctx.beginPath();
+    ctx.arc(0, 0, 2, 0, Math.PI * 2);
+    ctx.strokeStyle = "red";
+    ctx.fill();
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.restore();
+    ctx.rotate(Math.PI / 2)
+    ctx.font = "20px 微软雅黑";
+    ctx.fillText(`${time[0]}:${time[1]}:${time[2]}`, -40, 260);
+    ctx.restore();
+
+}
+
+function initialization() {
+    initClock();
+    setInterval(function () {
+        initClock();
+    }, 1000);
+}
+
+</script>
+
+<style lang="less">
+@import '../../assets/styles/style.less';
+
+.wrapper {
+  .flex-box-mixins(column, center, center);
+  .title {
+    font-size: 12 * @size-factor;
+    text-align: center;
+    color: @black;
+  }
+}
+</style>
