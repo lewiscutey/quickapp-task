@@ -1,0 +1,132 @@
+<template>
+  <div class="wrapper">
+    <text class="title">{{ text }}</text>
+    <div class="clocks">
+      <canvas id="clk-canvas"></canvas>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  private: {
+    drawComplete: false, 
+    text: '这是一个没有表盘的表',
+    
+  },
+  onShow() {
+  if (!this.drawComplete) {
+    this.drawCanvas()
+  }
+  },
+  drawCanvas() {
+    
+      const canvas = this.$element('clk-canvas') //获取 canvas 组件
+      const ctx = canvas.getContext('2d') //获取 canvas 绘图上下文
+      const date = new Date() //获取当前时间
+      const clockRadius = 250  //半径
+      const clockImage = new Image() //尝试给表加个表盘的图片 但失败了 不知道原因
+      ctx.clearRect(0, 0, 500, 500) //画前先把上次画的清空
+      //clockImage.src = 'src/assets/images/125855_nnla_89964.png'
+      //clockImage.onload = () => {
+      //  console.log('图片加载完成')
+      //}
+      ctx.save() //变更原点前先保存
+      ctx.translate(250,250)
+      // clockImage.onload = () => {
+      //  ctx.drawImage(clockImage, 0, 0)
+      // }
+
+    // 给表盘上加数字
+    ctx.font = '36px Arial';
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (var n = 1; n <= 12; n++) { //  根据半径算时间数字的角度 再根据角度算x,y的坐标
+        var theta = (n - 3) * (Math.PI * 2) / 12;
+        var x = clockRadius * 0.7 * Math.cos(theta);
+        var y = clockRadius * 0.7 * Math.sin(theta);
+        ctx.fillText(n, x, y);
+    }
+
+//小时的换算
+      ctx.save();
+      var hours = date.getHours();
+      var theta = (hours - 3) * 2 * Math.PI / 12;
+
+      ctx.rotate(theta);
+      ctx.beginPath();
+      ctx.moveTo(-15, -5);// 画表的针
+      ctx.lineTo(-15, 5);
+      ctx.lineTo(250 * 0.5, 1);
+      ctx.lineTo(250 * 0.5, -1);
+      ctx.fill();
+    
+      ctx.restore();
+//分钟
+    ctx.save();
+    var minute = date.getMinutes();
+    var theta = (minute - 15) * 2 * Math.PI / 60;
+    ctx.rotate(theta);
+    ctx.beginPath();
+    ctx.moveTo(-15, -4);
+    ctx.lineTo(-15, 4);
+    ctx.lineTo(clockRadius * 0.8, 1);
+    ctx.lineTo(clockRadius * 0.8, -1);
+    ctx.fill();
+    ctx.restore();
+
+// 秒
+    ctx.save();
+    var seconds = date.getSeconds();
+    var theta = (seconds - 15) * 2 * Math.PI / 60;
+    ctx.rotate(theta);
+    ctx.beginPath();
+    ctx.moveTo(-15, -3);
+    ctx.lineTo(-15, 3);
+    ctx.lineTo(clockRadius * 0.9, 1);
+    ctx.lineTo(clockRadius * 0.9, -1);
+    ctx.fillStyle = '#0f0';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.restore();
+    ctx.restore();
+    this.timer = setInterval(()=>{
+      this.drawCanvas()
+    },1000)  
+  }
+}
+
+</script>
+
+<style lang="less">
+@import './../../assets/styles/style.less';
+
+.wrapper {
+  .flex-box-mixins(column, center, center);
+  margin: 0 10 * @size-factor;
+  .title {
+    font-size: 8 * @size-factor;
+    text-align: center;
+    color: @black;
+  }
+  .clocks {
+    height: 500px;
+    width: 500px;
+  }
+  .desc {
+    margin-top: 10 * @size-factor;
+    color: @grey;
+  }
+  .btn {
+    width: 90 * @size-factor;
+    height: 16 * @size-factor;
+    border-radius: 8 * @size-factor;
+    background-color: @brand;
+    color: @white;
+    font-size: 30px;
+    margin-top: 16 * @size-factor;
+  }
+}
+</style>
