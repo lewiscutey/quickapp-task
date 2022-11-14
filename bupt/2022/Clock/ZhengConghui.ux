@@ -1,0 +1,163 @@
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="wrapper">
+    <!--base1表盘-->
+    <div class="base1">
+      <div class='move-to-center line'></div>
+      <div class="move-to-center line line2"></div>
+      <div class="move-to-center line line3"></div>
+      <div class="move-to-center line line4"></div>
+      <div class="move-to-center line line5"></div>
+      <div class="move-to-center line line6"></div>
+      <!--base2用来遮挡line1~6-->
+      <div class="move-to-center base2"></div>
+      <!--有排列顺序要求，center在最上面挡住3个指针~-->
+      <div class="ptr m-ptr" style="transform: rotate({{mPtr-180}}deg)"></div>
+      <div class="ptr h-ptr" style="transform: rotate({{hPtr-180}}deg)"></div>
+      <div class="ptr s-ptr" style="transform: rotate({{sPtr-180}}deg)"></div>
+      <div class="move-to-center center"></div>
+    </div>
+    <text class="time-label">当前时间：{{ hText }}:{{ mText }}:{{ sText }}</text>
+  </div>
+</template>
+
+<script>
+export default {
+  // 页面级组件的数据模型，影响传入数据的覆盖机制：private内定义的属性不允许被覆盖
+  private: {
+    sPtr: 0,
+    mPtr: 0,
+    hPtr: 0,
+    hText: '',
+    mText:'',
+    sText:'',
+  },
+  
+  onInit() {
+    // --------------------------------- Optimize SEO Start
+    // 当 titlebar 的文案与搜索的标题不一致时，请先设置 titlebar
+    // 备注：this.$page.setMeta 需要引擎 1090 版本及以上才支持，因此这段做注释处理；
+    this.$page.setTitleBar({ text: '钟表' })
+    //一秒更新一次时间
+    setInterval(() => {
+      this.update()
+    }, 1000)
+  },
+  update(){
+    let d = new Date()
+    let h = d.getHours()
+    let m = d.getMinutes()
+    let s = d.getSeconds()
+    this.sPtr = s * 6
+    this.mPtr = m * 6 + s * 0.1
+    this.hPtr = h * 30 + m * 0.5 + s / 120
+    this.hText = h > 9 ? h : '0'+ h
+    this.mText = m > 9 ? m : '0'+ m
+    this.sText = s > 9 ? s : '0'+ s
+  }
+}
+</script>
+
+<style lang="less">
+@import './../../assets/styles/style.less';
+
+.wrapper {
+  .flex-box-mixins(column, center, center);
+}
+
+.base1{
+  background-color: rgb(201, 199, 188);
+  border-radius: 50%;
+  width: 300px;
+  height: 300px;
+}
+
+.move-to-center{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.center{
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #f99c7f;
+  margin-left: -10px;
+  margin-top: -10px;
+}
+
+.base2{
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background-color: rgb(224, 219, 194);
+  margin-left: -130px;
+  margin-top: -130px;
+}
+
+.line{
+  width: 6px;
+  height: 280px;
+  background-color: gray;
+  margin-left: -3px;
+  margin-top: -140px;
+}
+
+.line2{
+  transform: rotate(30deg);
+}
+
+.line3{
+  transform: rotate(60deg);
+}
+
+.line4{
+  transform: rotate(90deg);
+}
+
+.line5{
+  transform: rotate(120deg);
+}
+
+.line6{
+  transform: rotate(150deg);
+}
+
+.ptr{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: 0px 0px;
+}
+
+.s-ptr{
+  background-color: rgb(3, 3, 3);
+  width: 4px;
+  height: 110px;
+  margin-left: -2px;
+}
+
+.m-ptr{
+  background-color: #0a0a0a;
+  width: 8px;
+  height: 90px;
+  border-radius: 4px;
+  margin-left: -4px;
+}
+
+.h-ptr{
+  background-color: #191919;
+  width: 10px;
+  height: 70px;
+  border-radius: 4px;
+  margin-left: -5px;
+}
+
+.time-label{
+  font-size: 40px;
+  margin-top: 50px;
+}
+
+
+</style>
