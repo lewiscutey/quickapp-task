@@ -1,0 +1,78 @@
+<template>
+  <div class="container">
+    <stack class="stack">
+        <image src="/common/clock_bg.png" class="clock-bg"></image> <!--设置表盘图片-->
+        <image src="/common/hour_hand.png" class="clock-hand"
+               style="transform : rotate({{ hour * 30 + minute / 2 }}deg);"></image> <!--设置时钟图片，(hour * 30)一小时旋转30度，(minute / 2)时钟每分钟旋转的角度-->
+        <image src="/common/minute_hand.png" class="clock-hand"
+               style="transform : rotate({{ minute * 6 + second / 10 }}deg);"></image> <!--设置分钟图片，(minute * 6)一分钟旋转6度，(second / 10)分钟每秒钟旋转的角度-->
+        <image src="/common/second_hand.png" class="clock-hand"
+               style="transform : rotate({{ second * 6 }}deg);"></image> <!--设置秒钟图片，(second * 6)一秒旋转6度-->
+   </stack>
+   <text class="digit-clock"> {{ hour }}:{{ minute }}:{{ second }}</text>
+  </div>
+</template>
+
+<style lang="less">
+@import './../../assets/styles/style.less';
+
+.container {     
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+.stack {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 50%;
+}
+.clock-bg {
+    width: 80%;
+    height: 80%;
+    object-fit: scale-down;
+}
+.clock-hand {
+    width: 25%;
+    height: 65%;
+    object-fit: contain;
+}
+.digit-clock {    
+    font-size: 58px;   
+    text-align: center;
+}
+</style>
+
+<script>
+export default {
+    timer: undefined,
+    //定义参数
+    data: {
+      hour: 0,   //定义小时
+      minute: 0, //定义分钟
+      second: 0  //定义秒
+    },
+    onInit () {
+        this.$page.setTitleBar({ text: '时钟' });
+        this.updateTime();
+        this.timer = setInterval(() => {
+            var nowTime = new Date();
+            this.hour = nowTime.getHours();
+            this.minute = nowTime.getMinutes(); 
+            this.second = nowTime.getSeconds();}, 1000); //设置1s的定时器
+    },  
+    updateTime () {       
+        // console.log(this)
+        var nowTime = new Date();
+        this.hour = nowTime.getHours();
+        this.minute = nowTime.getMinutes(); 
+        this.second = nowTime.getSeconds();    
+    },
+    onDestroy() {
+        clearInterval(this.timer);
+    }
+}
+</script>
