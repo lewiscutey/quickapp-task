@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八卦图</title>
+    <style>
+        .box {
+            margin: 100px auto;
+            text-align: center;
+        }
+
+        #square {
+            margin-top: 20px;
+            width: 200px;
+            height: 200px;
+            border: 1px solid black;
+            border-radius: 50%;
+            transform: rotate(0deg);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div>
+            <span>鼠标移入加速旋转，移出减速旋转并还原</span>
+        </div>
+        <img id="square" src="./images/img_dengyi.png" alt="">
+    </div>
+
+    <script>
+        var img1 = document.getElementById("square");
+        // 图片当前旋转角度
+        var angel = 0;
+        // 图片旋转速度
+        var speed = 0;
+        // 加速间隔
+        var overInterval = 60;
+        // 减速间隔
+        var outInterval = 20;
+        var timer;
+
+        function render() {
+            angel += speed;
+            img1.style.transform = `rotate(${angel}deg)`;
+        }
+
+        (function animloop() {
+            render();
+            window.requestAnimationFrame(animloop);
+        })();
+
+        // 设置鼠标移入事件
+        img1.onmouseover = function () {
+            clearInterval(timer);
+            timer = setInterval(function () {
+                // 旋转速度上限
+                if (speed < 300)
+                    speed++;
+                console.log(`speed = ${speed} angel = ${angel}`);
+            }, overInterval);
+        };
+
+        // 设置鼠标移出事件
+        img1.onmouseout = function () {
+            clearInterval(timer);
+            timer = setInterval(function () {
+                if (speed > 5)
+                    speed--;
+                // 图片即将摆正时停止旋转
+                else if (Math.abs(360 - angel % 360) <= 15) {
+                    angel = 0;
+                    speed = 0;
+                    clearInterval(timer);
+                }
+                console.log(`speed = ${speed} angel = ${angel}`);
+            }, outInterval);
+        };
+    </script>
+</body>
+
+</html>
