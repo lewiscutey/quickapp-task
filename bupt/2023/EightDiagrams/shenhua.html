@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八卦图</title>
+    <style>
+       .bagua{
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            width: 100px;
+            height: 50px;
+            border-top: 2px solid #000;
+            border-right: 2px solid #000;
+            border-bottom: 50px solid #000;
+            border-left: 2px solid #000;
+            border-radius: 100px;
+       }
+       /*左边*/
+       .bagua::before{
+            content: '';
+            width: 10px;
+            height: 10px;
+            border: 20px solid #FFF;
+            position: absolute;
+            right: 0;
+            top: 25px;
+            border-radius: 50px;
+            background: #000;
+       }
+       /*右边样式*/
+       .bagua::after{
+            content: '';
+            width: 10px;
+            height: 10px;
+            border: 20px solid #000;
+            position: absolute;
+            left: 0;
+            top: 25px;
+            border-radius: 50px;
+            background: #fff;
+       }
+       /*旋转动画*/
+       .bagua:hover{
+        animation: rotate 2s linear infinite;
+       }
+       /*定义旋转动画关键帧*/
+       @keyframes rotate {
+        0%{transform: rotate(0deg)}
+        100%{transform: rotate(360deg)}
+       }
+
+    </style>
+</head>
+<body>
+    <div class="bagua"></div>
+    <!-- <img src="1.jpg" alt="图片" class="bagua"> -->
+<script>
+    /*获取元素*/
+    const bagua = document.querySelector('.bagua');
+    let timer;
+    /*鼠标放在上面动画开启*/
+    bagua.addEventListener('mouseover',()=>{
+        bagua.style.animationPlayState='running';
+    })
+    /*移出关闭*/
+    bagua.addEventListener('mouseout',()=>{
+        bagua.style.animationPlayState='running';
+        timer=setTimeout(()=>{
+            bagua.style.animationPlayState='paused';
+            console.log('1');
+        },3000)
+    })
+</script>
+</body>
+</html>
