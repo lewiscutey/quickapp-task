@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>太极八卦图</title>
+<style>
+
+@keyframes spin {
+from {transform: rotate(0deb);}
+to {transform: rotate(180turn);}
+}
+  
+#taiji{
+ 	width: 400px;
+    height: 200px; /* 白框*/ 
+ 
+    border: 1px solid black;
+    border-radius: 50%; 
+    border-bottom-width: 200px; /* 底部加黑框，得到白黑半圆,半径200*/ 
+    position: absolute;
+    transition: all 3s linear; 
+    
+}
+#taiji:hover {
+    animation: spin 30s ease-in infinite;
+    transition: all 3s linear; 
+}
+
+#smallblack{
+
+    width: 200px; 
+    height: 200px;
+    background-color: black;
+                
+    border-radius: 50%;
+    position: absolute;
+    top: 100px; /* 距离父元素top边100px */
+}
+#smallwhite{
+
+    width: 200px; 
+    height: 200px;
+    background-color: white; 
+    border-radius: 50%;
+    position: absolute;
+    top: 100px; /* 距离父元素top边100px */
+    left: 200px; /* 距离父元素left边200px */
+}
+#smallestwhite{
+
+    width: 20px; 
+    height: 20px;
+    background-color: white; 
+    border-radius: 50%;
+    position: absolute;
+    top: 90px; /* 距离父元素top边100px */
+    left: 90px; /* 距离父元素left边200px */
+}
+#smallestblack{
+
+    width: 20px; 
+    height: 20px;
+    background-color: black; 
+    border-radius: 50%;
+    position: absolute;
+    top: 90px; /* 距离父元素top边100px */
+    left: 90px; /* 距离父元素left边200px */
+}
+</style>
+</head>
+
+
+<body>
+<div id="taiji">
+		<div id="smallblack">
+            <div id="smallestwhite"></div>
+        </div>
+        
+        <div id="smallwhite">
+            <div id="smallestblack"></div>
+        </div>
+</div>
+</body>
+</html>
