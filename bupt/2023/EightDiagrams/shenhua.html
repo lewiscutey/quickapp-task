@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八卦图</title>
+    <style>
+       .bagua{
+        transition: transform 2s;
+        border-radius: 50%;
+       }
+       .bagua:hover{
+        animation: rotate 2s linear infinite;
+       }
+       /*定义旋转动画关键帧*/
+       @keyframes rotate {
+        0%{transform: rotate(0deg)}
+        100%{transform: rotate(360deg)}
+       }
+
+    </style>
+</head>
+<body>
+    <!-- <div class="bagua"></div> -->
+    <img src="1.jpg" alt="图片" class="bagua">
+<script>
+    const bagua = document.querySelector('.bagua');
+    let timer;
+    bagua.addEventListener('mouseover',()=>{
+        bagua.style.animationPlayState='running';
+    })
+    bagua.addEventListener('mouseout',()=>{
+        bagua.style.animationPlayState='running';
+        timer=setTimeout(()=>{
+            bagua.style.animationPlayState='paused';
+            console.log('1');
+        },3000)
+    })
+</script>
+</body>
+</html>
