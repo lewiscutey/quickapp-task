@@ -47,8 +47,35 @@
             border: 75px solid #000;
         }
 
+
+        @keyframes rotate{
+         0% {
+            transform: rotate(0);
+        }
+
+        25% {
+            transform: rotate(90deg);
+        }
+
+        50% {
+            transform: rotate(180deg);
+        }
+
+        75% {
+            transform: rotate(270deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+
+
+	}
+
+
         div:hover {
-            transform: rotate(1000deg);
+            animation: rotate 10s linear infinite;
+            -webkit-animation: rotate 10s linear infinite;
         }
     </style>
 
