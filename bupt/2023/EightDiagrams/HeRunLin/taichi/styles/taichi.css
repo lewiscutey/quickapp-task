@@ -1,0 +1,47 @@
+:root {
+    --WheelDiameter: 400px;
+    --SubWheelDiameter: 200px;
+    --TaichiDotGradient: 15%
+}
+
+.taichi_show {
+    display: flex;
+    align-items: center;
+    flex-direction: column
+}
+
+.taichi_title {
+    margin-bottom: 50px;
+
+    font-size: 28px;
+    word-wrap: break-word;
+    color: black;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+.taichi_wheel {
+    width: var(--WheelDiameter);
+    height: var(--WheelDiameter);
+    background-image: linear-gradient(white 50%, black 50%);
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+}
+
+.taichi_wheel::before,
+.taichi_wheel::after {
+    content: "";
+    width: var(--SubWheelDiameter);
+    height: var(--SubWheelDiameter);
+    border-radius: 50%;
+}
+
+.taichi_wheel::before {
+    background-image: radial-gradient(black var(--TaichiDotGradient), white var(--TaichiDotGradient));
+}
+
+.taichi_wheel::after {
+    background-image: radial-gradient(white var(--TaichiDotGradient), black var(--TaichiDotGradient));
+}
