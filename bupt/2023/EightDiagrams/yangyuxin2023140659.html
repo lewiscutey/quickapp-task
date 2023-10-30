@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    #EightDiagrams {
+        width: 200px;
+        height: 200px;
+        transition: transform 0.5s;
+    }
+</style>
+</head>
+<body>
+    <img id="EightDiagrams" src="image1.jpg" alt="Image 1" />
+
+    <script>
+        var start = false;
+        var angle = 0;
+        var speed = 1.0;
+        var graph = document.getElementById('EightDiagrams');
+
+        function rotate(time) {
+            if (start) {
+                angle += speed * time;
+                graph.style.transform = 'rotate(' + angle + 'deg)';
+                speed += 0.05;
+                requestAnimationFrame(rotate);
+
+                // 在转速最快时切换到image2.jpg
+                if (speed >= 3) {
+                    graph.src = 'image2.jpg';
+                }
+            }
+        }
+
+        function stop(time) {
+            if (!start) {
+                angle += speed * time;
+                graph.style.transform = 'rotate(' + angle + 'deg)';
+                speed -= 0.15;
+                if (speed < 0) {
+                    speed = 0;
+                }
+
+                if (angle >= 360 || angle <= -360) {
+                    angle = 0;
+                    graph.style.transform = 'rotate(0deg)';
+                    graph.src = 'image1.jpg';
+                }
+                
+
+                requestAnimationFrame(stop);
+            }
+        }
+
+        graph.addEventListener('mouseover', () => {
+            start = true;
+            requestAnimationFrame(rotate);
+        });
+
+        graph.addEventListener('mouseout', () => {
+            start = false;
+            requestAnimationFrame(stop);
+        });
+    </script>
+</body>
+</html>
