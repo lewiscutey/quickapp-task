@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八卦图-Royel</title>
+    <style>
+        body {
+            background-color: #eee;
+        }
+
+        #round {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 300px;
+            height: 300px;
+            border: 1px solid black;
+            background-color: #fff;
+            border-radius: 50%;
+            background-image: linear-gradient(to left, #fff, #fff 50%, #000 50%, #000);
+        }
+
+        #round::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            margin-right: 75px;
+            background-color: #fff;
+            width: 40px;
+            height: 40px;
+            border: 55px solid #000;
+            border-radius: 50%;
+        }
+
+        #round::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            margin-left: 75px;
+            background-color: #000;
+            width: 40px;
+            height: 40px;
+            border: 55px solid #fff;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="round"></div>
+
+    <script>
+        var img1 = document.getElementById("round");
+        // 图片当前旋转角度
+        var angel = 0;
+        // 图片旋转速度
+        var speed = 0;
+        // 加速间隔
+        var overInterval = 60;
+        // 减速间隔
+        var outInterval = 10;
+        var timer;
+
+        function render() {
+            angel += speed;
+            img1.style.transform = `rotate(${angel}deg)`;
+        }
+
+        (function animloop() {
+            render();
+            window.requestAnimationFrame(animloop);
+        })();
+
+        // 设置鼠标移入事件
+        img1.onmouseover = function () {
+            clearInterval(timer);
+            timer = setInterval(function () {
+                // 旋转速度上限
+                if (speed < 500)
+                    speed++;
+            }, overInterval);
+        };
+
+        // 设置鼠标移出事件
+        img1.onmouseout = function () {
+            clearInterval(timer);
+            timer = setInterval(function () {
+                if (speed > 0)
+                    speed--;
+                else {
+                    angel = angel % 360;
+                    clearInterval(timer);
+                }
+            }, outInterval);
+        };
+    </script>
+</body>
+
+</html>
