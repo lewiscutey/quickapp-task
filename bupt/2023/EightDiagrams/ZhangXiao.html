@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太极八卦图</title>
+    <style>
+
+        body {
+
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            background-color: #444444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .box {
+
+            width: 200px;
+            height: 200px;
+            border-radius: 100%;
+            background-color: #000000;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px 5px #aafffc;
+            /* animation: boxrotate 0.1ms linear infinite; */
+        }
+        @keyframes boxrotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+
+        }
+
+        .box>div {
+
+            position: absolute;
+
+        }
+
+
+
+        .white-sq {
+
+            width: 100px;
+            height: 200px;
+            background-color: #fff;
+            left: 0px;
+            top: 0px;
+        }
+
+
+
+        .black-sq {
+            width: 100px;
+            height: 200px;
+            background-color: #000000;
+            right: 0px;
+            top: 0px;
+        }
+
+
+
+        .white-bigcir {
+
+            width: 100px;
+            height: 100px;
+            border-radius: 100%;
+            top: 0;
+            left: 25%;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+
+
+        .white-bigcir>div {
+
+            height: 30px;
+            width: 30px;
+            border-radius: 100%;
+            background-color: #000000;
+        }
+
+
+
+        .black-bigcir {
+
+            width: 100px;
+            height: 100px;
+            border-radius: 100%;
+            bottom: 0px;
+            left: 25%;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+
+
+        .black-bigcir>div {
+
+            height: 30px;
+            width: 30px;
+            border-radius: 100%;
+            background-color: #ffffff;
+
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="box">
+
+    <div class="white-sq"></div>
+
+    <div class="black-sq"></div>
+
+
+
+    <div class="white-bigcir">
+
+        <div></div>
+
+    </div>
+
+    <div class="black-bigcir">
+
+        <div></div>
+
+    </div>
+
+</div>
+
+<script>
+
+    var box = document.querySelector(".box");
+
+    let time = 1000;
+    let interval;
+    let decelerateInterval;
+
+    // 当鼠标悬停在 box 上时，开始加速旋转
+    box.addEventListener('mouseover', function() {
+        clearInterval(decelerateInterval);  // 清除减速定时器，以确保不与加速定时器冲突
+        interval = setInterval(function() {
+            if (time > 1) {
+                time--;
+            }
+            if (time >= 0.2 && time <= 1) {
+                time -= 0.1;
+            }
+            var str = 'boxrotate ' + time + 'ms linear infinite';
+            box.style.animation = str;
+        }, 50);
+    });
+
+    // 当鼠标移开 box 时，逐渐减慢旋转速度，直到恢复到初始速度
+    box.addEventListener('mouseout', function() {
+        clearInterval(interval);  // 清除加速定时器
+        box.style.animation = 'none';//停止动画
+        time = 1000;
+    });
+
+</script>
+
+</body>
+
+</html>
