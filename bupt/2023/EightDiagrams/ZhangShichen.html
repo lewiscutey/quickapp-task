@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>八卦图</title>
+  <style>
+    body{
+            background-color: lightgray;
+    }
+    .half-black {
+        width: 200px;
+        height: 400px;
+        background-color: black;
+        border-radius: 200px 0px 0px 200px;
+    }
+
+    .half-white {
+        width: 200px;
+        height: 400px;
+        background-color: white;
+        border-radius: 0px 200px 200px 0px;
+        position: absolute;
+        left: 208px;
+        top: 0px;
+    }
+
+    .side-white {
+        width: 200px;
+        height: 200px;
+        background-color: white;
+        border-radius: 100px;
+        position: absolute;
+        left: 100px;
+        bottom: 0px;
+    }
+
+    .side-black {
+        width: 200px;
+        height: 200px;
+        background-color: black;
+        border-radius: 100px;
+        position: absolute;
+        left: -108px;
+        top: 0px;
+    }
+
+    .small-black {
+        width: 50px;
+        height: 50px;
+        background-color: black;
+        border-radius: 50%;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        z-index: 200;
+    }
+
+    .small-white {
+        width: 50px;
+        height: 50px;
+        background-color: white;
+        border-radius: 50%;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        z-index: 300;
+    }
+
+    #box {
+        width: 400px;
+        height: 400px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+    </style>
+</head>
+<body>
+    <div id="box">
+        <div class="half-black">
+            <div class="side-white">
+                <div class="small-black"></div>
+            </div>
+        </div>
+        <div class="half-white">
+            <div class="side-black">
+                <div class="small-white"></div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    var start = true;
+    var angle = 0;
+    var speed = 1;
+    var lastTime = 0;
+    var graph = document.getElementById('box');
+    graph.addEventListener('mouseover', () => {
+        start = true;
+        requestAnimationFrame(inc);
+    });
+
+    graph.addEventListener('mouseout', () => {
+        start = false;
+        requestAnimationFrame(dec);
+    });
+
+    function inc(time) {
+        if (start) {
+            var delta = time - lastTime;
+            angle += speed * delta / 16.67;
+            graph.style.transform = 'rotate(' + angle + 'deg)';
+            speed += 0.1;
+            lastTime = time;
+            requestAnimationFrame(inc);
+        }
+    }
+    function dec(time) {
+        if (!start) {
+            var delta = time - lastTime;
+            angle += speed * delta / 16.67;
+            graph.style.transform = 'rotate(' + angle + 'deg)';
+            speed -= 0.1;
+            if(speed<0){
+                speed = 0;
+            }
+            lastTime = time;
+            requestAnimationFrame(dec);
+        }
+    }
+
+</script>
+</html>
