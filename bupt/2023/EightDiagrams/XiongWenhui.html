@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八卦</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            background-color: #eeeeee;
+        }
+
+        #bagua-wrapper {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #bagua {
+            width: 400px;
+            height: 400px;
+            border-radius: 200px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 1);
+        }
+
+        #bagua>div:first-child {
+            width: 50%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            background-color: black;
+        }
+
+        #bagua>div:nth-child(2) {
+            width: 50%;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            background-color: white;
+        }
+
+        #bagua>div:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            left: 50%;
+            margin-left: -100px;
+            border-radius: 50%;
+            background-color: black;
+        }
+
+        #bagua>div:nth-child(4) {
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -100px;
+            border-radius: 50%;
+            background-color: white;
+        }
+
+        #bagua>div:nth-child(5) {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            left: 50%;
+            top: 75px;
+            margin-left: -50px;
+            border-radius: 50%;
+            background-color: white;
+        }
+
+        #bagua>div:nth-child(6) {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            left: 50%;
+            bottom: 75px;
+            margin-left: -50px;
+            border-radius: 50%;
+            background-color: black;
+        }
+
+        /* 结束突兀且无变速 */
+        /* @keyframes x {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #bagua:hover {
+            animation: x 10s linear infinite;
+        } */
+    </style>
+</head>
+
+<body>
+    <div id="bagua-wrapper">
+        <div id="bagua">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <script>
+        var InterVal
+        var rotateDegree = 0, rotateTime = 0
+        document.getElementById('bagua').onmouseenter = function () {
+            InterVal = setInterval(function () {
+                var bagua = document.getElementById('bagua')
+                if (rotateTime < 10) {
+                    rotateTime += 1
+                }
+                rotateDegree += 10 * rotateTime
+                bagua.style.transform = 'rotate(' + rotateDegree + 'deg)'
+                bagua.style.transition = '0.1s linear'
+            }, 100)
+        }
+        document.getElementById('bagua').onmouseleave = function () {
+            clearInterval(InterVal)
+            var bagua = document.getElementById('bagua')
+            rotateDegree = Math.ceil(rotateDegree / 360) * 360
+            rotateTime = 0
+            bagua.style.transform = 'rotate(' + rotateDegree + 'deg)'
+            bagua.style.transition = '1s ease-out'
+        }
+    </script>
+</body>
+
+</html>
