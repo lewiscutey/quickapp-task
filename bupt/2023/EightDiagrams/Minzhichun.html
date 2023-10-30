@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>EightDiagrams</title>
+</head>
+<style>
+    body {
+        background: #ddd;
+    }
+
+    * {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+    }
+
+    #EightDiagrams {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        overflow: hidden;
+        animation: 10s myanimation linear infinite;
+    }
+
+    #EightDiagrams>div:first-child {
+        background: #000000;
+        position: absolute;
+        left: 0;
+        width: 200px;
+        height: 400px;
+    }
+
+    #EightDiagrams>div:nth-child(2) {
+        background: #ffffff;
+        position: absolute;
+        right: 0;
+        width: 200px;
+        height: 400px;
+    }
+
+    #EightDiagrams>div:nth-child(3) {
+        background: #000000;
+        position: absolute;
+        top: 0px;
+        left: 200px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        margin-left: -100px;
+    }
+
+    #EightDiagrams>div:nth-child(4) {
+        background: #ffffff;
+        position: absolute;
+        bottom: 0px;
+        left: 200px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        margin-left: -100px;
+    }
+
+    #EightDiagrams>div:nth-child(5) {
+        background: #ffffff;
+        position: absolute;
+        top: 75px;
+        left: 200px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-left: -25px;
+    }
+
+    #EightDiagrams>div:nth-child(6) {
+        background: #000000;
+        position: absolute;
+        bottom: 75px;
+        left: 200px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-left: -25px;
+    }
+
+    #EightDiagrams-wrapper {
+        display: flex;
+        height: 100vh;
+        flex-direction: column;
+        justify-content: center;
+        /* 水平居中 */
+        align-items: center;
+        /* 垂直居中 */
+    }
+
+</style>
+<body>
+    <div id="EightDiagrams-wrapper">
+        <div id="EightDiagrams">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+</body>
+
+<script>
+    var start = true;
+    var angle = 0;
+    var speed = 1;
+    var lastTime = 0;
+    var graph = document.getElementById('EightDiagrams');
+
+    graph.addEventListener('mouseover', () => {
+        start = true;
+        requestAnimationFrame(over);
+    });
+
+    graph.addEventListener('mouseout', () => {
+        start = false;
+        requestAnimationFrame(out);
+    });
+
+    function over(time) {
+        if (start) {
+            var delta = time - lastTime;
+            angle += speed * delta / 50;
+            graph.style.transform = 'rotate(' + angle + 'deg)';
+            speed += 0.1;
+            lastTime = time;
+            requestAnimationFrame(over);
+        }
+    }
+
+    function out(time) {
+        if (!start) {
+            var delta = time - lastTime;
+            angle += speed * delta / 80;
+            graph.style.transform = 'rotate(' + angle + 'deg)';
+            speed = speed < 0 ? 0 : speed - 0.1;
+            lastTime = time;
+            requestAnimationFrame(out);
+        }
+    }
+
+</script>
+
+</html>
