@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework太极八卦图</title>
+    <style>
+        body {
+            background-color: rgb(92, 213, 152);
+        }
+        .fu {
+            width: 500px;
+            height: 500px;
+            position: relative;
+            left: 300px;
+        }
+        .fu>div {
+            position: absolute;
+        }
+        .z1 {
+            width: 250px;
+            height: 500px;
+            background-color: #fff;
+            border-radius: 250px 0px 0px 250px;
+        }
+        .z2 {
+            width: 250px;
+            height: 500px;
+            left: 250px;
+            background-color: black;
+            border-radius: 0px 250px 250px 0px;
+        }
+        .z3 {
+            width: 250px;
+            height: 250px;
+            left: 125px;
+            background-color: black;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .z4 {
+            top: 250px;
+            width: 250px;
+            height: 250px;
+            left: 125px;
+            background-color: #fff;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .z5 {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 50%;
+            left: 200px;
+            top: 85px;
+            z-index: 2;
+        }
+        .z6 {
+            width: 100px;
+            height: 100px;
+            background-color: black;
+            border-radius: 50%;
+            left: 200px;
+            top: 335px;
+            z-index: 2;
+        }
+        @keyframes circles {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="fu" id="taiji">
+        <div class="z1"></div>
+        <div class="z2"></div>
+        <div class="z3"></div>
+        <div class="z4"></div>
+        <div class="z5"></div>
+        <div class="z6"></div>
+    </div>
+    <script>
+
+    var start = true;
+    var angle = 0;
+    var speed = 1;
+    var lastTime = 0;
+    var graph = document.getElementById('taiji');
+
+    function rotate(time) {
+        if (start) {
+            var delta = time - lastTime;
+            angle += speed * delta / 20;
+            graph.style.transform = 'rotate(' + angle + 'deg)';
+            speed += 0.1;
+            //加速
+            lastTime = time;
+            //重复循环
+            requestAnimationFrame(rotate);
+            
+        }
+    }
+
+    function stop(time) {
+        if (!start) {
+            var delta = time - lastTime;
+            angle += speed * delta / 50;
+            graph.style.transform = 'rotate(' + angle + 'deg)';
+            speed -= 0.1;
+            if (speed < 0) {
+                speed = 0;
+            }
+
+            lastTime = time;
+
+            requestAnimationFrame(stop);
+
+
+        }
+    }
+//鼠标悬停在八卦图上
+    graph.addEventListener('mouseover', () => {
+        start = true;
+        //进入旋转动画
+        requestAnimationFrame(rotate);
+    });
+
+
+//鼠标移出八卦图
+    graph.addEventListener('mouseout', () => {
+        start = false;
+        requestAnimationFrame(stop);
+    });
+
+    </script>
+</body>
+</html>
