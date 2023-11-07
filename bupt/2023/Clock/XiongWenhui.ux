@@ -1,0 +1,87 @@
+<template>
+  <div class="wrapper">
+    <canvas id="clock"></canvas>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+
+export default {
+  private: {
+  },
+
+  onInit() {
+    this.$page.setTitleBar({ text: '我的闹钟！' });
+  },
+
+  onShow() {
+    const canvas = document.getElementById('clock');
+    const ctx = canvas.getContext('2d');
+
+    setInterval(() => {
+      // 清除画布
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 绘制表盘的外圆
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, 200, 0, Math.PI * 2);
+      ctx.strokeStyle = '#000';
+      ctx.stroke();
+
+      // 绘制表盘的刻度
+      for (let i = 0; i < 12; i++) {
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(i * (Math.PI / 6));
+        ctx.beginPath();
+        ctx.moveTo(0, -180); ctx.lineTo(0, -200);
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 绘制表盘的指针
+      const date = new Date();
+      const hour = date.getHours() % 12;
+      const minute = date.getMinutes();
+      const second = date.getSeconds();
+      // 时针
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(hour * (Math.PI / 6) + minute * (Math.PI / 360) + second * (Math.PI / 21600)); ctx.beginPath();
+      ctx.moveTo(0, - 100); ctx.lineTo(0, 20);
+      ctx.strokeStyle = '#000'; ctx.stroke();
+      ctx.restore();
+      // 分针
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(minute * (Math.PI / 30) + second * (Math.PI / 1800)); ctx.beginPath();
+      ctx.moveTo(0, -160); ctx.lineTo(0, 20);
+      ctx.strokeStyle = '#000'; ctx.stroke();
+      ctx.restore();
+      // 秒针
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2); ctx.rotate(second * (Math.PI / 30));
+      ctx.beginPath();
+      ctx.moveTo(0, -180); ctx.lineTo(0, 20);
+      ctx.strokeStyle = '#f00'; ctx.stroke();
+      ctx.restore();
+    }, 1000);
+  },
+
+}
+</script>
+
+<style lang="less">
+@import './../../assets/styles/style.less';
+
+.wrapper {
+  .flex-box-mixins(column, center, center);
+
+  #clock{
+    width: 500px;
+    height: 500px;
+  }
+}
+</style>
