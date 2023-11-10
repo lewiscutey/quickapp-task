@@ -1,0 +1,121 @@
+<template>
+  <div class="wrapper">
+    <text class="title">{{ title }}</text>
+    <canvas id="clock"></canvas>
+  </div>
+</template>
+
+<script>
+export default {
+  // 页面级组件的数据模型，影响传入数据的覆盖机制：private内定义的属性不允许被覆盖
+  private: {
+    title: 'Clock',
+    drawComplete: false
+  },
+
+  onInit() {
+    this.$page.setTitleBar({ text: '时钟' })
+    setInterval(this.drawCanvas,1000)
+    
+  },
+  onShow() {
+    
+  },
+  
+  drawCanvas(){
+    const canvas= document.getElementById('clock')
+    const ctx=canvas.getContext('2d')
+    const r=(400-10)/2  //半径
+    const x=410/2
+    const y=410/2//圆心
+    ctx.clearRect(0,0,canvas.width,canvas.height)
+    //圆
+    ctx.beginPath()
+    ctx.arc(x, y, r , 0, 2 * Math.PI)
+    ctx.lineWidth = 5
+    ctx.strokeStyle = 'black'
+    ctx.stroke()
+    ctx.closePath()
+    //圆心
+    ctx.beginPath()
+    ctx.arc(x, y, 5 , 0, 2 * Math.PI)
+    ctx.fillStyle = 'black'
+    ctx.fill()
+    ctx.closePath()
+
+    //数字
+    for(let i =0 ;i<12;i++){
+      const angle=-Math.PI/3+(Math.PI/6)*i
+      const x1=x+(r-30)*Math.cos(angle)
+      const y1=y+(r-30)*Math.sin(angle)
+      ctx.beginPath()
+      ctx.font = '40px sans-serif'
+      ctx.textAlign='center'
+      ctx.textBaseline='middle'
+      ctx.fillText(i+1, x1, y1)
+      ctx.closePath()
+    }
+
+    
+    const time= new Date()
+    const hh=time.getHours()
+    const mm=time.getMinutes()
+    const ss=time.getSeconds()
+    //时针
+    const HAngle=-Math.PI/2+(Math.PI/6)*(hh%12+mm/60)
+    const HL=r*0.6
+    const x2=x+HL*Math.cos(HAngle)
+    const y2=y+HL*Math.sin(HAngle)//终点
+    ctx.beginPath()
+    ctx.moveTo(x,y)
+    ctx.lineTo(x2,y2)
+    ctx.lineWidth = 10
+    ctx.strokeStyle = 'black'
+    ctx.stroke()
+    ctx.closePath()
+    //分针
+    const MAngle=-Math.PI/2+(Math.PI/30)*(mm+ss/60)
+    const ML=r*0.9
+    const x3=x+ML*Math.cos(MAngle)
+    const y3=y+ML*Math.sin(MAngle)//终点
+    ctx.beginPath()
+    ctx.moveTo(x,y)
+    ctx.lineTo(x3,y3)
+    ctx.lineWidth = 7
+    ctx.strokeStyle = 'black'
+    ctx.stroke()
+    ctx.closePath()
+    //秒针
+    const SAngle=-Math.PI/2+(Math.PI/30)*(ss)
+    const SL=r*0.9
+    const SL2=r*0.1
+    const x4=x+SL*Math.cos(SAngle)
+    const y4=y+SL*Math.sin(SAngle)//终点
+    const x5=x-SL2*Math.cos(SAngle)
+    const y5=y-SL2*Math.sin(SAngle)//起点
+    ctx.beginPath()
+    ctx.moveTo(x5,y5)
+    ctx.lineTo(x4,y4)
+    ctx.lineWidth = 3
+    ctx.strokeStyle = 'red'
+    ctx.stroke()
+    ctx.closePath()
+  }
+}
+</script>
+
+<style lang='less'>
+@import './../../assets/styles/style.less';
+.wrapper {
+  .flex-box-mixins(column, center, center);
+  .title {
+    font-size: 8 * @size-factor;
+    text-align: center;
+    color: @black;
+  }
+}
+#clock {
+  height: 410px;
+  width: 410px;
+}
+</style>
