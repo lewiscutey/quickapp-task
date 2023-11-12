@@ -1,0 +1,158 @@
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="content">
+    <canvas id='iclock' class="clock"></canvas>
+    <text class="title">{{ title }}</text>
+  </div>
+    
+</template>
+
+<script>
+
+export default {
+  // 页面级组件的数据模型，影响传入数据的覆盖机制：private内定义的属性不允许被覆盖
+  private: {
+    title: '2023140701_张啸',
+  },
+  onInit() {
+    this.$page.setTitleBar({ text: '时钟' })
+  },
+  onShow() {
+    // 每秒执行一次
+    setInterval(this.drawClock, 1000)
+  },
+
+  drawClock() {
+    var clockRadius = 350;
+    
+    var now = new Date();
+    const canvas = document.getElementById('iclock');
+    const ctx = canvas.getContext('2d'); //获取 canvas 绘图上下文
+    ctx.clearRect(0, 0, clockRadius * 2, clockRadius * 2);
+    ctx.save();
+   
+    // 移动原点到canvas元素中心 
+    ctx.translate(clockRadius, clockRadius);
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "black";
+    ctx.lineCap = "round";
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // 生成1-12个数字表盘
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (var i = 1; i <= 12; i++) {
+        var theta = (i-3) * (Math.PI * 2) / 12;
+        var x = clockRadius * 0.7 * Math.cos(theta);
+        var y = clockRadius * 0.7 * Math.sin(theta);
+        ctx.fillText(i, x, y);
+    }
+    
+    // 整时的较长条
+    ctx.save();
+    ctx.lineWidth = 6;
+    for(var i = 1; i <= 12; i++){
+      ctx.beginPath();
+      ctx.moveTo(clockRadius * 0.55, 0);
+      ctx.lineTo(clockRadius * 0.6, 0);
+      ctx.stroke();
+      ctx.rotate(Math.PI/6);
+    }
+    ctx.restore();
+
+    // 每分钟的圆圈点点
+    ctx.save();
+    for(var i = 0; i < 60; i++){
+      if(i % 5 != 0){
+        ctx.beginPath();
+        ctx.arc(clockRadius * 0.57, 0, 4, 0, Math.PI*2, true);
+        ctx.fill();
+      }
+      ctx.rotate(Math.PI/30);
+    }
+    ctx.restore();
+
+    // 获取当前时间
+    var sec = now.getSeconds();
+    var min = now.getMinutes();
+    var hr  = now.getHours() % 12;
+    
+    // 时钟
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate( (Math.PI/6)*hr + (Math.PI/360)*min + (Math.PI/21600)*sec );
+    ctx.lineWidth = 8;
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.moveTo(-clockRadius * 0.1, 0);
+    ctx.lineTo(0, 6);
+    ctx.lineTo(clockRadius * 0.35, 0);
+    ctx.lineTo(0,-6);
+    ctx.fill();
+    ctx.restore();
+
+    // 分钟
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate( (Math.PI/30)*min + (Math.PI/1800)*sec );
+    ctx.lineWidth = 4;
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.moveTo(-clockRadius * 0.12, 0);
+    ctx.lineTo(0, 4);
+    ctx.lineTo(clockRadius * 0.45, 0);
+    ctx.lineTo(0, -4);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+
+    // 秒针
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate(sec * Math.PI/30);
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "blue";
+    ctx.beginPath();
+    ctx.moveTo(-clockRadius * 0.15, 0);
+    ctx.lineTo(0, 3);
+    ctx.lineTo(clockRadius * 0.55, 0);
+    ctx.lineTo(0, -3);
+    ctx.fill();
+    ctx.restore();
+    ctx.restore();
+  },
+
+}
+
+</script>
+
+<style>
+
+  .content {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #fdfafa; /* 添加背景颜色 */
+    border-radius: 20px; /* 边框圆角 */
+    padding: 20px; /* 内边距 */
+    
+  }
+
+  .title {
+    font-size: 40px;
+    text-align: center;
+    color: rgb(51, 51, 51); /* 标题颜色优化 */
+    margin-bottom: 20px; /* 标题与时钟之间的间距 */
+  }
+
+  .clock { 
+    width: 700px;
+    height: 700px;
+    border-radius: 50%; /* 圆形时钟 */
+    background-color: #ada4ab; /* 轻微的背景色 */
+  }
+  
+</style>
