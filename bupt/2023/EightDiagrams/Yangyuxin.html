@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bagua</title>
+    <style>
+        
+        body {
+            /* Styling for the entire page */
+            height: 100vh;
+            width: 100vw;
+            background-color: rgb(186, 212, 228);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Styling for the bagua diagram container */
+        .baguabox {
+            width: 300px;
+            height: 300px;
+            border-radius: 100%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px 5px;
+        }
+        .baguabox > div {
+            position: absolute;
+        }
+
+        /* Keyframes for the rotation animation */
+        @keyframes rotatebaguabox {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Styling for individual elements of the bagua diagram */
+        .whitesec1 {
+            width: 150px;
+            height: 300px;
+            background-color: #fff;
+            border-radius: 150px 0px 0px 150px;
+        }
+        
+        .whitesec2 {
+            top: 150px;
+            width: 150px;
+            height: 150px;
+            left: 75px;
+            background-color: #fff;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .whitesec3 {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-radius: 50%;
+            left: 120px;
+            top: 51px;
+            z-index: 2;
+        }
+
+        .blacksec1 {
+            width: 150px;
+            height: 300px;
+            left: 150px;
+            background-color: black;
+            border-radius: 0px 150px 150px 0px;
+        }
+
+        .blacksec2 {
+            width: 150px;
+            height: 150px;
+            left: 75px;
+            background-color: black;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .blacksec3 {
+            width: 60px;
+            height: 60px;
+            background-color: black;
+            border-radius: 50%;
+            left: 120px;
+            top: 201px;
+            z-index: 2;
+        }
+
+        h1 {
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 52%;
+            transform: translateX(-50%);
+            font-size: 40px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>EightDiagram</h1>
+    <div class="baguabox" id="bagua">
+        <!-- Elements of the bagua diagram -->
+        <div class="whitesec1"></div>
+        <div class="whitesec2"></div>
+        <div class="whitesec3"></div>
+        <div class="blacksec1"></div>
+        <div class="blacksec2"></div>
+        <div class="blacksec3"></div>
+    </div>
+    <script>
+        // Animation control variables
+        var flag = true; // Rotation flag
+        var angle = 0; // Current rotation angle
+        var angSpeed = 1.0; // Angular speed
+        var past = 0; // For acceleration calculation
+        var baguadiagram = document.getElementById('bagua');
+
+        // Function to rotate the diagram
+        function rotate(curr) {
+            if (flag) {
+                var duration = curr - past;
+                angle += angSpeed * duration / 30;
+                baguadiagram.style.transform = 'rotate(' + angle + 'deg)';
+                angSpeed += 0.05;
+                past = curr;
+                requestAnimationFrame(rotate);
+            }
+        }
+
+        // Function to stop the rotation
+        function stop(curr) {
+            if (!flag) {
+                var duration = curr - past;
+                angle += angSpeed * duration / 25;
+                baguadiagram.style.transform = 'rotate(' + angle + 'deg)';
+                angSpeed -= 0.3;
+                if (angSpeed < 0) {
+                    angSpeed = 0;
+                }
+                past = curr;
+                requestAnimationFrame(stop);
+            }
+        }
+
+        // Mouse hover over the bagua diagram event
+        baguadiagram.addEventListener('mouseover', () => {
+            flag = true;
+            // Start rotating
+            requestAnimationFrame(rotate);
+        });
+
+        // Mouse out of the bagua diagram event
+        baguadiagram.addEventListener('mouseout', () => {
+            flag = false;
+            // Stop rotating
+            requestAnimationFrame(stop);
+        });
+    </script>
+</body>
+</html>

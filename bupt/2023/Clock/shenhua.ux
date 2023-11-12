@@ -1,0 +1,149 @@
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="content">
+    <canvas class="clock" id="clock"></canvas>
+  </div>
+</template>
+
+<script>
+export default {
+  onInit() {
+    this.$page.setTitleBar({text: 'canvas时钟绘制'})
+  },
+  onShow() {
+    const canvas = this.$element('clock')
+    const ctx = canvas.getContext('2d')
+    this.update(ctx)
+    //定时器每秒重新画时钟
+    setInterval(()=>{
+      ctx.clearRect(0,0,300,300)
+      this.update(ctx)
+    },1000)
+  },
+  //时钟更新
+  update(ctx){
+    var time = new Date()
+    var hours = time.getHours()
+    var minutes = time.getMinutes()
+    var seconds = time.getSeconds()
+    // 保存canvas状态，因为绘制底盘时它偏移了
+    ctx.save();
+    this.drawPanel(ctx);
+    this.hourNum(ctx);
+    this.secondHand(ctx,seconds);
+    this.minuteHand(ctx,minutes);
+    this.hourHand(ctx,hours, minutes);
+    this.centerDot(ctx);
+    // 恢复canvas状态
+    ctx.restore();
+
+  },
+  //绘制底盘
+  drawPanel(ctx){
+    ctx.fillStyle="black"
+    ctx.lineWidth=20
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.strokeRect(0,0,300,300)
+    // ctx.fillRect(0,0,300,300)
+    ctx.translate(150,150)//为了后期将旋转点为.clock的中心的，所以将translate偏移一半的距离
+    //开始绘制
+    ctx.beginPath()
+    //画圆
+    ctx.arc(0,0,130,0,2*Math.PI)
+    //填充颜色为白色
+    ctx.fillStyle="white"
+    ctx.fill()
+  },
+  //绘制12个数字
+  hourNum(ctx){
+    const arr=[1,2,3,4,5,6,7,8,9,10,11,12]
+    ctx.beginPath()
+    //数字样式
+    ctx.font="30px sans-serif"
+    ctx.textAlign="center"
+    ctx.textBaseline="middle"
+    ctx.fillStyle="black"
+    //一个圆上它的x坐标为：R * cos（它的角度）， y坐标为：R *sin（它的角度）。同时，因为Math.cos（）与Math.sin（）里是计算弧度的，所以要转换。公式：弧度 = 角度 * π / 180
+    for(let i=0;i<arr.length;i++){
+      ctx.fillText(arr[i],108*Math.cos(((i*30-60)*Math.PI)/180),108 * Math.sin(((i*30 - 60)*Math.PI)/180))
+    }
+  },
+  //绘制中心圆点，一个空心黑圆
+  centerDot(ctx){
+    ctx.beginPath()
+    ctx.arc(0,0,8,0,2*Math.PI)
+    ctx.fill()
+  },
+  //绘制时针，hours 与 minutes 为传入的当前的时间的小时数与分钟数
+  hourHand(ctx,hours,minutes){
+    // 应该旋转的角度，默认时钟为指向12点方向。
+    var radius =((2 * Math.PI) / 12) * hours + (((1 / 6) * Math.PI) / 60) * minutes;
+    // 保存当前状态，为了旋转后能回到当初状态。
+    ctx.save();
+    ctx.beginPath();
+    // 针的宽度
+    ctx.lineWidth = 5;
+    // 针头为圆角
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "black";
+    // 旋转
+    ctx.rotate(radius);
+    // 画一条线表示时钟
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -50);
+    ctx.stroke();
+    // 回到保存的状态
+    ctx.restore();
+  },
+  //绘制分针
+  minuteHand(ctx,minutes){
+    var radius = ((2 * Math.PI) / 60) * minutes;
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "black";
+    ctx.rotate(radius);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -70);
+    ctx.stroke();
+    ctx.restore();
+  },
+  //秒针
+  secondHand(ctx,seconds){
+    var radius = ((2 * Math.PI) / 60) * seconds;
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "red";
+    ctx.rotate(radius);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -90);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  
+}
+</script>
+
+<style lang="less">
+@import './../../assets/styles/style.less';
+
+body{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.content{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.clock{
+  width: 300px;
+  height: 300px;
+}
+</style>
