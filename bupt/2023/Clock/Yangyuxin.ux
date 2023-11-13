@@ -1,0 +1,130 @@
+<template>
+  <div class="doc-page">
+    <div class="ctx">
+      <canvas class="myClock" id="myClock"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .ctx {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    /* elaboration */
+    background-color: rgb(224, 230, 237); /* background color */
+    border-radius: 15px; 
+    padding: 10px; 
+  }
+  .myClock {
+    height: 500px;
+    width: 500px;
+    /* elaboration */
+    border-radius: 80%; /* round */
+    background-color: rgb(164, 195, 238);
+    border: 1px solid rgb(0, 0, 0);
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      flag: false,
+      wid:500,
+      h:500,
+      ctx:null,
+      canvas:null,
+      timer:null
+    },
+    onInit() {
+      this.$page.setTitleBar({
+        text: 'myClock'
+      })
+    },
+    onShow() {
+      //DOM
+      if (!this.flag) {
+        this.drawMyClock()
+      }
+    },
+    onDestroy() {
+    if (this.timer != null)
+      clearInterval(this.timer)
+  },
+    drawMyClock() {
+        this.canvas = this.$element('myClock') //acquire canvas component
+        this.ctx = this.canvas.getContext('2d') //acquire canvas context
+        this.ctx.translate(250,250)
+        this.flag = true
+        this.showMyClock()
+    },
+    showMyClock() {
+            //clear Canvas
+            this.ctx.clearRect((-this.wid) / 2, (-this.h )/ 2, this.wid, this.h)
+            // len of clock hands
+            var len = this.wid / 2;
+            // clock
+            var tlen = len * 0.85;
+            this.ctx.font = "32px 'Arial'";
+            this.ctx.fillStyle = "black";
+            this.ctx.textAlign = "center";
+            this.ctx.textBaseLine = "middle";
+            
+            const twoPi = Math.PI * 2;
+            const totalTags = 12;
+
+            for (var i = 0; i < totalTags; i++) {
+                // angle
+                var angle = twoPi * (3 - i) / totalTags;
+                // pos
+                var x = tlen * Math.cos(angle);
+                var y = -tlen * Math.sin(angle);
+                // draw text on Canvas
+                this.ctx.fillText(i, x, y);
+            }
+
+            // moment
+            var date = new Date();
+            var hour = date.getHours();
+            var min = date.getMinutes();
+            var sec = date.getSeconds();
+            hour = (hour > 12) ? hour - 12 : hour;
+ 
+            //hour hand
+            var hourAng = Math.PI * 2 * (3 - (hour + min / 60)) / 12;
+            var hourLen = len * 0.5;
+            this.showClockHand(hourAng, hourLen, 15, "#000000");
+ 
+            //min hand
+            var minAng = Math.PI * 2 * (15 - (min + sec / 60)) / 60;
+            var minLen = len * 0.7;
+            this.showClockHand(minAng, minLen, 10, "#000000");
+ 
+            //sec hand
+            var secAng = Math.PI * 2 * (15 - sec) / 60;
+            var secLen = len * 0.8;
+            this.showClockHand(secAng, secLen, 3, "#aa0000");
+ 
+            this.timer=setInterval(()=>{
+                 this.showMyClock()
+               },1000) //show each 1000ms
+        },
+
+        showClockHand(angle, len, width, color) {
+            // pos
+            var x = len * Math.cos(angle);
+            var y = -len * Math.sin(angle);
+            // hand
+            this.ctx.strokeStyle = color;
+            this.ctx.lineWidth = width;
+            this.ctx.lineCap = "round";
+            // paths
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, 0);
+            this.ctx.lineTo(x, y);
+            this.ctx.stroke();
+            this.flag = true;
+        }
+
+  }
+</script>
