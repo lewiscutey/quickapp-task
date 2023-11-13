@@ -1,0 +1,177 @@
+<template>
+  <div class="doc-page">
+    <div class="content">
+      <canvas class="my_clock" id="my_clock"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .content {
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(204, 204, 204);
+    width: 100%;
+  }
+  .my_clock {
+    width: 300px;
+    height: 300px;
+    background-color: rgb(15, 15, 15);
+    border-radius: 50px;
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      inited: false,  
+      ctx:null
+    },
+    onInit() {
+      this.$page.setTitleBar({
+        text: '时钟' })   
+    },
+    onShow() {
+
+      
+      if (!this.inited) {
+        this.inited = true
+        //获取 canvas 组件 和 绘图上下文
+        const canvas = this.$element('my_clock') 
+        this.ctx =  canvas.getContext('2d') 
+        this.update()
+        //定时器 每隔1s刷新一次
+        setInterval(() =>{
+          this.update()},1000)
+        }
+      
+    },
+     update(){
+        //获取当前时间
+        var time = new Date()
+        var hours = time.getHours()
+        var minutes = time.getMinutes()
+        var seconds = time.getSeconds()
+        console.log("%d,%d,%d",hours,minutes,seconds)
+        //清屏
+        this.ctx.clearRect(0, 0, 300, 300)
+        //保存当前坐标系
+        this.ctx.save()
+        //移动原点
+        this.ctx.translate(150, 150)
+        //绘制表盘中心点
+        this.drawCenterDot();
+        //绘制表盘
+        this.drawPanel();
+        //绘制数字
+        this.drawNum();
+        //绘制时针
+        this.drawHourHand(hours,minutes)
+        //绘制分针
+        this.drawMinuteHand(minutes,seconds)
+        //绘制秒针
+        this.drawSecondHand(seconds)
+        //恢复坐标系
+        this.ctx.restore()
+    },
+
+    //绘制表盘
+    drawPanel() {
+      this.ctx.arc(0, 0, 130, 0, 2*Math.PI, true)
+      this.ctx.fillStyle = "white";
+      this.ctx.fill();
+    },
+
+    //绘制数字
+    drawNum(){
+      this.ctx.beginPath();
+      // 数字的基本样式
+      this.ctx.font = "30px fangsong";
+      this.ctx.textAlign = "center";
+      this.ctx.textBaseline = "middle";
+      this.ctx.fillStyle = "black";
+      for (var i = 1; i < 13; i++) {
+      this.ctx.fillText(
+        i,
+        108 * Math.cos((((i-1) * 30 - 60) * Math.PI) / 180),
+        108 * Math.sin((((i-1) * 30 - 60) * Math.PI) / 180)
+      );
+    }
+       
+    },
+
+    //绘制表盘中心原点
+    drawCenterDot() {
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 8, 0, 2 * Math.PI);
+        this.ctx.fill();
+        this.ctx.beginPath();
+        this.ctx.fillStyle = "gray";
+        this.ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+        this.ctx.fill();
+      },
+    //绘制时针
+    drawHourHand(hours, minutes) {
+      //时针旋转角度
+      var radius = ((2 * Math.PI) / 12) * hours + (((1 / 6) * Math.PI) / 60) * minutes;
+      // 保存当前状态，为了旋转后能回到当初状态
+      this.ctx.save();
+      this.ctx.beginPath();
+      // 针的宽度
+      this.ctx.lineWidth = 5;
+      // 针头为圆角
+      this.ctx.lineCap = "round";
+      this.ctx.strokeStyle = "black";
+      // 旋转
+      this.ctx.rotate(radius);
+      // 画一条线表示时钟
+      this.ctx.moveTo(0, 0);
+      this.ctx.lineTo(0, -50);
+      this.ctx.stroke();
+      // 回到保存的状态
+      this.ctx.restore();
+    },
+      //绘制分针
+    drawMinuteHand( minutes,seconds) {
+      //分针旋转角度
+      var radius =((2 * Math.PI) / 60) * minutes + ((2 * Math.PI) / 3600)*seconds;
+      // 保存当前状态，为了旋转后能回到当初状态
+      this.ctx.save();
+      this.ctx.beginPath();
+      // 针的宽度
+      this.ctx.lineWidth = 3;
+      // 针头为圆角
+      this.ctx.lineCap = "round";
+      this.ctx.strokeStyle = "black";
+      // 旋转
+      this.ctx.rotate(radius);
+      // 画一条线表示时钟
+      this.ctx.moveTo(0, 0);
+      this.ctx.lineTo(0, -70);
+      this.ctx.stroke();
+      // 回到保存的状态
+      this.ctx.restore();
+    },
+      //绘制秒针
+    drawSecondHand(seconds) {
+      //秒针旋转角度
+      var radius =(2 * Math.PI)*(seconds/60);
+      // 保存当前状态，为了旋转后能回到当初状态。
+      this.ctx.save();
+      this.ctx.beginPath();
+      // 针的宽度
+      this.ctx.lineWidth = 1;
+      // 针头为圆角
+      this.ctx.lineCap = "round";
+      this.ctx.strokeStyle = "red";
+      // 旋转
+      this.ctx.rotate(radius);
+      // 画一条线表示时钟
+      this.ctx.moveTo(0, 0);
+      this.ctx.lineTo(0, -90);
+      this.ctx.stroke();
+      // 回到保存的状态
+      this.ctx.restore();
+    }
+  }
+</script>
