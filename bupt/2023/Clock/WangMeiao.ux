@@ -1,0 +1,154 @@
+ 
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="demo-page">
+
+    <text class="title">*^_^*<br><br>欢迎打开{{ clockName }}</text>
+    <canvas id='myclock' class="clock" height=700 width=700></canvas>
+
+  </div>
+</template>
+
+<script>
+
+export default {
+
+  private: {
+    clockName: 'MyClock',
+  },
+
+  onInit() {  // 页面初始化时被调用
+    this.$page.setTitleBar({ text: '一个时钟' })
+  },
+
+  onShow() {  // 页面显示时被调用
+    setInterval(this.drawClock, 1000)  // 1000ms == 1s， 即一秒调用一次
+  },
+
+  drawClock() {
+
+    // 获得当下时间
+    var now = new Date();
+    var hr  = now.getHours() % 12;
+    var min = now.getMinutes();
+    var sec = now.getSeconds();
+
+    // 获得canvas元素
+    const canvas = document.getElementById('myclock'); 
+    const ctx = canvas.getContext('2d'); //获取canvas绘图上下文
+    var clockRadius = 350 ;  // 时钟半径为canvas的一半
+    ctx.clearRect(0, 0, clockRadius * 2, clockRadius * 2);  // 清除上一秒内容
+
+    // 保存当前绘图状态
+    ctx.save();
+
+    ctx.translate(clockRadius, clockRadius); // 移动原点到canvas元素中心 
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "black";
+    ctx.lineCap = "round";
+    ctx.font = '40px Times New Roman';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // 外轮廓
+    ctx.beginPath();
+    ctx.lineWidth = 6;
+    ctx.arc(0, 0, 280, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    // 写一行字
+    const text = 'Hello, Canvas!';
+    ctx.fillText(text, 0, -clockRadius * 0.3);
+
+    // 数字
+    for (var i = 1; i <= 12; i++) {
+        var theta = (i-3) * (Math.PI * 2) / 12;
+        var x = clockRadius * 0.7 * Math.cos(theta);
+        var y = clockRadius * 0.7 * Math.sin(theta);
+        ctx.fillText(i, x, y);
+    }
+    // 刻度
+    ctx.save();
+    ctx.lineWidth = 6;
+    for(var i = 0; i < 60; i++){
+        ctx.beginPath();
+
+        if(i % 5 != 0){
+        ctx.arc(clockRadius * 0.57, 0, 3, 0, Math.PI*2, true);
+        ctx.fill();
+        }else{
+
+        ctx.moveTo(clockRadius * 0.55, 0);
+        ctx.lineTo(clockRadius * 0.6, 0);
+        ctx.stroke();  // 描边
+        }
+      ctx.rotate(Math.PI/30);
+    }
+    ctx.restore();  // 恢复到之前保存的绘图状态
+
+    ctx.strokeStyle = "blue";
+    ctx.fillStyle = "blue";
+    // 时针
+    ctx.save();
+    ctx.rotate(-Math.PI/2);  // 逆时针旋转 90 度
+    ctx.rotate( (Math.PI/6)*hr + (Math.PI/360)*min + (Math.PI/21600)*sec );
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-clockRadius * 0.1, 0);
+    ctx.lineTo(0, 4);
+    ctx.lineTo(clockRadius * 0.35, 0);
+    ctx.lineTo(0,-4);
+    ctx.fill();
+    ctx.restore();
+
+    // 分针
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate( (Math.PI/30)*min + (Math.PI/1800)*sec );
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-clockRadius * 0.12, 0);
+    ctx.lineTo(0, 3);
+    ctx.lineTo(clockRadius * 0.45, 0);
+    ctx.lineTo(0, -3);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+
+    // 秒针
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate(sec * Math.PI/30);
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.moveTo(-clockRadius * 0.15, 0);
+    ctx.lineTo(0, 3);
+    ctx.lineTo(clockRadius * 0.55, 0);
+    ctx.lineTo(0, -3);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.restore();
+  },
+
+}
+
+</script>
+
+<style>
+
+  .demo-page {
+    flex-direction: column;  /*  column: 垂直分布 */
+    justify-content: flex-start;  /* 子元素在主轴上从上到下排列 */
+    align-items: center;  /* 在交叉轴上的对齐方式 */
+  }
+
+  .title {
+    font-size: 40px;
+    text-align: center;
+    color: #000000;
+
+  }
+  
+</style>
