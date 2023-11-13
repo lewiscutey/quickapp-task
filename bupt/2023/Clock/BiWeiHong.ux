@@ -1,0 +1,75 @@
+<template>
+  <div class="container">
+    <canvas id="clock" class="clock"></canvas>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router';
+
+  export default {
+    data: {
+      canvasId: 'clock',
+      ctx: null,
+      clockRadius: 100,
+    },
+    onShow() {
+      this.ctx = this.$element(this.canvasId).getContext('2d');
+      this.drawClock();
+      setInterval(() => this.drawClock(), 1000);
+    },
+    drawClock() {
+      const now = new Date();
+      const ctx = this.ctx;
+      const radius = this.clockRadius;
+      const x = radius + 10;
+      const y = radius + 10;
+      
+      ctx.clearRect(0, 0, 2 * (radius + 10), 2 * (radius + 10));
+
+      // Draw clock body
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Draw hands
+      const hourHandLength = radius * 0.5;
+      const minuteHandLength = radius * 0.8;
+      const secondHandLength = radius * 0.9;
+
+      // Calculate positions
+      const secondAngle = (now.getSeconds() / 60) * 2 * Math.PI - Math.PI / 2;
+      const minuteAngle = (now.getMinutes() / 60) * 2 * Math.PI - Math.PI / 2;
+      const hourAngle = ((now.getHours() % 12 + now.getMinutes() / 60) / 12) * 2 * Math.PI - Math.PI / 2;
+
+      // Draw hands
+      this.drawLine(ctx, x, y, secondHandLength, secondAngle);
+      this.drawLine(ctx, x, y, minuteHandLength, minuteAngle);
+      this.drawLine(ctx, x, y, hourHandLength, hourAngle);
+    },
+    drawLine(ctx, x1, y1, length, angle) {
+      const x2 = x1 + length * Math.cos(angle);
+      const y2 = y1 + length * Math.sin(angle);
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    },
+  };
+</script>
+
+<style>
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .clock {
+    width: 220px;
+    height: 220px;
+  }
+</style>
