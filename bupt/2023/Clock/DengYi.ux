@@ -1,0 +1,181 @@
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="wrapper">
+    <canvas class='clock' id='clock'></canvas>
+  </div>
+</template>
+
+<script>
+export default {
+  private: {
+    ctx: null,
+    radius:250    // 时钟表盘半径
+  },
+  onInit() {
+    // 当 titlebar 的文案与搜索的标题不一致时，请先设置 titlebar
+    this.$page.setTitleBar({ text: '时钟_邓毅' });
+  },
+
+  onShow() {
+    setInterval(() => {
+      this.drawClock();
+    }, 1000);
+  },
+
+  drawClock(){
+    const canvas = this.$element('clock');
+    this.ctx = canvas.getContext('2d');
+    // 获取当前时间
+    var date=new Date();
+    var hour=date.getHours();
+    var minite=date.getMinutes();
+    var second=date.getSeconds();
+
+    this.ctx.save();    // 保存目前canvas状态
+    // 转移画布坐标原点到表盘圆心
+    this.ctx.translate(this.radius,this.radius);
+    // 绘制表盘
+    this.drawPanel();
+    // 绘制表盘内圆点
+    this.drawDots();
+    // 绘制数字
+    this.drawNumber();
+
+    //绘制时分秒针
+    this.drawHourNeedle(hour,minite);
+    this.drawMinNeedle(minite,second)
+    this.drawSecNeedle(second);
+    
+    //绘制中间空心圆点
+    this.ctx.beginPath();
+    this.ctx.fillStyle = "white";
+    this.ctx.arc(0, 0, 5, 2*Math.PI, 0);
+    this.ctx.fill();
+    this.ctx.closePath();
+
+    this.ctx.restore();   // 恢复canvas状态
+  },
+
+  // 绘制表盘
+  drawPanel(){
+    //绘制表盘内底色
+    this.ctx.beginPath();
+    this.ctx.fillStyle = "white";
+    this.ctx.arc(0, 0, this.radius - this.ctx.lineWidth, 0, 2*Math.PI);
+    this.ctx.fill();
+
+    // 绘制表盘边框
+    this.ctx.beginPath();
+    this.ctx.lineWidth = 8;
+    this.ctx.strokeStyle = '#333333';
+    this.ctx.arc(0, 0, this.radius - this.ctx.lineWidth / 2, 0, 2*Math.PI);
+    this.ctx.stroke();
+
+    this.ctx.closePath();
+  },
+
+  //绘制圆点，共60个点
+  drawDots()
+  {
+    for(var j = 0; j < 60; j++){
+      var angle = 2*Math.PI / 60 * j;
+      var x = Math.cos(angle) * (this.radius - 22);
+      var y = Math.sin(angle) * (this.radius - 22);
+
+      this.ctx.beginPath();
+      //对应数值位置圆点标记为黑色，其他圆点为灰色
+      if (j % 5 == 0)
+          this.ctx.fillStyle = "#333";
+      else
+          this.ctx.fillStyle = "#ccc";
+      this.ctx.arc(x, y, 2, 0, 2*Math.PI);
+      this.ctx.fill();
+      this.ctx.closePath();
+    }
+  },
+
+  //绘制数值
+  drawNumber(){
+    this.ctx.font = "25px Arial";
+    this.ctx.fillStyle = "#333";
+    this.ctx.textAlign = "center";
+    this.ctx.textBaseline = "middle";
+
+    for(var i = 0; i < 12; i++){
+      // canvas默认0角度为x轴正向，需要整体旋转，因此 i-2
+      var angle = 2*Math.PI / 12 * (i - 2);
+      var x = Math.cos(angle) * (this.radius - 48);
+      var y = Math.sin(angle) * (this.radius - 48);
+      this.ctx.beginPath();
+      this.ctx.fillText((i+1).toString(), x, y);
+      this.ctx.closePath();
+    }
+  },
+
+  // 绘制时针
+  drawHourNeedle(hour,minite){
+    var round = 2*Math.PI;
+    // 避免时针一直指向具体数字，加入当前分钟数的计算，忽略秒数的计算，-3是因为canvas默认0°为x轴正向
+    var angle = round / 12 * (hour +  minite / 60 - 3);
+    var x = Math.cos(angle) * (this.radius - 120);
+    var y = Math.sin(angle) * (this.radius - 120);
+
+    //时针
+    this.ctx.beginPath();
+    this.ctx.lineWidth = 9;
+    this.ctx.lineCap = 'round';
+    this.ctx.moveTo(-x * .2, -y * .2);
+    this.ctx.lineTo(x, y);
+    this.ctx.stroke();
+    this.ctx.closePath();
+  },
+
+  // 绘制分针
+  drawMinNeedle(minute,second){
+    var round = 2*Math.PI;
+    // 避免分针一直指向具体分钟处，加入当前秒数的计算，-15是因为canvas默认0°为x轴正向
+    var angle = round / 60 * (minute + second / 60 - 15);
+    var x = Math.cos(angle) * (this.radius - 72);
+    var y = Math.sin(angle) * (this.radius - 72);
+
+    //分针
+    this.ctx.beginPath();
+    this.ctx.lineWidth = 6;
+    this.ctx.lineCap = 'round';
+    this.ctx.moveTo(-x * .25, -y * .25);
+    this.ctx.lineTo(x, y);
+    this.ctx.stroke();
+    this.ctx.closePath();
+  },
+
+  // 绘制秒针
+  drawSecNeedle(second){
+    // -15是因为canvas默认0°为x轴正向
+    var angle = 2*Math.PI / 60 * (second - 15);
+    var x = Math.cos(angle) * (this.radius - 44);
+    var y = Math.sin(angle) * (this.radius - 44);
+
+    //秒针
+    this.ctx.beginPath();
+    this.ctx.lineWidth = 3;
+    this.ctx.lineCap = 'round';
+    this.ctx.moveTo(-x * .25, -y * .25);
+    this.ctx.lineTo(x, y);
+    this.ctx.stroke();
+    this.ctx.closePath();
+  }
+}
+</script>
+
+<style lang="less">
+@import './../../assets/styles/style.less';
+
+.wrapper {
+  .flex-box-mixins(column, center, center);
+  background-color: #eee;
+}
+.wrapper #clock{
+  width: 500px;
+  height:500px;
+}
+</style>
