@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八卦图</title>
+</head>
+<body>
+    <div class="tai">
+        <div class="bai"></div>
+       <div class="hei"></div>
+   </div>
+   <style>
+    .tai{
+        width: 200px;
+        height: 200px;
+        border: 1px solid #000;
+        background: linear-gradient(#fff 50%, #000 50%); 
+         /* 使用渐变添加背景颜色 */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+
+        .bai{
+            height: 50%;
+            width: 50%;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+         /* 白色部分黑色小圆点 */
+        .bai::after{
+            content: '';
+            width: 30px;
+            height: 30px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        .hei{
+            height: 50%;
+            width: 50%;
+            background: #000;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* 黑色部分白色小圆点 */
+        .hei::after{
+            content: '';
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        /* // 加个动画旋转起来 */
+        animation: rotate 2s linear infinite;
+    }
+
+    @keyframes rotate {
+        from{
+            transform: rotate(0deg);
+        }
+        to{
+            transform: rotate(360deg);
+        }
+    }
+
+   </style>
+
+</body>
+</html>
