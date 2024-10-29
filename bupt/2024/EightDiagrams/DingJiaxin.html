@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EightDiagrams</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 200px;
+      background: #ccc;
+    }
+
+    div {
+      width: 200px;
+      height: 400px;
+      background-color: #fff;
+      border-left: 200px solid #000;
+      border-radius: 50%;
+      position: relative;
+      transition: all 4s;
+    }
+
+    div::after,
+    div::before {
+      content: "";
+      display: block;
+      height: 50px;
+      width: 50px;
+      border-radius: 50%;
+      margin-left: -100px;
+    }
+
+    div::after {
+      background: black;
+      border: 75px solid #fff;
+    }
+
+    div::before {
+      background: #fff;
+      border: 75px solid #000;
+    }
+
+    /* 添加旋转动画 */
+    /* @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    } */
+  </style>
+</head>
+
+<body>
+  <div id="EightDiagrams"></div>
+
+  <script>
+    var start = true;
+    var angle = 0;
+    var speed = 1;
+    var lastTime = 0;
+    var graph = document.getElementById('EightDiagrams');
+
+    graph.addEventListener('mouseover', () => {
+      start = true;
+      requestAnimationFrame(over);
+    });
+
+    graph.addEventListener('mouseout', () => {
+      start = false;
+      requestAnimationFrame(out);
+    });
+
+    function over(time) {
+      if (start) {
+        var delta = time - lastTime;
+        angle += speed * delta / 10;
+        graph.style.transform = 'rotate(' + angle + 'deg)';
+        speed += 0.1;
+        lastTime = time;
+        requestAnimationFrame(over);
+      }
+    }
+
+    function out(time) {
+      if (!start) {
+        var delta = time - lastTime;
+        angle += speed * delta / 80;
+        graph.style.transform = 'rotate(' + angle + 'deg)';
+        speed = speed < 0 ? 0 : speed - 0.1;
+        lastTime = time;
+        requestAnimationFrame(out);
+      }
+    }
+  </script>
+</body>
+
+</html>
