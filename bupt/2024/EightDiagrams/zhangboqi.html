@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+
+        *{
+            margin: 0px;
+            padding: 0px;
+        }
+
+        /*左半白，右半黑*/
+        .taiji{
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(0.25turn, white 50%,black 50%);
+            border-radius: 50%;
+            margin: 100px auto;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid black;
+        }
+
+        /*上大白圆*/
+        .taiji::before{
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+            background-color: white;
+            border-radius: 50%;
+        }
+        /*下大黑圆*/
+        .taiji::after{
+            content: "";
+            position: absolute;
+            bottom: 0%;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+            background-color: black;
+            border-radius: 50%;
+        }
+
+        /*上小黑圆*/
+        .dot1{
+            position: absolute;
+            top: calc(25% - 25px);
+            left: calc(50% - 25px);
+            width: 50px;
+            height: 50px;
+            background-color: black;
+            border-radius: 50%;
+        }
+
+        /*下小黑圆*/
+        .dot2{
+            position: absolute;
+            bottom: calc(25% - 25px);
+            left: calc(50% - 25px);
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .rotate{
+            animation: rotate 1s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0turn);
+            }
+            to{
+                transform: rotate(1turn);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="taiji" id="taiji">
+    <div class="dot1"></div>
+    <div class="dot2"></div>
+</div>
+
+<script>
+    const taiji= document.getElementById("taiji");
+    let speed = 1;
+    taiji.addEventListener('mouseenter',()=>{
+        taiji.classList.add('rotate');
+        speed = 1;
+        rotate();
+    })
+
+    taiji.addEventListener('mouseleave',()=>{
+        taiji.classList.remove('rotate')
+        taiji.style.animationDuration=`1s`
+    })
+
+    function rotate(){
+        speed *= 0.996; //996 icu!!!
+        taiji.style.animationDuration=`${speed}s`
+        if (taiji.classList.contains('rotate')){
+            requestAnimationFrame(rotate)
+        }
+    }
+
+</script>
+</body>
+</html>
