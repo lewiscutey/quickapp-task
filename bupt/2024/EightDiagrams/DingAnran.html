@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eight Diagrams Spinner</title>
+</head>
+<body>
+<div id="eightDiagrams"></div>
+</body>
+<style>
+    /* 全局样式重置 */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* 八卦图主体样式 */
+    #eightDiagrams {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        border: 2px solid black;
+        margin: 120px auto;
+        background: linear-gradient(to bottom, white 50%, black 50%);
+        overflow: hidden;
+    }
+
+    /* 上方白色小圆 */
+    #eightDiagrams::before {
+        content: "";
+        position: absolute;
+        top: 25%;
+        left: 0;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: white;
+        border: 100px solid black;
+    }
+
+    /* 下方黑色小圆 */
+    #eightDiagrams::after {
+        content: "";
+        position: absolute;
+        top: 25%;
+        right: 0;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: black;
+        border: 100px solid white;
+    }
+</style>
+<script>
+    let isAccelerating = false; // 控制旋转的加速状态
+    let rotationAngle = 0; // 当前旋转角度
+    let speedFactor = 0.5; // 初始旋转速度
+    const maxSpeed = 5; // 最大旋转速度
+    const spinElement = document.getElementById('eightDiagrams'); // 获取八卦图元素
+
+    // 控制旋转效果的主函数
+    function animateSpin() {
+        rotationAngle = (rotationAngle + speedFactor) % 360; // 更新旋转角度
+        spinElement.style.transform = `rotate(${rotationAngle}deg)`; // 应用旋转
+
+        // 控制加速或减速
+        if (isAccelerating) {
+            speedFactor = Math.min(speedFactor + 0.1, maxSpeed); // 加速，直至达到最大速度
+        } else {
+            speedFactor = Math.max(speedFactor - 0.1, 0); // 减速，直至停止
+        }
+
+        if (speedFactor > 0) {
+            requestAnimationFrame(animateSpin); // 当速度大于0时继续旋转
+        }
+    }
+
+    // 鼠标移入触发加速旋转
+    spinElement.addEventListener('mouseenter', () => {
+        if (!isAccelerating) {
+            isAccelerating = true;
+            requestAnimationFrame(animateSpin); // 开始动画
+        }
+    });
+
+    // 鼠标移出触发减速停止
+    spinElement.addEventListener('mouseleave', () => {
+        isAccelerating = false;
+    });
+</script>
+</html>
