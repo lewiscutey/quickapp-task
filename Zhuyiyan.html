@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First-homework of Quick_app</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f0f0; 
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #baguatu-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-top: 20px;
+        }
+
+        #baguatu {
+            width: 400px;
+            height: 400px;
+            border-radius: 200px;
+            position: absolute;
+            overflow: hidden;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.5s;
+        }
+
+        #baguatu > div:first-child {
+            width: 50%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            background-color: black;
+        }
+        #baguatu > div:nth-child(2) {
+            width: 50%;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            background-color: white;
+        }
+        #baguatu > div:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            left: 50%;
+            margin-left: -100px;
+            border-radius: 50%;
+            background-color: black;
+        }
+        #baguatu > div:nth-child(4) {
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -100px;
+            border-radius: 50%;
+            background-color: white;
+        }
+        #baguatu > div:nth-child(5) {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            left: 50%;
+            top: 75px;
+            margin-left: -25px;
+            border-radius: 50%;
+            background-color: white;
+        }
+        #baguatu > div:nth-child(6) {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            left: 50%;
+            bottom: 75px;
+            margin-left: -25px;
+            border-radius: 50%;
+            background-color: black;
+        }
+
+        .button-container {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            background-color: #4CAF50;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+<div class="button-container">
+    <button id="toggle-color">颜色反转</button>
+    <button id="toggle-direction">改变旋转方向</button>
+    <button id="toggle-animation">开始/停止旋转</button>
+    <button id="increase-rotation-speed">加速旋转</button>
+    <button id="decrease-rotation-speed">减速旋转</button>
+    <button id="increase-move-speed">加速移动</button>
+    <button id="decrease-move-speed">减速移动</button>
+</div>
+<div id="baguatu-wrapper">
+    <div id="baguatu">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+<script>
+    const baguatuElement = document.getElementById('baguatu');
+    const parts = baguatuElement.children;
+    const toggleColorButton = document.getElementById('toggle-color');
+    const toggleDirectionButton = document.getElementById('toggle-direction');
+    const toggleAnimationButton = document.getElementById('toggle-animation');
+    const increaseRotationSpeedButton = document.getElementById('increase-rotation-speed');
+    const decreaseRotationSpeedButton = document.getElementById('decrease-rotation-speed');
+    const increaseMoveSpeedButton = document.getElementById('increase-move-speed');
+    const decreaseMoveSpeedButton = document.getElementById('decrease-move-speed');
+
+    function toggleColors() {
+        for (let part of parts) {
+            if (getComputedStyle(part).backgroundColor === 'rgb(0, 0, 0)') {
+                part.style.backgroundColor = 'white';
+            } else {
+                part.style.backgroundColor = 'black';
+            }
+        }
+    }
+
+    toggleColorButton.addEventListener('click', toggleColors);
+
+    const screenWidth = window.innerWidth;
+    const baguatuWidth = 400;
+    let positionX = 0;
+    let direction = 1; // 1 for right, -1 for left
+    let moveSpeed = 0.5; // 水平移动速度
+    let rotationSpeed = 1; // 旋转速度
+    let rotationDegrees = 0; // 旋转角度
+    let animationId; // 用于存储requestAnimationFrame ID
+
+    function animateBaguatu() {
+        positionX += direction * moveSpeed;
+        if (positionX >= (screenWidth - baguatuWidth) / 2 || positionX <= -(screenWidth - baguatuWidth) / 2) {
+            direction *= -1;
+        }
+
+        rotationDegrees += rotationSpeed;
+        if (rotationDegrees >= 360) {
+            rotationDegrees = 0;
+        }
+
+        baguatuElement.style.transform = `translateX(${positionX}px) rotate(${rotationDegrees}deg)`;
+
+        animationId = requestAnimationFrame(animateBaguatu);
+    }
+
+    function startAnimation() {
+        if (!animationId) animateBaguatu();
+    }
+
+    function stopAnimation() {
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+    }
+
+    function toggleDirection() {
+        direction *= -1;
+        rotationSpeed *= -1;
+    }
+
+    function toggleAnimation() {
+        if (animationId) {
+            stopAnimation();
+        } else {
+            startAnimation();
+        }
+    }
+
+    function increaseRotationSpeed() {
+        rotationSpeed += 0.5 * Math.sign(rotationSpeed);
+    }
+
+    function decreaseRotationSpeed() {
+        rotationSpeed = Math.max(0.5, Math.abs(rotationSpeed) - 0.5) * Math.sign(rotationSpeed);
+    }
+
+    function increaseMoveSpeed() {
+        moveSpeed += 0.5;
+    }
+
+    function decreaseMoveSpeed() {
+        moveSpeed = Math.max(0.5, moveSpeed - 0.5);
+    }
+
+    toggleDirectionButton.addEventListener('click', toggleDirection);
+    toggleAnimationButton.addEventListener('click', toggleAnimation);
+    increaseRotationSpeedButton.addEventListener('click', increaseRotationSpeed);
+    decreaseRotationSpeedButton.addEventListener('click', decreaseRotationSpeed);
+    increaseMoveSpeedButton.addEventListener('click', increaseMoveSpeed);
+    decreaseMoveSpeedButton.addEventListener('click', decreaseMoveSpeed);
+</script>
+</body>
+</html>
