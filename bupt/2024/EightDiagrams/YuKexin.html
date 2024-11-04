@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>八卦图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #EightDiagrams {
+            position: relative;
+            width: 504px;
+            height: 504px;
+            border-radius: 50%;
+            border: 2px solid black;
+            margin: 100px auto;
+            background: linear-gradient(to bottom, #ffff 0%, #ffff 50%, #000000 50%, #000000 100%);
+        }
+
+        #EightDiagrams::before {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            content: "";
+            top: 25%;
+            left: 0;
+            border-radius: 50%;
+            border: 100px black solid;
+            background: white;
+        }
+
+        #EightDiagrams::after {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            content: "";
+            top: 25%;
+            right: 0;
+            border-radius: 50%;
+            border: 100px white solid;
+            background: black;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="EightDiagrams"></div>
+
+    <script>
+        const graph = document.getElementById('EightDiagrams');
+        let isRotating = false;
+        let rotationAngle = 0;
+        let rotationSpeed = 0.5;
+        let lastTimestamp = 0;
+
+        function animate(timestamp) {
+            if (isRotating) {
+                const deltaTime = timestamp - lastTimestamp;
+                rotationAngle += rotationSpeed * deltaTime / 30;
+                graph.style.transform = `rotate(${rotationAngle}deg)`;
+                rotationSpeed += 0.05;
+            } else {
+                const deltaTime = timestamp - lastTimestamp;
+                rotationAngle += rotationSpeed * deltaTime / 60;
+                graph.style.transform = `rotate(${rotationAngle}deg)`;
+                rotationSpeed -= 0.05;
+                if (rotationSpeed <= 0) {
+                    rotationSpeed = 0;
+                }
+            }
+            lastTimestamp = timestamp;
+            requestAnimationFrame(animate);
+        }
+
+        graph.addEventListener('mouseenter', () => {
+            isRotating = true;
+            requestAnimationFrame(animate);
+        });
+
+        graph.addEventListener('mouseleave', () => {
+            isRotating = false;
+            requestAnimationFrame(animate);
+        });
+    </script>
+
+</body>
+
+</html>
