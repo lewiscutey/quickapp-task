@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh_cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太极图</title>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="taiji"></div>
+    </div>
+</body>
+</html>
+
+<style>
+*{
+    margin: 0;
+    padding: 0;
+}
+.wrapper{
+    margin: 0 auto;
+    position: relative;
+    top:30px;
+    left:30px;
+    width: 330px;
+    height: 325px;
+    z-index: 1;
+}
+.taiji {
+    position: relative;
+    top: 63px;
+    left: 65px;
+    background-color: #fff;
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    border: #000 solid 1px;
+    background-image: linear-gradient(to left, #fff, #fff 50%, #000 50%, #000);
+    transition: transform 0.1s linear;
+}
+.taiji::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 38px solid #000;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+}
+.taiji::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    border: 38px solid #fff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+}
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const taiji = document.querySelector('.taiji');
+    let angularVelocity = 0; // 角速度，单位：度/秒
+    let angularAcceleration = 30; // 角加速度，单位：度/秒²
+    let maxSpeed = 1800; // 最大速度，单位：度/秒
+    let lastTime = 0; // 上一次更新时间
+    let rotationAngle = 0; // 总旋转角度
+    let isAccelerating = true; // 是否正在加速
+
+    // 更新太极图旋转角度
+    function updateRotation(currentTime) {
+        const timeDelta = (currentTime - lastTime) / 1000; // 时间差，单位：秒
+        lastTime = currentTime;
+
+        if (isAccelerating) {
+            angularVelocity += angularAcceleration * timeDelta;
+            if (angularVelocity > maxSpeed) {
+                angularVelocity = maxSpeed;
+                isAccelerating = false;
+            }
+        } else {
+            angularVelocity += angularAcceleration * timeDelta;
+            if (angularVelocity < 0) {
+                angularVelocity = 0;
+                // 停止动画
+                return;
+            }
+        }
+
+        rotationAngle += angularVelocity * timeDelta;
+        taiji.style.transform = `rotate(${rotationAngle}deg)`;
+
+        requestAnimationFrame(updateRotation);
+    }
+
+    // 鼠标移入事件
+    taiji.addEventListener('mouseenter', function() {
+        if (angularVelocity === 0 || angularVelocity < 0) {
+            isAccelerating = true;
+            angularVelocity = 0;
+            lastTime = performance.now(); // 使用performance.now()获取更精确的时间
+            rotationAngle = 0; // 重置旋转角度
+            requestAnimationFrame(updateRotation);
+        }
+    });
+
+    // 鼠标移出事件
+    taiji.addEventListener('mouseleave', function() {
+        if (angularVelocity > 0) {
+            isAccelerating = false;
+            angularAcceleration = -angularAcceleration; // 改变加速度方向
+            lastTime = performance.now(); // 重置时间
+            requestAnimationFrame(updateRotation);
+        }
+    });
+});
+</script>
