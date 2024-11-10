@@ -1,69 +1,183 @@
 <template>
-  <!-- template里只能有一个根节点 -->
-  <div class="wrapper">
-    <text class="title">{{ title }}</text>
-    <!-- 点击跳转详情页 -->
-    <input
-      class="btn"
-      type="button"
-      value="跳转到详情页"
-      onclick="onDetailBtnClick"
-    />
+  <div class="container">
+    <canvas class="clock" id="clockCanvas"></canvas>
   </div>
 </template>
 
 <script>
-import router from '@system.router'
-
 export default {
-  // 页面级组件的数据模型，影响传入数据的覆盖机制：private内定义的属性不允许被覆盖
   private: {
-    title: '欢迎体验快应用开发',
+    drawingContext: null,
+    radius: 200,
+    centerSize: 10,
+    hourHandLength: 80,
+    hourHandWidth: 7,
+    minuteHandLength: 120,
+    minuteHandWidth: 5,
+    secondHandLength: 150,
+    secondHandWidth: 2,
+    centerColor: 'rgba(0, 0, 0, 1)',
+    tickColor: 'rgba(0, 0, 0, 1)',
+    // Numbers on the dial
+    numbers: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2],
+    intervalId: null
   },
 
   onInit() {
-    // --------------------------------- Optimize SEO Start
-    // 当 titlebar 的文案与搜索的标题不一致时，请先设置 titlebar
-    // 备注：this.$page.setMeta 需要引擎 1090 版本及以上才支持，因此这段做注释处理；
-    this.$page.setTitleBar({ text: '欢迎体验快应用开发' })
-    if (this.$page.setMeta) {
-      this.$page.setMeta({
-        title: '快应用示例模版',
-        description:
-          '快应用是移动互联网新型应用生态，与手机系统深度整合，为用户提供更加场景化的体验。具备传统APP完整的应用体验，但无需安装、即点即用。',
-      })
-    }
-    // --------------------------------- Optimize SEO End
+    this.$page.setTitleBar({ text: 'A Simple Clock' });
   },
 
-  onDetailBtnClick() {
-    // 跳转到应用内的某个页面，router用法详见：文档 -> 接口 -> 页面路由
-    router.push({
-      uri: '/pages/DemoDetail',
-    })
+  onShow() {
+    this.initializeClock();
   },
-}
+
+  onDestroy() {
+    if (this.intervalId !== null) {
+      clearInterval(this.intervalId);
+    }
+  },
+
+  initializeClock() {
+    const canvas = this.$element('clockCanvas');
+    this.drawingContext = canvas.getContext('2d');
+    this.intervalId = setInterval(() => this.renderClock(), 1000);
+  },
+
+  renderClock() {
+    this.drawingContext.save();
+    this.clearCanvas();
+    this.drawCenter();
+    this.drawTicksAndNumbers();
+    this.drawHands();
+    this.drawingContext.restore();
+  },
+
+  clearCanvas() {
+    this.drawingContext.clearRect(0, 0, this.radius * 2, this.radius * 2);
+  },
+
+  drawHands() {
+    const currentTime = new Date();
+    const hours = currentTime.getHours() % 12;
+    const minutes = currentTime.getMinutes();
+    const seconds = currentTime.getSeconds();
+    this.drawHourHand(hours, minutes);
+    this.drawMinuteHand(minutes);
+    this.drawSecondHand(seconds);
+  },
+
+  drawHourHand(hours, minutes) {
+    this.drawingContext.save();
+    this.drawingContext.beginPath();
+    const hourAngle = (Math.PI * 2) / 12 * hours;
+    const minuteOffset = (Math.PI * 2) / 12 / 60 * minutes;
+    this.drawingContext.rotate(hourAngle + minuteOffset);
+    this.drawingContext.lineWidth = this.hourHandWidth;
+    this.drawingContext.lineCap = "round";
+    this.drawingContext.moveTo(0, 0);  // Start at the center, no trailing part
+    this.drawingContext.lineTo(0, -this.hourHandLength);
+    this.drawingContext.stroke();
+    this.drawingContext.closePath();
+    this.drawingContext.restore();
+  },
+
+  drawMinuteHand(minutes) {
+    this.drawingContext.save();
+    this.drawingContext.beginPath();
+    const minuteAngle = (Math.PI * 2) / 60 * minutes;
+    this.drawingContext.rotate(minuteAngle);
+    this.drawingContext.lineWidth = this.minuteHandWidth;
+    this.drawingContext.lineCap = "round";
+    this.drawingContext.moveTo(0, 0);  // Start at the center, no trailing part
+    this.drawingContext.lineTo(0, -this.minuteHandLength);
+    this.drawingContext.stroke();
+    this.drawingContext.closePath();
+    this.drawingContext.restore();
+  },
+
+  drawSecondHand(seconds) {
+      this.drawingContext.save();
+      this.drawingContext.beginPath();
+      const secondAngle = (Math.PI * 2) / 60 * seconds;
+      this.drawingContext.rotate(secondAngle);
+      this.drawingContext.lineWidth = this.secondHandWidth;
+      this.drawingContext.moveTo(0, 0);  // Start at the center, no trailing part
+      this.drawingContext.lineTo(0, -this.secondHandLength);
+      this.drawingContext.stroke();
+      this.drawingContext.closePath();
+      this.drawingContext.restore();
+  },
+
+  drawTicksAndNumbers() {
+    this.drawingContext.translate(this.radius, this.radius);
+    const numberRadius = this.radius - 18;  // Adjusted radius for numbers
+    const tickRadius = this.radius - 30;    // Adjusted radius for tick marks
+    const majorTickLength = 15;             // Length of major tick marks (for hours)
+    const minorTickLength = 7;              // Length of minor tick marks (for minutes)
+
+    this.drawingContext.textAlign = 'center';
+    this.drawingContext.textBaseline = "middle";
+    this.drawingContext.font = "20px Times New Roman";
+
+    // Draw hour numbers
+    for (let i = 0; i < this.numbers.length; i++) {
+        const angle = (Math.PI * 2) / 12 * i;
+        const x = Math.cos(angle) * numberRadius;
+        const y = Math.sin(angle) * numberRadius;
+        this.drawingContext.fillText(this.numbers[i], x, y);
+    }
+
+    // Draw tick marks
+    for (let i = 0; i < 60; i++) {
+        const angle = (Math.PI * 2) / 60 * i;
+        const outerX = Math.cos(angle) * tickRadius;
+        const outerY = Math.sin(angle) * tickRadius;
+        const innerX = Math.cos(angle) * (tickRadius - (i % 5 === 0 ? majorTickLength : minorTickLength));
+        const innerY = Math.sin(angle) * (tickRadius - (i % 5 === 0 ? majorTickLength : minorTickLength));
+
+        this.drawingContext.beginPath();
+        this.drawingContext.moveTo(outerX, outerY);
+        this.drawingContext.lineTo(innerX, innerY);
+        this.drawingContext.lineWidth = i % 5 === 0 ? 3 : 1; // Thicker lines for hour ticks
+        this.drawingContext.strokeStyle = this.tickColor;
+        this.drawingContext.stroke();
+        this.drawingContext.closePath();
+    }
+  },
+
+  drawCenter() {
+    this.drawingContext.beginPath();
+    this.drawingContext.moveTo(this.radius, this.radius);
+    this.drawingContext.arc(
+      this.radius,
+      this.radius,
+      this.centerSize,
+      0, Math.PI * 2, true
+    );
+    this.drawingContext.fillStyle = this.centerColor;
+    this.drawingContext.fill();
+  },
+};
 </script>
 
-<style lang="less">
-@import './../../assets/styles/style.less';
+<style>
+* {
+  margin: 0;
+  padding: 0;
+}
 
-.wrapper {
-  .flex-box-mixins(column, center, center);
-  .title {
-    font-size: 8 * @size-factor;
-    text-align: center;
-    color: @black;
-  }
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 0.3);
+}
 
-  .btn {
-    width: 90 * @size-factor;
-    height: 16 * @size-factor;
-    border-radius: 8 * @size-factor;
-    background-color: @brand;
-    color: @white;
-    font-size: 30px;
-    margin-top: 16 * @size-factor;
-  }
+.clock {
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background-color: rgba(80, 185, 255, 0.3);
 }
 </style>
