@@ -1,0 +1,106 @@
+<template>
+  <div class="clock">
+    <canvas id="canvas"></canvas>
+  </div>
+</template>
+
+<script lang="ts">
+export default {
+  private: {
+   
+  },
+  onInit() {
+    this.$page.setTitleBar({text: "时钟组件"})
+  },
+  onShow() {
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    //半径
+    var radius = 300;
+    //平移画布中心点
+    ctx.translate(375, 500);
+    //1s执行一次
+    setInterval(drawALL, 1000);
+
+    function drawALL() {
+      drawClock(ctx, radius);
+      drawNumbers(ctx, radius);
+      drawPointers(ctx, radius);
+    }
+    //表盘
+    function drawClock(ctx, radius) {
+      ctx.beginPath();
+      //画圆 x , y , r, begin , end
+      ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+      //设置白色并填充
+      ctx.fillStyle = 'white';
+      ctx.fill();
+      //黑色边框
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 12;
+      ctx.stroke();
+      //圆点
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * 0.05, 0, 2 * Math.PI);
+      ctx.fillStyle = 'black';
+      ctx.fill();
+    }
+
+    //数字
+    function drawNumbers(ctx, radius) {
+      var ang;
+      var num;
+      const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+      ctx.font = radius * 0.15 + "px arial";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      for (num = 1; num < 13; num++) {
+        ang = num * Math.PI / 6;
+        //顺时针旋转坐标系
+        ctx.rotate(ang);
+        //平移,x不动,数字在-y
+        ctx.translate(0, -radius * 0.85);
+        ctx.rotate(-ang);
+        ctx.fillText(romanNumerals[num-1], 0, 0);
+        ctx.rotate(ang);
+        ctx.translate(0, radius * 0.85);
+        ctx.rotate(-ang);
+      }
+    }
+
+    //指针
+    function drawPointers(ctx, radius) {
+      var now = new Date();
+      var hour = now.getHours();
+      var minute = now.getMinutes();
+      var second = now.getSeconds();
+      
+      hour = hour % 12;
+      hour = (hour * Math.PI / 6) + (minute * Math.PI / (6 * 60)) + (second * Math.PI / (360 * 60));
+      drawPointer(ctx, hour, radius * 0.5, radius * 0.07);
+      
+      minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
+      drawPointer(ctx, minute, radius * 0.8, radius * 0.05);
+      
+      second = (second * Math.PI / 30);
+      drawPointer(ctx, second, radius * 0.9, radius * 0.02);
+    }
+    
+    function drawPointer(ctx, pos, length, width) {
+      ctx.beginPath();
+      ctx.lineWidth = width;
+      ctx.lineCap = "rectangle";
+      ctx.moveTo(0, 1);
+      ctx.rotate(pos);
+      ctx.lineTo(0, -length);
+      ctx.stroke();
+      ctx.rotate(-pos);
+    }
+  },
+}
+</script>
+<style lang="less">
+  #canvas{
+    background-color: #ffffff;
+  }
+</style>
