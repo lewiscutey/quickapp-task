@@ -1,0 +1,126 @@
+<template>
+  <div class="content">
+    <canvas class="clock" id="clock" width="300" height="300"></canvas>
+  </div>
+</template>
+
+<script>
+export default {
+  onInit() {
+    this.$page.setTitleBar({ text: 'darの时钟' })
+  },
+  onShow() {
+    const canvas = this.$element('clock')
+    const ctx = canvas.getContext('2d')
+    this.update(ctx)
+    // 每秒重新画时钟
+    setInterval(() => {
+      ctx.clearRect(0, 0, 300, 300)
+      this.update(ctx)
+    }, 1000)
+  },
+  update(ctx) {
+    const time = new Date()
+    const hours = time.getHours() % 12
+    const minutes = time.getMinutes()
+    const seconds = time.getSeconds()
+
+    ctx.save()
+    this.drawPanel(ctx)
+    this.hourNum(ctx)
+    this.secondHand(ctx, seconds)
+    this.minuteHand(ctx, minutes)
+    this.hourHand(ctx, hours, minutes)
+    this.centerDot(ctx)
+    ctx.restore()
+  },
+  // 底盘
+  drawPanel(ctx) {
+    ctx.clearRect(0, 0, 300, 300)
+    ctx.beginPath()
+    ctx.arc(150, 150, 130, 0, 2 * Math.PI)
+    ctx.fillStyle = '#f0f0f0'
+    ctx.fill()
+    ctx.lineWidth = 10
+    ctx.strokeStyle = '#333'
+    ctx.stroke()
+  },
+  // 12个数字
+  hourNum(ctx) {
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    ctx.font = '20px Arial'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = '#333'
+    for (let i = 0; i < arr.length; i++) {
+      const angle = (i * 30 - 90) * Math.PI / 180
+      const x = 150 + 100 * Math.cos(angle)
+      const y = 150 + 100 * Math.sin(angle)
+      ctx.fillText(arr[i], x, y)
+    }
+  },
+  // 中心圆点
+  centerDot(ctx) {
+    ctx.beginPath()
+    ctx.arc(150, 150, 5, 0, 2 * Math.PI)
+    ctx.fillStyle = '#333'
+    ctx.fill()
+  },
+  // 时针
+  hourHand(ctx, hours, minutes) {
+    const angle = ((hours * 30 + minutes * 0.5) - 90) * Math.PI / 180
+    ctx.save()
+    ctx.beginPath()
+    ctx.lineWidth = 8
+    ctx.lineCap = 'round'
+    ctx.strokeStyle = '#333'
+    ctx.moveTo(150, 150)
+    ctx.lineTo(150 + 50 * Math.cos(angle), 150 + 50 * Math.sin(angle))
+    ctx.stroke()
+    ctx.restore()
+  },
+  // 分针
+  minuteHand(ctx, minutes) {
+    const angle = ((minutes * 6) - 90) * Math.PI / 180
+    ctx.save()
+    ctx.beginPath()
+    ctx.lineWidth = 6
+    ctx.lineCap = 'round'
+    ctx.strokeStyle = '#333'
+    ctx.moveTo(150, 150)
+    ctx.lineTo(150 + 80 * Math.cos(angle), 150 + 80 * Math.sin(angle))
+    ctx.stroke()
+    ctx.restore()
+  },
+  // 秒针
+  secondHand(ctx, seconds) {
+    const angle = ((seconds * 6) - 90) * Math.PI / 180
+    ctx.save()
+    ctx.beginPath()
+    ctx.lineWidth = 2
+    ctx.lineCap = 'round'
+    ctx.strokeStyle = 'red'
+    ctx.moveTo(150, 150)
+    ctx.lineTo(150 + 100 * Math.cos(angle), 150 + 100 * Math.sin(angle))
+    ctx.stroke()
+    ctx.restore()
+  }
+}
+</script>
+
+<style>
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.clock {
+  width: 300px;
+  height: 300px;
+  border: 2px solid #333;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+}
+</style>
