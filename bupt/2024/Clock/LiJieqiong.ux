@@ -1,0 +1,237 @@
+<template>
+  <div class="doc-page">
+    <div class="content">
+      <canvas class="clock" id="clock"></canvas>
+      <div class="button {{clicking}}" @click="changSkin">
+        <a>一键换肤</a>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  // Developer: Lijieqiong
+  // Date: 2024.11.6
+  // Functions: canvas方式实现模拟时钟
+  // Addition: 补充一键切换闹钟外观功能，通过点击钟表下方按键触发
+
+export default {
+  private: {
+    ctx: null, // canvas的上下文对象
+    radius: 240, // 时钟的半径
+    center_x: 250, // 时钟的中心点坐标
+    center_y: 250,
+    axises: {
+      hour: { x: 0, y: 0 },
+      minute: { x: 0, y: 0 },
+      second: { x: 0, y: 0 }
+    },
+    skin_num: 0,
+    skin_family: [
+      { most: 'black', sub: '#909090', decoration: '#00e1ff' },
+      { most: '#6f430a', sub: '#146bad', decoration: '#c7a50e' },
+      { most: '#4e3a02', sub: '#ba442f', decoration: '#9ae31b' },
+      { most: 'black', sub: 'blue', decoration: 'red' },
+      { most: '#4e0a7e', sub: '#f34895', decoration: '#12dcd8' },
+      { most: '#42095d', sub: '#ff9100', decoration: '#ffce08' },
+    ],
+    changing: false
+  },
+  computed: {
+    clicking() {
+      return this.changing ? 'clicking' : '';
+    }
+
+  },
+  onInit() {
+    this.$page.setTitleBar({
+      text: 'canvas简单绘制'
+    })
+  },
+  onShow() {
+    // 通过id获取canvas元素，并获取其绘图上下文
+    const canvas = this.$element('clock') //获取 canvas 组件
+    this.ctx = canvas.getContext('2d');
+    // 设置画笔基本属性
+    const main_color = this.skin_family[this.skin_num].most;
+    this.changMainColor();
+    this.ctx.font = 'bold 30px ZCOOL XiuKai Hei'; // 设置字体大小
+    this.ctx.textAlign = 'center';// 设置字体横向对齐方式
+    this.ctx.textBaseline = 'middle';// 设置字体竖向对齐方式
+    this.ctx.lineWidth = 12;  // 设置线宽
+    this.ctx.translate(this.center_x, this.center_y);  // 将绘图原点移动到canvas中心
+    // 初次显示直接画、重新显示时也需要临时刷新一下
+    this.updateClock(1);
+    // 调用updateClock更新时钟
+    this.updateClock(0);
+  },
+  onHide() {
+    this.ctx.clearRect(-this.center_x, -this.center_y, 2 * this.center_x, 2 * this.center_y) // 清除画布
+  },
+
+  changSkin() {
+    this.changing = true;
+    this.skin_num < this.skin_family.length - 1 ? this.skin_num++ : this.skin_num = 0;
+    this.changMainColor();
+    this.updateClock(1);
+    setTimeout(() => {
+      this.changing = false;
+    }, 100)
+  },
+  changMainColor() {
+    const main_color = this.skin_family[this.skin_num].most;
+    this.ctx.fillStyle = main_color;  // 设置字体颜色
+    this.ctx.strokeStyle = main_color;   // 设置线的颜色
+  },
+
+  // 绘制时钟表盘
+  drawClockFace() {
+    // 私有函数1 —— 确定单个竖线路径
+    const drawLine = (angle, size) => {
+      var r = this.radius - 20;
+      var radian = (angle - 90) * Math.PI / 180; // 角度逆时针90度、再换算成弧度
+      var cos = Math.cos(radian).toFixed(2);
+      var sin = Math.sin(radian).toFixed(2);
+      // 根据弧度计算竖线起始点的位置
+      this.ctx.beginPath();
+      this.ctx.moveTo(Math.floor(cos * (r - size)), Math.floor(sin * (r - size)));
+      this.ctx.lineTo(Math.floor(cos * r), Math.floor(sin * r));
+      this.ctx.stroke();
+    }
+    // 私有函数2 —— 绘制代表时间格子的竖线(span:跨几个分钟格子; width, len, color为线条特征)
+    const drawLines = (span, width, len, color) => {
+      this.ctx.lineWidth = width;  // 设置线宽
+      this.ctx.strokeStyle = color;   // 设置线的颜色
+      for (let i = 0; i < 60; i += span)  drawLine(i * 6, len);//  循环绘制竖线
+    }
+    // 私有函数3 —— 绘制表盘数字
+    const drawNums = () => {
+      for (let i = 1; i <= 12; i++) {
+        var r = this.radius - 70;
+        var radian = (i * 30 - 90) * Math.PI / 180; // 角度逆时针90度、再换算成弧度
+        var cos = Math.cos(radian).toFixed(2);
+        var sin = Math.sin(radian).toFixed(2);
+        this.ctx.fillText(i, Math.floor(cos * r), Math.floor(sin * r));
+      }
+    }
+
+    // 绘制表盘：
+    this.ctx.restore(); // 恢复之前的绘图状态(防止页面隐藏再开启后状态丢失)
+    this.ctx.save(); // 保存当前绘图状态
+    this.ctx.clearRect(-this.center_x, -this.center_y, 2 * this.center_x, 2 * this.center_y) // 清除画布
+    this.ctx.beginPath();// 开始绘制一个圆形路径
+    this.ctx.arc(0, 0, this.radius, 0, 2 * Math.PI); // 绘制圆形，半径为this.radius
+    this.ctx.stroke(); // 绘制圆形路径
+    // 绘制分钟的时间格子
+    drawLines(1, 6, 20, this.skin_family[this.skin_num].sub);
+    // 绘制时钟的时间格子
+    drawLines(5, 8, 30, this.skin_family[this.skin_num].most);
+    // 绘制数字
+    drawNums();
+    this.ctx.restore(); // 恢复之前的绘图状态
+  },
+
+
+  // 更新时钟(once表示是否仅单次刷新)
+  updateClock(once) {
+    // 获取当前小时、分钟和秒
+    const now = new Date(); // 获取当前时间
+    const hour = now.getHours() % 12; // 12小时回归
+    const minute = now.getMinutes();
+    const second = now.getSeconds();
+
+    //// 三个私有函数—————实现表针转动动画
+    // 根据角度更新最终的坐标
+    const computAxis = (agl, percent, obj_name) => {
+      var radian = (agl - 90) * Math.PI / 180; // 角度往逆时针转90度，再换算成弧度
+      var size = this.radius * percent;
+      this.axises[obj_name].x = Math.floor(Math.cos(radian).toFixed(2) * size);
+      this.axises[obj_name].y = Math.floor(Math.sin(radian).toFixed(2) * size);
+    }
+    // 计算表针角度、获得所有终点坐标
+    const computAngle = (hour, minute, second) => {
+      var angle;// 初始角度为0
+      // 计算时针终点坐标
+      angle = (hour + minute / 60) * 30; // 时针每小时走30度
+      computAxis(angle, 0.5, 'hour');
+      // 计算分针终点坐标
+      angle = minute * 6; // 分针每分走6度 
+      computAxis(angle, 0.7, 'minute');
+      // 计算秒针终点坐标
+      angle = second * 6; // 秒针每秒走6度 
+      computAxis(angle, 0.75, 'second');
+    }
+    // 绘制表针
+    const drawPoint = (type, color) => {
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, 0);
+      this.ctx.lineTo(this.axises[type].x, this.axises[type].y);
+      this.ctx.strokeStyle = color;   // 设置线的颜色
+      this.ctx.stroke();
+    }
+
+    // // 动画过程
+    this.ctx.restore(); // 恢复之前的绘图状态
+    this.drawClockFace(); // 重绘表盘
+    this.ctx.save(); // 保存当前绘图状态
+    // 绘制表针
+    computAngle(hour, minute, second); // 计算新的指针位置
+    this.ctx.lineWidth = 4;  // 设置线宽
+    drawPoint('second', this.skin_family[this.skin_num].decoration);
+    this.ctx.lineWidth = 8;  // 设置线宽
+    drawPoint('minute', this.skin_family[this.skin_num].sub);
+    this.ctx.lineWidth = 16;  // 设置线宽
+    drawPoint('hour', this.skin_family[this.skin_num].most);
+    this.ctx.restore(); // 恢复之前的绘图状态
+
+    // 加个表针扣扣上
+    this.ctx.save(); // 保存当前绘图状态
+    this.ctx.beginPath();// 开始绘制一个圆形路径
+    this.ctx.lineWidth = 16;  // 设置线宽
+    this.ctx.arc(0, 0, 10, 0, 2 * Math.PI); // 绘制圆环形按钮
+    this.ctx.stroke(); // 绘制圆形路径
+    this.ctx.restore(); // 恢复之前的绘图状态
+
+    // 使用requestAnimationFrame递归调用updateClock方法，实现时钟的实时更新
+    if (!once) requestAnimationFrame(() => { this.updateClock() });
+  },
+
+}
+</script>
+
+<style lang="less">
+@size: 500px;
+
+.content {
+  flex-direction: column;
+  padding-top: 160px;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  .clock {
+    height: @size;
+    width: @size;
+    margin-bottom: 60px;
+  }
+  .button {
+    width: 40%;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    background-color: #4e0a7e;
+    background-color: #ff9100;
+    background-color: #ffce08;
+    background-color: #1496ad;
+    border-radius: 20px;
+    a {
+      color: #ffffff;
+      font-family: "ZCOOL XiuKai Hei", "Source Han Sans CN";
+      font-size: 30px;
+      font-weight: bolder;
+    }
+  }
+  .clicking {
+    background-color: rgb(89, 166, 178);
+  }
+}
+</style>

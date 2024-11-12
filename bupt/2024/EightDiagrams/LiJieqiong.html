@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<!-- 
+Developer: 李洁琼
+
+布局变动：八卦图位置调整为窗口中心
+添加功能： 1. 波纹动态效果
+         2. 八卦图转动半圈自动敲一次木鱼
+         3. 点击窗口任意位置视为敲一次木鱼
+
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>电子木鱼</title>
+    <style>
+      * {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      html,
+      body,
+      .box {
+        height: 100%;
+      }
+
+      .box {
+        background: hsl(106, 6%, 69%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* 太极部分 */
+      .taichi {
+        width: 200px;
+        height: 400px;
+        background-color: #fff;
+        border-left: 200px solid #000;
+        border-radius: 50%;
+        z-index: 2;
+      }
+      .taichiout {
+        z-index: 2;
+        border-radius: 50%;
+        box-shadow: 0px 0px 10px 16px #5757574b;
+      }
+
+      .taichi::after,
+      .taichi::before {
+        content: '';
+        display: block;
+        height: 50px;
+        width: 50px;
+        border-radius: 50%;
+        margin-left: -100px;
+      }
+
+      .taichi::after {
+        background: black;
+        border: 75px solid white;
+      }
+
+      .taichi::before {
+        background: white;
+        border: 75px solid black;
+      }
+
+      /* 太极动画部分 */
+      @keyframes load {
+        0% {
+          transform: rotate(0);
+        }
+        50% {
+          transform: rotate(180deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes zoom {
+        0% {
+          transform: scale(1, 1);
+        }
+        40% {
+          transform: scale(1, 1);
+        }
+        45% {
+          transform: scale(1.05, 1.05);
+        }
+        50% {
+          transform: scale(1, 1);
+        }
+        90% {
+          transform: scale(1, 1);
+        }
+        95% {
+          transform: scale(1.05, 1.05);
+        }
+        100% {
+          transform: scale(1, 1);
+        }
+      }
+
+      .taichi {
+        animation: load 6s ease -1s infinite;
+        -webkit-animation: load 6s ease -1s infinite;
+      }
+
+      .taichiout {
+        animation: zoom 6s ease -1.3s infinite;
+        -webkit-animation: zoom 6s ease -1.3s infinite;
+      }
+
+      /* 涟漪部分 */
+      .wave {
+        width: 360px;
+        height: 360px;
+      }
+      .wave::before,
+      .wave::after {
+        content: '';
+        display: block;
+        width: 380px;
+        height: 380px;
+        margin-left: -20px;
+        margin-top: -20px;
+      }
+      .wave,
+      .wave::before,
+      .wave::after {
+        border-radius: 50%;
+        position: absolute;
+        z-index: 1;
+      }
+      .white {
+        border: 20px solid white;
+      }
+      .black {
+        border: 20px solid black;
+      }
+      .white::before {
+        border: 10px solid white;
+      }
+      .black::before {
+        border: 10px solid black;
+      }
+
+      /* 涟漪动画部分 */
+      @keyframes wave1 {
+        0% {
+          opacity: 0.9;
+          transform: scale(1, 1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(2, 2);
+        }
+      }
+      @keyframes wave2 {
+        0% {
+          opacity: 0.6;
+          transform: scale(1, 1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.5, 1.5);
+        }
+      }
+      .white {
+        animation: wave1 6s ease 1s infinite;
+        -webkit-animation: wave1 6s linear 1s infinite;
+      }
+      .black {
+        animation: wave1 6s ease 4s infinite;
+        -webkit-animation: wave1 6s linear 4s infinite;
+      }
+      .white::before {
+        animation: wave2 6s ease 1s infinite;
+        -webkit-animation: wave2 6s linear 1s infinite;
+      }
+      .black::before {
+        animation: wave2 6s ease 4s infinite;
+        -webkit-animation: wave2 6s linear 4s infinite;
+      }
+
+      /* 功德+1部分 */
+      .box span {
+        position: absolute;
+        color: yellow;
+        font-size: 36px;
+        font-weight: bold;
+        font-family: Arial, Helvetica, sans-serif;
+        text-shadow: 0px 0px 5px #2c5230;
+        margin-top: -10px;
+        margin-left: -20px;
+        z-index: 5;
+      }
+      /* 功德+1部分动画 */
+      @keyframes fly {
+        0% {
+          opacity: 0;
+          transform: translateY(0);
+        }
+        30% {
+          opacity: 0.8;
+          transform: translateY(-50px);
+        }
+        60% {
+          opacity: 0;
+          transform: translateY(-50px);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(0);
+        }
+      }
+      .shadow {
+        animation: fly 3s linear -0.4s infinite;
+        -webkit-animation: fly 3s linear -0.4s infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="woodfish" class="box">
+      <span>功德 +1</span>
+      <span class="shadow">功德 +1</span>
+      <div class="wave white"></div>
+      <div class="wave black"></div>
+      <div class="taichiout">
+        <div class="taichi"></div>
+      </div>
+    </div>
+    <script>
+      var woodfish = document.getElementById('woodfish');
+      woodfish.addEventListener('click', function (event) {
+        // 创建一个文本节点
+        var textNode = document.createTextNode('功德+1');
+        // 创建一个元素来包含文本
+        var span = document.createElement('span');
+        span.appendChild(textNode);
+        // 设置样式（可选）
+        span.style.left = event.clientX + 'px';
+        span.style.top = event.clientY + 'px';
+        span.style.color = '#54ddff';
+        span.classList.add('shadow');
+        // 将元素添加到文档中
+        woodfish.appendChild(span);
+        setTimeout(function () {
+          woodfish.removeChild(span);
+        }, 1500);
+      });
+    </script>
+  </body>
+</html>
