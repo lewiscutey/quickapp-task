@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh_cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旋转八卦图</title>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="out">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>        
+        <div class="out" style="transform: rotate(45deg);">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line2"></div>
+        </div>        
+        <div class="out" style="transform: rotate(90deg);">
+            <div class="line2"></div>
+            <div class="line"></div>
+            <div class="line2"></div>
+        </div>        
+        <div class="out" style="transform: rotate(135deg);">
+            <div class="line"></div>
+            <div class="line2"></div>
+            <div class="line2"></div>
+        </div>        
+        <div class="out">
+            <div class="line2"></div>
+            <div class="line2"></div>
+            <div class="line2"></div>
+        </div>        
+        <div class="out" style="transform: rotate(-135deg);">
+            <div class="line2"></div>
+            <div class="line2"></div>
+            <div class="line"></div>
+        </div>        
+        <div class="out" style="transform: rotate(-90deg);">
+            <div class="line"></div>
+            <div class="line2"></div>
+            <div class="line"></div>
+        </div>        
+        <div class="out" style="transform: rotate(-45deg);">
+            <div class="line2"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>
+        <div class="taiji"></div>
+    </div>
+</body>
+</html>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #eee;
+}
+.wrapper {
+    margin: 0 auto;
+    position: relative;
+    width: 330px;
+    height: 325px;
+    z-index: 1;
+    animation: rotateAnimation 2s linear 0;
+}
+
+.out {
+    width: 30px;
+    position: absolute;
+    transition: transform 0.3s ease; /* 外圈卦象悬停动画 */
+}
+.out:hover {
+    transform: scale(1.2); /* 悬停放大效果 */
+}
+
+.line {
+    width: 30px;
+    height: 1px;
+    background: linear-gradient(to right, #000000, #000000);
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.line2 {
+    width: 30px;
+    height: 1px;
+    background: repeating-linear-gradient(to right, black, black 10px, transparent 8px, transparent 20px);
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.taiji {
+    position: relative;
+    top: 63px;
+    left: 65px;
+    background-color: #fff;
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    border: #000 solid 1px;
+    background-image: linear-gradient(to left, #fff, #fff 50%, #000 50%, #000);
+    animation: blinkAnimation 3s infinite; /* 中心太极闪烁效果 */
+}
+.taiji::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 38px solid #000;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+}
+.taiji::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    border: 38px solid #fff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+}
+
+/* 八卦图旋转动画 */
+@keyframes rotateAnimation {
+  from {transform: rotate(0deg);}
+  to {transform: rotate(360deg);}
+}
+
+/* 中心太极闪烁动画 */
+@keyframes blinkAnimation {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+</style>
+
+<script>
+    let durationTime = 2;
+    const items = document.querySelectorAll('.out');
+    const wrapper = document.querySelector(".wrapper");
+    const radius = 150;
+    const totalItems = items.length;
+    const angleIncrement = (2 * Math.PI) / totalItems;
+    let flag = -1;
+
+    items.forEach((item, index) => {
+        const angle = index * angleIncrement;
+        const x = radius + radius * Math.cos(angle - Math.PI / 2);
+        const y = radius + radius * Math.sin(angle - Math.PI / 2);
+        item.style.left = `${x + 15 - item.offsetWidth / 2}px`;
+        item.style.top = `${y + 12 - item.offsetHeight / 2}px`;
+    });
+
+    function updateEnterAnimation() {
+        if (flag == 1) {
+            durationTime -= 0.002;
+            if (durationTime < 0.002) {
+                durationTime = 0.002;
+            }
+            wrapper.style.animation = `rotateAnimation ${durationTime}s linear infinite`;
+        } else if (flag == 0) {
+            if (durationTime < 2) {
+                durationTime += 0.03;
+                wrapper.style.animation = `rotateAnimation ${durationTime}s linear infinite`;
+            } else {
+                wrapper.style.animation = `rotateAnimation 0s ease-out infinite`;
+            }
+        }
+        requestAnimationFrame(updateEnterAnimation);
+    }
+    updateEnterAnimation();
+
+    wrapper.addEventListener('mouseenter', () => {
+        flag = 1;
+    });
+    wrapper.addEventListener('mouseleave', () => {
+        flag = 0;
+    });
+</script>
