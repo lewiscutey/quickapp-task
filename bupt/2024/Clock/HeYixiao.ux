@@ -1,0 +1,137 @@
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="demo-page">
+    <div id="date-time" class="date-time"></div>
+    <canvas id="heyixiao-clock" class="clock"></canvas>
+  </div>
+</template>
+
+<script>
+import router from '@system.router';
+
+export default {
+  onInit() {
+    this.$page.setTitleBar({ text: '何奕骁の小时钟' });
+  },
+  onShow() {
+    if (!this.flag) {
+      this.initClock()
+    }
+  },
+  initClock() {
+    const canvas = document.getElementById('heyixiao-clock');
+    const context = canvas.getContext('2d');
+    const radius = canvas.width / 2;
+    context.translate(radius, radius);
+
+    // Update clock every second
+    setInterval(() => {
+      this.updateDateTime();
+      this.drawClock(context, radius);
+    }, 1000);
+  },
+  
+  updateDateTime() {
+    const now = new Date();
+    const dateTimeElement = document.getElementById('date-time');
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    dateTimeElement.textContent = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  },
+
+  drawClock(context, radius) {
+    this.drawFace(context, radius);
+    this.drawNumbers(context, radius);
+    this.drawTime(context, radius);
+  },
+  
+  drawFace(context, radius) {
+    context.beginPath();
+    context.arc(0, 0, radius, 0, 2 * Math.PI);
+    context.fillStyle = '#7ad3b5';
+    context.fill();
+
+    context.strokeStyle = '#333';
+    context.lineWidth = radius * 0.1;
+    context.stroke();
+
+    context.beginPath();
+    context.arc(0, 0, radius * 0.1, 0, 2 * Math.PI);
+    context.fillStyle = '#333';
+    context.fill();
+  },
+  
+  drawNumbers(context, radius) {
+    context.font = `${radius * 0.15}px arial`;
+    context.textBaseline = 'middle';
+    context.textAlign = 'center';
+
+    for (let num = 1; num <= 12; num++) {
+      const ang = num * Math.PI / 6;
+      context.rotate(ang);
+      context.translate(0, -radius * 0.85);
+      context.rotate(-ang);
+      context.fillText(num.toString(), 0, 0);
+      context.rotate(ang);
+      context.translate(0, radius * 0.85);
+      context.rotate(-ang);
+    }
+  },
+  
+  drawTime(context, radius) {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const second = now.getSeconds();
+    
+    // Hour
+    const hourAngle = ((hour % 12) + minute / 60) * (Math.PI / 6);
+    this.drawHand(context, hourAngle, radius * 0.5, radius * 0.07);
+
+    // Minute
+    const minuteAngle = (minute + second / 60) * (Math.PI / 30);
+    this.drawHand(context, minuteAngle, radius * 0.8, radius * 0.07);
+
+    // Second
+    const secondAngle = second * (Math.PI / 30);
+    this.drawHand(context, secondAngle, radius * 0.9, radius * 0.02);
+  },
+  
+  drawHand(context, position, length, width) {
+    context.beginPath();
+    context.lineWidth = width;
+    context.lineCap = "round";
+    context.moveTo(0, 0);
+    context.rotate(position);
+    context.lineTo(0, -length);
+    context.stroke();
+    context.rotate(-position);
+  }
+};
+
+</script>
+
+<style>
+  .demo-page {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #b9c6dd;
+  }
+
+  .date-time {
+    margin-bottom: 100px;
+  }
+
+  .clock { 
+    width: 500px;
+    height: 500px;
+    border-radius: 50%; 
+    background-color: #7ad3b5;
+  }
+</style>
