@@ -31,7 +31,7 @@
     "entry": "Demo",
     "pages": {
       "Demo": {
-        "component": "WuJing"
+        "component": "index"
       },
       "DemoDetail": {
         "component": "index"
