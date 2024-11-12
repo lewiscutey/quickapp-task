@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>八卦图</title>
+    <style>
+        /* 重置样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #ddd;
+        }
+
+        /* 居中容器 */
+        #EightDiagrams-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* 防止放大后超出视口 */
+        }
+
+        /* 放大容器 */
+        #EightDiagrams-container {
+            transition: transform 10s linear;
+        }
+
+        /* 鼠标悬停时，触发放大效果 */
+        #EightDiagrams-container:hover {
+            transform: scale(10);
+        }
+
+        /* 太极图本体 */
+        #EightDiagrams {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            overflow: hidden;
+            animation: rotate 10s linear infinite;
+        }
+
+        /* 左半边（黑色） */
+        .left-half {
+            background: #000;
+            position: absolute;
+            left: 0;
+            width: 200px;
+            height: 400px;
+        }
+
+        /* 右半边（白色） */
+        .right-half {
+            background: #fff;
+            position: absolute;
+            right: 0;
+            width: 200px;
+            height: 400px;
+        }
+
+        /* 上方黑色半圆 */
+        .top-circle {
+            background: #000;
+            position: absolute;
+            top: 0;
+            left: 200px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin-left: -100px;
+        }
+
+        /* 下方白色半圆 */
+        .bottom-circle {
+            background: #fff;
+            position: absolute;
+            bottom: 0;
+            left: 200px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin-left: -100px;
+        }
+
+        /* 上方小白点 */
+        .small-white-circle {
+            background: #fff;
+            position: absolute;
+            top: 75px;
+            left: 200px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-left: -25px;
+        }
+
+        /* 下方小黑点 */
+        .small-black-circle {
+            background: #000;
+            position: absolute;
+            bottom: 75px;
+            left: 200px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-left: -25px;
+        }
+
+        /* 定义旋转动画 */
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="EightDiagrams-wrapper">
+        <div id="EightDiagrams-container">
+            <div id="EightDiagrams">
+                <div class="left-half"></div>
+                <div class="right-half"></div>
+                <div class="top-circle"></div>
+                <div class="bottom-circle"></div>
+                <div class="small-white-circle"></div>
+                <div class="small-black-circle"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
