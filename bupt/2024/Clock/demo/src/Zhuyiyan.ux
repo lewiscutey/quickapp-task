@@ -1,0 +1,135 @@
+<template>
+  <div class="wrapper">
+    <div class="controls">
+      <button @click="incrementHour">增加1小时</button>
+      <button @click="incrementMinute">增加1分钟</button>
+    </div>
+    <canvas id="canvas" style="background-color:white;"></canvas>
+  </div>
+</template>
+
+<script>
+export default {
+  private: {
+    hourOffset: 0,
+    minuteOffset: 0,
+  },
+  
+  onInit() {
+    this.$page.setTitleBar({ text: 'Clock' });
+  },
+
+  onShow() {
+    const canvas = this.$element("canvas");
+    const ctx = canvas.getContext("2d");
+    const radius = 250;
+    ctx.translate(375, 500);
+
+    setInterval(() => this.drawClock(ctx, radius), 1000);
+  },
+
+  drawClock(ctx, radius) {
+    this.drawFace(ctx, radius);
+    this.drawNumbers(ctx, radius);
+    this.drawTime(ctx, radius);
+  },
+
+  drawFace(ctx, radius) {
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#e0e0e0'; // Lighter background
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = radius * 0.05;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.1, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333';
+    ctx.fill();
+  },
+
+  drawNumbers(ctx, radius) {
+    ctx.font = radius * 0.15 + "px arial";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    for (let num = 1; num < 13; num++) {
+      const ang = num * Math.PI / 6;
+      ctx.rotate(ang);
+      ctx.translate(0, -radius * 0.85);
+      ctx.rotate(-ang);
+      ctx.fillText(num.toString(), 0, 0);
+      ctx.rotate(ang);
+      ctx.translate(0, radius * 0.85);
+      ctx.rotate(-ang);
+    }
+  },
+
+  drawTime(ctx, radius) {
+    const now = new Date();
+    let hour = now.getHours() + this.hourOffset;
+    let minute = now.getMinutes() + this.minuteOffset;
+    const second = now.getSeconds();
+    
+    hour = hour % 12;
+    hour = (hour * Math.PI / 6) + (minute * Math.PI / (6 * 60)) + (second * Math.PI / (360 * 60));
+    this.drawHand(ctx, hour, radius * 0.5, radius * 0.07);
+    
+    minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
+    this.drawHand(ctx, minute, radius * 0.8, radius * 0.05);
+    
+    const secondPos = (second * Math.PI / 30);
+    this.drawHand(ctx, secondPos, radius * 0.9, radius * 0.02);
+  },
+
+  drawHand(ctx, pos, length, width) {
+    ctx.beginPath();
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.moveTo(0, 0);
+    ctx.rotate(pos);
+    ctx.lineTo(0, -length);
+    ctx.stroke();
+    ctx.rotate(-pos);
+  },
+
+  incrementHour() {
+    this.hourOffset = (this.hourOffset + 1) % 12;
+  },
+
+  incrementMinute() {
+    this.minuteOffset = (this.minuteOffset + 1) % 60;
+  }
+}
+</script>
+
+<style lang="less">
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .controls {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  button {
+  margin: 5px;
+  padding: 20px;
+  font-size: 16px;
+  background-color: #5e4caf; /* Purple */
+  color: white; /* 将字体颜色改为白色 */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+  button:hover {
+    background-color: #45a049;
+  }
+</style>
