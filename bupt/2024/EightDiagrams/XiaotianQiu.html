@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>八卦图</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+
+    .bagua {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      background-color: #fff;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .yin-yang {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #fff 50%, #000 50%);
+      border: 4px solid #000; /* 添加边框使内圈更明显 */
+    }
+
+    .yin-yang::before,
+    .yin-yang::after {
+      content: '';
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+    }
+
+    .yin-yang::before {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #000;
+    }
+
+    .yin-yang::after {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #fff;
+    }
+
+    /* 添加黑色区域中的白色小圆点和白色区域中的黑色小圆点 */
+    .small-dot {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+
+    .small-dot.white {
+      top: 25%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #fff;
+    }
+
+    .small-dot.black {
+      bottom: 25%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #000;
+      position: absolute;
+      z-index: 10;
+    }
+    .bagua-symbols {
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .symbol {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .symbol:nth-child(1) { transform: translate(0, -130px) rotate(0deg); }
+    .symbol:nth-child(2) { transform: translate(90px, -90px) rotate(45deg); }
+    .symbol:nth-child(3) { transform: translate(130px, 0) rotate(90deg); }
+    .symbol:nth-child(4) { transform: translate(90px, 90px) rotate(135deg); }
+    .symbol:nth-child(5) { transform: translate(0, 130px) rotate(180deg); }
+    .symbol:nth-child(6) { transform: translate(-90px, 90px) rotate(225deg); }
+    .symbol:nth-child(7) { transform: translate(-130px, 0) rotate(270deg); }
+    .symbol:nth-child(8) { transform: translate(-90px, -90px) rotate(315deg); }
+  </style>
+</head>
+<body>
+<div class="bagua">
+  <div class="yin-yang">
+    <div class="small-dot white"></div>
+    <div class="small-dot black"></div>
+  </div>
+</div>
+</body>
+</html>
