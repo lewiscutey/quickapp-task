@@ -1,0 +1,127 @@
+<template>
+  <div class="home-page">
+    <canvas id="canvas" style="background-color: white"></canvas>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+
+export default {
+  private: {},
+
+  onInit() {
+    this.$page.setTitleBar({ text: 'MyClock' })
+  },
+
+  onShow() {
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    let width = window.innerWidth; // 使用window.innerWidth获取视口宽度
+    let height = window.innerHeight; // 使用window.innerHeight获取视口高度
+    canvas.width = width;
+    canvas.height = height;
+    var radius = Math.min(width, height) / 2;
+    ctx.translate(width / 2, height / 2);
+    radius = radius * 0.9;
+
+    drawClock(); // 提前显示，防止1s后显示
+    setInterval(drawClock, 1000);
+
+    function drawClock() {
+      drawFace(ctx, radius);
+      drawNumbers(ctx, radius);
+      drawTime(ctx, radius);
+    }
+
+    function drawFace(ctx, radius) {
+      var grad;
+      ctx.beginPath(); // 开始一个新的路径
+      ctx.arc(0, 0, radius, 0, 2 * Math.PI); // 绘制一个圆形
+      ctx.fillStyle = 'white'; // 设置填充颜色为白色
+      ctx.fill(); // 填充圆形
+      grad = ctx.createRadialGradient(0, 0, radius * 0.95, 0, 0, radius * 1.05); // 创建一个径向渐变
+      grad.addColorStop(0, '#81d4fa'); // 在渐变的起始位置添加蓝色
+      grad.addColorStop(0.5, 'white'); // 在渐变的中间位置添加白色
+      grad.addColorStop(1, '#81d4fa'); // 在渐变的结束位置添加蓝色
+      ctx.strokeStyle = grad; // 设置描边颜色为刚才创建的渐变
+      ctx.lineWidth = radius * 0.1; // 设置描边的宽度为半径的10%
+      ctx.stroke(); // 描边
+      ctx.beginPath(); // 开始新的路径
+      ctx.arc(0, 0, radius * 0.1, 0, 2 * Math.PI); // 绘制一个小圆作为时钟的中心点
+      ctx.fillStyle = '#03a9f4'; // 设置填充颜色为蓝色
+      ctx.fill(); // 填充小圆
+    }
+
+    function drawNumbers(ctx, radius) {
+      var ang;
+      var num;
+      ctx.font = radius * 0.15 + "px Arial";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      for (num = 1; num < 13; num++) {
+        ang = num * Math.PI / 6; // 计算每个数字的角度位置
+        ctx.rotate(ang); 
+        ctx.translate(0, -radius * 0.85); // 移动绘图中心
+        ctx.rotate(-ang); // 反转旋转，使数字保持水平
+        ctx.fillText(num.toString(), 0, 0);
+        ctx.rotate(ang);
+        ctx.translate(0, radius * 0.85);
+        ctx.rotate(-ang); // 全部返回初始状态
+      }
+    }
+
+    function drawTime(ctx, radius) {
+      var now = new Date();
+      var hour = now.getHours();
+      var minute = now.getMinutes();
+      var second = now.getSeconds();
+
+      hour = hour % 12;
+      hour = (hour * Math.PI / 6) +
+        (minute * Math.PI / (6 * 60)) +
+        (second * Math.PI / (360 * 60));
+      drawHand(ctx, hour, radius * 0.5, radius * 0.07, '#03a9f4');  // 绘制时针
+
+      minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
+      drawHand(ctx, minute, radius * 0.8, radius * 0.07, '#81d4fa');  // 绘制分针
+
+      second = (second * Math.PI / 30);
+      drawHand(ctx, second, radius * 0.9, radius * 0.02, '#03a9f4');  // 绘制秒针
+    }
+
+    function drawHand(ctx, pos, length, width, color) {
+      ctx.beginPath();
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.moveTo(0, 1); // 微调指针起点，效果美观
+      ctx.rotate(pos);
+      ctx.lineTo(0, -length);
+      ctx.strokeStyle = color;
+      ctx.stroke();
+      ctx.rotate(-pos); // 恢复之前的旋转操作，以便下一次绘制
+    }
+  },
+}
+</script>
+
+<style lang="less">
+.home-page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative; // 确保父容器正确布局
+}
+
+canvas {
+  position: absolute; // 设置绝对定位
+  top: 0;
+  left: 35px;
+  width: 90%; // 宽度100%
+  height: 100%; // 高度100%
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); // 调整阴影效果
+}
+</style>
