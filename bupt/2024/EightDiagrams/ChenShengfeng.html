@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh_cn">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>旋转八卦图</title>
+</head>
+
+<body>
+	<div class="container">
+		<div class="element">
+			<div class="solid-line"></div>
+			<div class="solid-line"></div>
+			<div class="solid-line"></div>
+		</div>
+		<div class="element" style="transform: rotate(45deg);">
+			<div class="solid-line"></div>
+			<div class="solid-line"></div>
+			<div class="dashed-line"></div>
+		</div>
+		<div class="element" style="transform: rotate(90deg);">
+			<div class="dashed-line"></div>
+			<div class="solid-line"></div>
+			<div class="dashed-line"></div>
+		</div>
+		<div class="element" style="transform: rotate(135deg);">
+			<div class="solid-line"></div>
+			<div class="dashed-line"></div>
+			<div class="dashed-line"></div>
+		</div>
+		<div class="element">
+			<div class="dashed-line"></div>
+			<div class="dashed-line"></div>
+			<div class="dashed-line"></div>
+		</div>
+		<div class="element" style="transform: rotate(-135deg);">
+			<div class="dashed-line"></div>
+			<div class="dashed-line"></div>
+			<div class="solid-line"></div>
+		</div>
+		<div class="element" style="transform: rotate(-90deg);">
+			<div class="solid-line"></div>
+			<div class="dashed-line"></div>
+			<div class="solid-line"></div>
+		</div>
+		<div class="element" style="transform: rotate(-45deg);">
+			<div class="dashed-line"></div>
+			<div class="solid-line"></div>
+			<div class="solid-line"></div>
+		</div>
+		<div class="yin-yang"></div>
+	</div>
+</body>
+
+</html>
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	body,
+	html {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+	}
+
+	.container {
+		position: relative;
+		width: 330px;
+		height: 325px;
+	}
+
+	.element {
+		width: 30px;
+		position: absolute;
+	}
+
+	.solid-line {
+		width: 30px;
+		height: 1px;
+		background: linear-gradient(to right, #000000, #000000);
+		margin-top: 5px;
+		margin-bottom: 5px;
+	}
+
+	.dashed-line {
+		width: 30px;
+		height: 1px;
+		background: repeating-linear-gradient(to right, black, black 10px, transparent 8px, transparent 20px);
+		margin-top: 5px;
+		margin-bottom: 5px;
+	}
+
+	.yin-yang {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background-color: #fff;
+		height: 200px;
+		width: 200px;
+		border-radius: 50%;
+		border: #000 solid 1px;
+		background-image: linear-gradient(to left, #fff, #fff 50%, #000 50%, #000);
+	}
+
+	.yin-yang::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #fff;
+		border: 38px solid #000;
+		border-radius: 50%;
+		width: 24px;
+		height: 24px;
+	}
+
+	.yin-yang::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #000;
+		border: 38px solid #fff;
+		border-radius: 50%;
+		width: 24px;
+		height: 24px;
+	}
+
+	@keyframes rotateEffect {
+		from {
+			transform: rotate(0deg);
+		}
+
+		to {
+			transform: rotate(360deg);
+		}
+	}
+</style>
+<script>
+	let animationSpeed = 2;
+	const elements = document.querySelectorAll('.element');
+	const container = document.querySelector(".container");
+	const rotationRadius = 150;
+	const totalElements = elements.length;
+	const angleOffset = (2 * Math.PI) / totalElements;
+	let isHovered = -1;
+
+	elements.forEach((element, index) => {
+		const angle = index * angleOffset;
+		const x = rotationRadius + rotationRadius * Math.cos(angle - Math.PI / 2);
+		const y = rotationRadius + rotationRadius * Math.sin(angle - Math.PI / 2);
+		element.style.left = `${x + 15 - element.offsetWidth / 2}px`;
+		element.style.top = `${y + 12 - element.offsetHeight / 2}px`;
+	});
+
+	function controlAnimationSpeed() {
+		if (isHovered == 1) {
+			animationSpeed -= 0.002;
+			if (animationSpeed < 0.002) {
+				animationSpeed = 0.002;
+			}
+			container.style.animation = `rotateEffect ${animationSpeed}s linear infinite`;
+		}
+		else if (isHovered == 0) {
+			if (animationSpeed < 2) {
+				animationSpeed += 0.03;
+				container.style.animation = `rotateEffect ${animationSpeed}s linear infinite`;
+			} else {
+				container.style.animation = `rotateEffect 0s ease-out infinite`;
+			}
+		}
+		requestAnimationFrame(controlAnimationSpeed);
+	}
+	controlAnimationSpeed();
+
+	container.addEventListener('mouseenter', () => {
+		isHovered = 1;
+	});
+	container.addEventListener('mouseleave', () => {
+		isHovered = 0;
+	});
+</script>

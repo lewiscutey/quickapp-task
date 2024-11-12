@@ -1,0 +1,145 @@
+<template>
+  <div class="doc-page">
+    <div class="ctx">
+      <canvas class="myClock" id="myClock"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .ctx {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    background-color: rgb(224, 230, 237);
+    border-radius: 15px;
+    padding: 10px;
+  }
+  .myClock {
+    height: 500px;
+    width: 500px;
+    border-radius: 80%;
+    background-color: rgb(0, 0, 0); /* 表盘黑色 */
+    border: 1px solid rgb(255, 255, 255); /* 白色边框 */
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      flag: false,
+      wid: 500,
+      h: 500,
+      ctx: null,
+      canvas: null,
+      timer: null
+    },
+    onInit() {
+      this.$page.setTitleBar({
+        text: 'myClock'
+      });
+    },
+    onShow() {
+      if (!this.flag) {
+        this.drawMyClock();
+      }
+    },
+    onDestroy() {
+      if (this.timer != null)
+        clearInterval(this.timer);
+    },
+    drawMyClock() {
+      this.canvas = this.$element('myClock');
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.translate(250, 250);
+      this.flag = true;
+      this.showMyClock();
+    },
+    showMyClock() {
+      this.ctx.clearRect((-this.wid) / 2, (-this.h) / 2, this.wid, this.h);
+      const len = this.wid / 2;
+      const tlen = len * 0.85;
+      
+      this.drawTicks(len); /* 添加刻度 */
+      
+      this.ctx.font = "32px 'Arial'";
+      this.ctx.fillStyle = "white";
+      this.ctx.textAlign = "center";
+      this.ctx.textBaseline = "middle";
+
+      const twoPi = Math.PI * 2;
+      const totalTags = 12;
+
+      for (let i = 1; i <= totalTags; i++) {
+        const angle = twoPi * (3 - i) / totalTags;
+        const x = tlen * Math.cos(angle);
+        const y = -tlen * Math.sin(angle);
+        this.ctx.fillText(i, x, y);
+      }
+
+      const date = new Date();
+      let hour = date.getHours();
+      const min = date.getMinutes();
+      const sec = date.getSeconds();
+      hour = hour > 12 ? hour - 12 : hour;
+
+      const hourAng = Math.PI * 2 * (3 - (hour + min / 60)) / 12;
+      const hourLen = len * 0.5;
+      this.showClockHand(hourAng, hourLen, 12, "white");
+
+      const minAng = Math.PI * 2 * (15 - (min + sec / 60)) / 60;
+      const minLen = len * 0.7;
+      this.showClockHand(minAng, minLen, 8, "white");
+
+      const secAng = Math.PI * 2 * (15 - sec) / 60;
+      const secLen = len * 0.85;
+      this.showClockHand(secAng, secLen, 2, "red"); /* 秒针为红色 */
+
+      this.drawCenterDot(); /* 添加中心点 */
+      
+      this.timer = setInterval(() => {
+        this.showMyClock();
+      }, 1000);
+    },
+
+    showClockHand(angle, len, width, color) {
+      const x = len * Math.cos(angle);
+      const y = -len * Math.sin(angle);
+      this.ctx.strokeStyle = color;
+      this.ctx.lineWidth = width;
+      this.ctx.lineCap = "round";
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, 0);
+      this.ctx.lineTo(x, y);
+      this.ctx.stroke();
+      this.flag = true;
+    },
+    
+    drawTicks(len) {
+      const tickLenHour = len * 0.1;
+      const tickLenMinute = len * 0.05;
+      const totalTicks = 60;
+      for (let i = 0; i < totalTicks; i++) {
+        const angle = (Math.PI * 2 * i) / totalTicks;
+        const xStart = (len - (i % 5 === 0 ? tickLenHour : tickLenMinute)) * Math.cos(angle);
+        const yStart = -(len - (i % 5 === 0 ? tickLenHour : tickLenMinute)) * Math.sin(angle);
+        const xEnd = len * Math.cos(angle);
+        const yEnd = -len * Math.sin(angle);
+        
+        this.ctx.lineWidth = i % 5 === 0 ? 4 : 2;
+        this.ctx.strokeStyle = "white";
+        this.ctx.beginPath();
+        this.ctx.moveTo(xStart, yStart);
+        this.ctx.lineTo(xEnd, yEnd);
+        this.ctx.stroke();
+      }
+    },
+
+    drawCenterDot() {
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, 6, 0, Math.PI * 2);
+      this.ctx.fillStyle = "white";
+      this.ctx.fill();
+    }
+  }
+</script>
