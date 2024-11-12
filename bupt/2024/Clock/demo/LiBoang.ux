@@ -1,0 +1,108 @@
+<template>
+  <div class="clock-container">
+    <canvas id="analog-clock"></canvas>
+  </div>
+</template>
+
+export default {
+  data() {
+    return {
+      canvasId: 'analog-clock',
+      clockRadius: 150,
+    };
+  },
+  mounted() {
+    this.drawClock();
+    setInterval(this.drawClock, 1000);
+  },
+  methods: {
+    drawClock() {
+      const canvas = document.getElementById(this.canvasId);
+      const context = canvas.getContext('2d');
+      const radius = this.clockRadius;
+
+      // 确保canvas尺寸与clockRadius匹配
+      canvas.width = radius * 2;
+      canvas.height = radius * 2;
+
+      // 清除画布
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 绘制时钟外框
+      context.beginPath();
+      context.arc(radius, radius, radius - 10, 0, 2 * Math.PI);
+      context.lineWidth = 1;
+      context.strokeStyle = 'black';
+      context.stroke();
+      context.closePath();
+
+      // 获取当前时间
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+
+      // 绘制时钟刻度
+      for (let i = 0; i < 12; i++) {
+        const angle = i * (2 * Math.PI / 12) - Math.PI / 2;
+        const x1 = radius + (radius - 10) * Math.cos(angle);
+        const y1 = radius + (radius - 10) * Math.sin(angle);
+        const x2 = radius + (radius - 40) * Math.cos(angle);
+        const y2 = radius + (radius - 40) * Math.sin(angle);
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        context.lineWidth = 2;
+        context.strokeStyle = 'black';
+        context.stroke();
+        context.closePath();
+      }
+
+      // 绘制时针
+      const hourAngle = (hours % 12 + minutes / 60) * (2 * Math.PI / 12) - Math.PI / 2;
+      const hourHandLength = radius * 0.5;
+      this.drawLine(context, radius, radius, hourHandLength, hourAngle);
+
+      // 绘制分针
+      const minuteAngle = (minutes + seconds / 60) * (2 * Math.PI / 60) - Math.PI / 2;
+      const minuteHandLength = radius * 0.7;
+      this.drawLine(context, radius, radius, minuteHandLength, minuteAngle);
+
+      // 绘制秒针
+      const secondAngle = (seconds + now.getMilliseconds() / 1000) * (2 * Math.PI / 60) - Math.PI / 2;
+      const secondHandLength = radius * 0.9;
+      this.drawLine(context, radius, radius, secondHandLength, secondAngle);
+
+      // 绘制中心圆点
+      context.beginPath();
+      context.arc(radius, radius, 5, 0, 2 * Math.PI);
+      context.fillStyle = 'black';
+      context.fill();
+      context.closePath();
+    },
+    drawLine(context, x1, y1, length, angle) {
+      const x2 = x1 + length * Math.cos(angle);
+      const y2 = y1 + length * Math.sin(angle);
+
+      context.beginPath();
+      context.moveTo(x1, y1);
+      context.lineTo(x2, y2);
+      context.stroke();
+    },
+  },
+};
+
+<style scoped>
+  .clock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  #analog-clock {
+    width: 300px;
+    height: 300px;
+  }
+</style>
