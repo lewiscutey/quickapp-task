@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eightdiagram</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f0f0;
+        }
+
+        #container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #eightdiagram {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 1);
+        }
+
+        #eightdiagram > .half-black {
+            width: 50%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            background-color: #000;
+        }
+
+        #eightdiagram > .half-white {
+            width: 50%;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            background-color: #fff;
+        }
+
+        #eightdiagram > .inner-black {
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            left: 50%;
+            margin-left: -100px;
+            border-radius: 50%;
+            background-color: black;
+        }
+
+        #eightdiagram > .inner-white {
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -100px;
+            border-radius: 50%;
+            background-color: white;
+        }
+
+        #eightdiagram > .dot-white {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            left: 50%;
+            top: 75px;
+            margin-left: -25px;
+            border-radius: 50%;
+            background-color: white;
+        }
+
+        #eightdiagram > .dot-black {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            left: 50%;
+            bottom: 75px;
+            margin-left: -25px;
+            border-radius: 50%;
+            background-color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="eightdiagram">
+            <div class="half-black"></div>
+            <div class="half-white"></div>
+            <div class="inner-black"></div>
+            <div class="inner-white"></div>
+            <div class="dot-white"></div>
+            <div class="dot-black"></div>
+        </div>
+    </div>
+
+    <script>
+        let rotation = 0, speed = 0;
+        const maxSpeed = 18;
+        let rotationTimer, speedTimer;
+        let isAccelerating = false;
+
+        function updateRotation() {
+            const symbol = document.getElementById('eightdiagram');
+            rotation += speed;
+            symbol.style.transform = `rotate(${rotation}deg)`;
+        }
+
+        function startRotation() {
+            if (!rotationTimer) {
+                rotationTimer = setInterval(updateRotation, 20);
+            }
+        }
+
+        function stopRotation() {
+            clearInterval(rotationTimer);
+            rotationTimer = null;
+        }
+
+        document.getElementById('eightdiagram').addEventListener('mouseenter', () => {
+            if (speedTimer) clearInterval(speedTimer);
+
+            isAccelerating = true;
+            startRotation();
+
+            speedTimer = setInterval(() => {
+                if (speed < maxSpeed) {
+                    speed += 1; // 每次增加 0.5 的速度
+                } else {
+                    clearInterval(speedTimer); // 达到最大速度后停止加速
+                }
+            }, 100);
+        });
+
+        document.getElementById('eightdiagram').addEventListener('mouseleave', () => {
+            if (speedTimer) clearInterval(speedTimer);
+
+            isAccelerating = false;
+
+            speedTimer = setInterval(() => {
+                if (speed > 0) {
+                    speed -= 1; // 每次减少 0.5 的速度
+                } else {
+                    clearInterval(speedTimer); // 当速度为 0 时停止减速
+                    stopRotation(); // 停止旋转
+                }
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>
