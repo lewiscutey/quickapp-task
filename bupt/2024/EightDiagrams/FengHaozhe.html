@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>八卦图</title>
+<style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            padding: 200px;
+            background: #ccc;
+        }
+
+        div {
+            width: 200px;
+            height: 400px;
+            background-color: #fff;
+            border-left: 200px solid #000;
+            border-radius: 50%;
+            color: blue;
+            position: relative;
+            transition: all 4s;
+        }
+
+
+        div::after,
+        div::before {
+            content: "";
+            display: block;
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            margin-left: -100px;
+        }
+
+        div::after {
+            background: black;
+            border: 75px solid #fff;
+        }
+
+        div::before {
+            background: #fff;
+            border: 75px solid #000;
+        }
+
+
+        @keyframes rotate{
+         0% {
+            transform: rotate(0);
+        }
+
+        25% {
+            transform: rotate(90deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+
+
+	}
+
+        div:hover {
+            animation: rotate 10s linear infinite;
+            -webkit-animation: rotate 10s linear infinite;
+        }
+    </style>
+
+</head>
+<body>
+<div id="taiji"></div>
+<script>
+    var direction = 1; //1为正向旋转，-1为反方向旋转
+    var taiji = document.getElementById('taiji');
+
+    taiji.addEventListener('click', function() {
+        direction *= -1; //点击改变旋转方向
+        taiji.style.animationDirection = direction === 1 ? 'normal' : 'reverse';
+    });
+</script>
+</body>
+</html>
