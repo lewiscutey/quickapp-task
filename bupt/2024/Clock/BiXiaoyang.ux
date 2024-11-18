@@ -23,7 +23,7 @@ export default {
   },
 
   onInit() {
-    this.$page.setTitleBar({ text: 'Enhanced Clock Demo' })
+    this.$page.setTitleBar({ text: 'BiXiaoyang\'s Clock' })
   },
 
   onShow() {
