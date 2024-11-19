@@ -1,0 +1,194 @@
+<template>
+  <div class="wrapper">
+    <canvas class="clock-canvas" id="clock-canvas"></canvas>
+  </div>
+</template>
+<script>
+export default {
+  private: {
+    ctx: null,
+    clockRadius: 200,
+    centerRadius: 10,
+    hourPointerLength: 80,
+    hourPointerWidth: 7,
+    minutePointerLength: 120,
+    minutePointerWidth: 5,
+    secondPointerLength: 150,
+    secondPointerWidth: 2,
+    centerFill: '#FFB6C1', 
+    scaleLineFill: '#FFC0CB', 
+    scales: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2],
+    timer: null,
+  },
+
+  onInit() {
+    this.$page.setTitleBar({ text: 'Zhang Zhining\'s Clock' });
+  },
+
+  onShow() {
+    this.initClock();
+  },
+
+  onDestroy() {
+    if (this.timer != null) {
+      clearInterval(this.timer);
+    }
+  },
+
+  initClock() {
+    const canvas = this.$element('clock-canvas');
+    this.ctx = canvas.getContext('2d');
+    this.updateClock();
+    this.timer = setInterval(() => this.updateClock(), 1000);
+  },
+
+  updateClock() {
+    const now = new Date();
+    this.ctx.save();
+    this.clearClock();
+    this.drawClockCenter();
+    this.drawScalesAndLines();
+    this.drawPointers(now);
+    this.ctx.restore();
+    this.updateDigitalTime(now);
+    this.updateDate(now);
+  },
+
+  clearClock() {
+    this.ctx.clearRect(0, 0, this.clockRadius << 1, this.clockRadius << 1);
+  },
+
+  drawPointers(now) {
+    const hour = now.getHours() % 12;
+    const minute = now.getMinutes();
+    const second = now.getSeconds();
+    this.drawHourPointer(hour, minute);
+    this.drawMinutePointer(minute);
+    this.drawSecondPointer(second);
+  },
+
+  drawHourPointer(hour, minute) {
+    this.ctx.save();
+    this.ctx.beginPath();
+    const h = Math.PI * 2 / 12 * hour;
+    const m = Math.PI * 2 / 12 / 60 * minute;
+    this.ctx.rotate(h + m);
+    this.ctx.lineWidth = this.hourPointerWidth;
+    this.ctx.lineCap = 'round';
+    this.ctx.moveTo(0, 20);
+    this.ctx.lineTo(0, -this.hourPointerLength);
+    this.ctx.strokeStyle = '#FF7F50'; // 马卡龙珊瑚橙
+    this.ctx.stroke();
+    this.ctx.closePath();
+    this.ctx.restore();
+  },
+
+  drawMinutePointer(minute) {
+    this.ctx.save();
+    this.ctx.beginPath();
+    const rad = Math.PI * 2 / 60 * minute;
+    this.ctx.rotate(rad);
+    this.ctx.lineWidth = this.minutePointerWidth;
+    this.ctx.lineCap = 'round';
+    this.ctx.moveTo(0, 20);
+    this.ctx.lineTo(0, -this.minutePointerLength);
+    this.ctx.strokeStyle = '#FFD700'; // 马卡龙金黄
+    this.ctx.stroke();
+    this.ctx.closePath();
+    this.ctx.restore();
+  },
+
+  drawSecondPointer(second) {
+    this.ctx.save();
+    this.ctx.beginPath();
+    const rad = Math.PI * 2 / 60 * second;
+    this.ctx.rotate(rad);
+    this.ctx.lineWidth = this.secondPointerWidth;
+    this.ctx.strokeStyle = '#90EE90'; // 马卡龙薄荷绿
+    this.ctx.moveTo(0, 20);
+    this.ctx.lineTo(0, -this.secondPointerLength);
+    this.ctx.stroke();
+    this.ctx.closePath();
+    this.ctx.restore();
+  },
+
+  drawScalesAndLines() {
+    this.ctx.translate(this.clockRadius, this.clockRadius);
+    const modifiedRadius = this.clockRadius - 18;
+    const scaleLineRadius = modifiedRadius - 25;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.font = '20px Arial';
+    for (let i = 0; i < this.scales.length; i++) {
+      const rad = Math.PI * 2 / 12 * i;
+      const x = Math.cos(rad) * modifiedRadius;
+      const y = Math.sin(rad) * modifiedRadius;
+      this.ctx.fillStyle = '#FF69B4'; // 马卡龙玫瑰粉
+      this.ctx.fillText(this.scales[i], x, y);
+    }
+
+    // 绘制分钟刻度
+    for (let i = 0; i < 60; i++) {
+      const rad = Math.PI * 2 / 60 * i;
+      const x = Math.cos(rad) * scaleLineRadius;
+      const y = Math.sin(rad) * scaleLineRadius;
+
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, i % 5 === 0 ? 3 : 1.5, 0, Math.PI * 2);
+      this.ctx.fillStyle = i % 5 === 0 ? '#FFB6C1' : '#E0FFFF'; 
+      this.ctx.closePath();
+      this.ctx.fill();
+    }
+  },
+
+  drawClockCenter() {
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, this.centerRadius, 0, Math.PI * 2, true);
+    this.ctx.fillStyle = this.centerFill;
+    this.ctx.fill();
+  },
+
+  updateDigitalTime(now) {
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    this.digitalTime = `${hours}:${minutes}:${seconds}`;
+  },
+
+  updateDate(now) {
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    this.currentDate = `${year}-${month}-${day}`;
+  },
+};
+
+</script>
+<style>
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 100%;
+}
+
+.clock-canvas {
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background-color: #FFF0F5; 
+}
+
+.digital-clock {
+  margin-top: 20px;
+  font-size: 48px;
+  font-family: 'Courier New', monospace;
+  color: #9370DB; 
+}
+.date-display {
+  margin-top: 10px;
+  font-size: 24px;
+  color: #87CEFA; 
+}
+</style>
