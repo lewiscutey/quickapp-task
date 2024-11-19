@@ -1,0 +1,143 @@
+ 
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="demo-page">
+
+    <canvas id='myclock' class="clock" height=700 width=700></canvas>
+
+  </div>
+</template>
+
+<script>
+
+export default {
+
+  private: {
+    clockName: 'MyClock',
+  },
+
+  onInit() {  // 页面初始化时被调用
+    this.$page.setTitleBar({ text: '时钟' })
+  },
+
+  onShow() {  // 页面显示时被调用
+    setInterval(this.drawClock, 1000)  // 1000ms == 1s， 即一秒调用一次
+  },
+
+  drawClock() {
+
+    // 获得当下时间
+    var now = new Date();
+    var hr  = now.getHours() % 12;
+    var min = now.getMinutes();
+    var sec = now.getSeconds();
+
+    // 获得canvas元素
+    const canvas = document.getElementById('myclock'); 
+    const clock = canvas.getContext('2d'); //获取canvas绘图上下文
+    var clockRadius = 350 ;  // 时钟半径为canvas的一半
+    clock.clearRect(0, 0, clockRadius * 2, clockRadius * 2);  // 清除上一秒内容
+
+    // 保存当前绘图状态
+    clock.save();
+
+    clock.translate(clockRadius, clockRadius); // 移动原点到canvas元素中心 
+    clock.strokeStyle = "black";
+    clock.fillStyle = "black";
+    clock.lineCap = "round";
+    clock.font = '40px Times New Roman';
+    clock.textAlign = 'center';
+    clock.textBaseline = 'middle';
+
+    // 外轮廓
+    clock.beginPath();
+    clock.lineWidth = 6;
+    clock.arc(0, 0, 280, 0, 2 * Math.PI);
+    clock.stroke();
+
+
+    // 数字
+    for (var i = 1; i <= 12; i++) {
+        var theta = (i-3) * (Math.PI * 2) / 12;
+        var x = clockRadius * 0.7 * Math.cos(theta);
+        var y = clockRadius * 0.7 * Math.sin(theta);
+        clock.fillText(i, x, y);
+    }
+    // 刻度
+    clock.save();
+    clock.lineWidth = 6;
+    for(var i = 0; i < 60; i++){
+        clock.beginPath();
+
+        if(i % 5 != 0){
+        clock.arc(clockRadius * 0.57, 0, 3, 0, Math.PI*2, true);
+        clock.fill();
+        }else{
+
+        clock.moveTo(clockRadius * 0.55, 0);
+        clock.lineTo(clockRadius * 0.6, 0);
+        clock.stroke();  // 描边
+        }
+      clock.rotate(Math.PI/30);
+    }
+    clock.restore();  // 恢复到之前保存的绘图状态
+
+    clock.strokeStyle = "blue";
+    clock.fillStyle = "blue";
+    // 时针
+  clock.save();
+  clock.rotate(-Math.PI/2);
+  clock.rotate( (Math.PI/6)*hr + (Math.PI/360)*min + (Math.PI/21600)*sec );
+  clock.lineWidth = 20; // 加宽时针
+  clock.beginPath();
+  clock.moveTo(-clockRadius * 0.2, 0);
+  clock.lineTo(clockRadius * 0.4, 0);
+  clock.stroke();
+  clock.restore();
+
+  // 分针
+  clock.save();
+  clock.rotate(-Math.PI/2);
+  clock.rotate( (Math.PI/30)*min + (Math.PI/1800)*sec );
+  clock.lineWidth = 10; // 加宽分针
+  clock.beginPath();
+  clock.moveTo(-clockRadius * 0.25, 0);
+  clock.lineTo(clockRadius * 0.45, 0);
+  clock.stroke();
+  clock.restore();
+
+  // 秒针
+  clock.save();
+  clock.rotate(-Math.PI/2);
+  clock.rotate(sec * Math.PI/30);
+  clock.lineWidth = 3; // 保持秒针宽度
+  clock.strokeStyle = "red"; // 秒针颜色
+  clock.beginPath();
+  clock.moveTo(-clockRadius * 0.3, 0);
+  clock.lineTo(clockRadius * 0.5, 0);
+  clock.stroke();
+  clock.restore();
+
+  clock.restore();
+  },
+
+}
+
+</script>
+
+<style>
+
+  .demo-page {
+    flex-direction: column;  /*  column: 垂直分布 */
+    justify-content: flex-start;  /* 子元素在主轴上从上到下排列 */
+    align-items: center;  /* 在交叉轴上的对齐方式 */
+  }
+
+  .title {
+    font-size: 40px;
+    text-align: center;
+    color: #000000;
+
+  }
+  
+</style>
