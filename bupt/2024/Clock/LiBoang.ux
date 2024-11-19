@@ -1,0 +1,99 @@
+<template>
+  <div class="clock-container">
+    <canvas id="analog-clock"></canvas>
+  </div>
+</template>
+
+export default {
+  data() {
+    return {
+      canvasId: 'analog-clock',
+      clockRadius: 150,
+    };
+  },
+  mounted() {
+    this.drawClock();
+    setInterval(this.drawClock, 1000);
+  },
+  methods: {
+    drawClock() {
+      const canvas = document.getElementById(this.canvasId);
+      const context = canvas.getContext('2d');
+      const radius = this.clockRadius;
+
+      canvas.width = radius * 2;
+      canvas.height = radius * 2;
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      context.beginPath();
+      context.arc(radius, radius, radius - 10, 0, 2 * Math.PI);
+      context.lineWidth = 1;
+      context.strokeStyle = 'black';
+      context.stroke();
+      context.closePath();
+
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+
+      for (let i = 0; i < 12; i++) {
+        const angle = i * (2 * Math.PI / 12) - Math.PI / 2;
+        const x1 = radius + (radius - 10) * Math.cos(angle);
+        const y1 = radius + (radius - 10) * Math.sin(angle);
+        const x2 = radius + (radius - 40) * Math.cos(angle);
+        const y2 = radius + (radius - 40) * Math.sin(angle);
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        context.lineWidth = 2;
+        context.strokeStyle = 'black';
+        context.stroke();
+        context.closePath();
+      }
+
+      const hourAngle = (hours % 12 + minutes / 60) * (2 * Math.PI / 12) - Math.PI / 2;
+      const hourHandLength = radius * 0.5;
+      this.drawLine(context, radius, radius, hourHandLength, hourAngle);
+
+      const minuteAngle = (minutes + seconds / 60) * (2 * Math.PI / 60) - Math.PI / 2;
+      const minuteHandLength = radius * 0.7;
+      this.drawLine(context, radius, radius, minuteHandLength, minuteAngle);
+
+      const secondAngle = (seconds + now.getMilliseconds() / 1000) * (2 * Math.PI / 60) - Math.PI / 2;
+      const secondHandLength = radius * 0.9;
+      this.drawLine(context, radius, radius, secondHandLength, secondAngle);
+
+      context.beginPath();
+      context.arc(radius, radius, 5, 0, 2 * Math.PI);
+      context.fillStyle = 'black';
+      context.fill();
+      context.closePath();
+    },
+    drawLine(context, x1, y1, length, angle) {
+      const x2 = x1 + length * Math.cos(angle);
+      const y2 = y1 + length * Math.sin(angle);
+
+      context.beginPath();
+      context.moveTo(x1, y1);
+      context.lineTo(x2, y2);
+      context.stroke();
+    },
+  },
+};
+
+<style scoped>
+  .clock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  #analog-clock {
+    width: 300px;
+    height: 300px;
+  }
+</style>
