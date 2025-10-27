@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>八卦图 - Homework</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ccc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+
+    .taiji {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #000 50%, #fff 50%);
+      position: relative;
+      border: 1px solid #333;
+      margin-bottom: 40px;
+    }
+
+    .taiji::before,
+    .taiji::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+    }
+
+    .taiji::before {
+      top: 0;
+      background: radial-gradient(circle at center, #000 0 20px, #fff 20.5px);
+    }
+
+    .taiji::after {
+      bottom: 0;
+      background: radial-gradient(circle at center, #fff 0 20px, #000 20.5px);
+    }
+
+    @keyframes rotate-clockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes rotate-counter-clockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(-360deg); }
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+    }
+
+    .controls button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: 1px solid #555;
+      border-radius: 5px;
+      background-color: #fff;
+      color: #333;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .controls button:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .controls button:active {
+      background-color: #ddd;
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="taiji" id="taiji-diagram"></div>
+
+  <div class="controls">
+    <button id="btn-clockwise">顺时针 / 暂停</button>
+    <button id="btn-counter-clockwise">逆时针 / 暂停</button>
+  </div>
+
+  <script>
+    const taiji = document.getElementById('taiji-diagram');
+    const btnClockwise = document.getElementById('btn-clockwise');
+    const btnCounterClockwise = document.getElementById('btn-counter-clockwise');
+    const animationDuration = 8; // 动画时长 (s)
+
+    // 获取元素当前的旋转角度
+    function getCurrentRotation(element) {
+      const transform = window.getComputedStyle(element).transform;
+      if (transform === 'none') return 0;
+
+      // 从 matrix transform 中提取数值并通过 atan2 计算角度
+      const values = transform.split('(')[1].split(')')[0].split(',');
+      const angle = Math.round(Math.atan2(values[1], values[0]) * (180 / Math.PI));
+      
+      // 将角度标准化到 0-360
+      return (angle + 360) % 360;
+    }
+
+    // 切换动画: 支持暂停/恢复/切换方向
+    function toggleAnimation(newAnimationName) {
+      const currentAnimationName = taiji.style.animationName;
+      const isPaused = taiji.style.animationPlayState === 'paused';
+
+      // 如果是当前动画且在播放，则暂停
+      if (currentAnimationName === newAnimationName && !isPaused) {
+        taiji.style.animationPlayState = 'paused';
+        return;
+      }
+
+      // 如果是当前动画且已暂停，则恢复
+      if (currentAnimationName === newAnimationName && isPaused) {
+        taiji.style.animationPlayState = 'running';
+        return;
+      }
+
+      // --- 切换到不同方向的动画 ---
+      const currentAngle = getCurrentRotation(taiji);
+      let progress = 0;
+
+      if (newAnimationName === 'rotate-clockwise') {
+        progress = currentAngle / 360;
+      } else {
+        // 逆时针动画的进度是反向计算的
+        progress = (360 - currentAngle) / 360;
+        if (currentAngle === 0) progress = 0;
+      }
+      
+      // 核心：使用负的 animation-delay 来让新动画从当前位置开始
+      const delay = -progress * animationDuration;
+
+      // 先重置动画，再应用新的，确保切换平滑
+      taiji.style.animation = 'none'; 
+      requestAnimationFrame(() => {
+        taiji.style.animationName = newAnimationName;
+        taiji.style.animationDuration = `${animationDuration}s`;
+        taiji.style.animationTimingFunction = 'linear';
+        taiji.style.animationIterationCount = 'infinite';
+        taiji.style.animationDelay = `${delay}s`;
+        taiji.style.animationPlayState = 'running';
+      });
+    }
+
+    btnClockwise.addEventListener('click', () => {
+      toggleAnimation('rotate-clockwise');
+    });
+
+    btnCounterClockwise.addEventListener('click', () => {
+      toggleAnimation('rotate-counter-clockwise');
+    });
+  </script>
+
+</body>
+</html>
