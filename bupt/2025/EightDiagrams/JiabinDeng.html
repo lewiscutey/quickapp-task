@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旋转八卦图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e4f3f2; 
+            overflow: hidden;
+        }
+        
+        #taiji {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #fff 0%, #fff 50%, #000 50%, #000 100%);
+        }
+        
+        #circle-white, #circle-black {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+        }
+        
+        #circle-white {
+            top: 0px;
+            left: 75px;
+            background: #fff;
+        }
+        
+        #circle-black {
+            bottom: 0px;
+            right: 75px;
+            background: #000;
+        }
+        
+        #dot-balck, #dot-white {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        } 
+
+        #dot-white {
+            bottom: 60px;
+            right: 135px;
+            background: #fff;
+        }
+        #dot-balck {
+            top: 60px;
+            left: 135px;
+            background: #000;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="taiji" id="taiji">
+        <div id="circle-white"></div>
+        <div id="circle-black"></div>
+        <div id="dot-white"></div>
+        <div id="dot-balck"></div>
+    </div>
+  <script>
+        const taiji = document.getElementById('taiji');
+        let angle = 0;             // 当前角度
+        let speed = 0;             // 当前速度
+        const maxSpeed = 10;        // 最大旋转速度（每帧度数）
+        const accel = 0.1;         // 加速量
+        const decel = 0.05;        // 减速量
+        let rotating = false;      // 是否在加速旋转
+
+        function animate() {
+            if (rotating && speed < maxSpeed) {
+                speed += accel;
+            } else if (!rotating && speed > 0) {
+                speed -= decel;
+                if (speed < 0) speed = 0;
+            }
+
+            angle = (angle + speed) % 360;
+            taiji.style.transform = `rotate(${angle}deg)`;
+
+            requestAnimationFrame(animate);
+        }
+
+        taiji.addEventListener('mouseenter', () => rotating = true);
+
+        taiji.addEventListener('mouseleave', () => rotating = false);
+
+        animate();
+    </script>
+</body>
+</html>
