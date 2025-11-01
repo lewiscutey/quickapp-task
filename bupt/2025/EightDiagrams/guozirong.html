@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>八卦图（放大至边界/缩小回原，离开反转）</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      height: 100vh;
+      background: #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden; /* 防止滚动条影响触边判断 */
+    }
+
+    .bagua {
+      position: relative;
+      width: 300px;    /* 基准直径 */
+      height: 300px;
+      border-radius: 50%;
+      overflow: hidden;
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    /* 左右两半 */
+    .half {
+      position: absolute;
+      width: 50%;
+      height: 100%;
+      top: 0;
+    }
+    .left  { left: 0;  background: #000; }
+    .right { right: 0; background: #fff; }
+
+    /* 上下两个“鱼身”半圆 */
+    .small {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .small.white { top: 0;    background: #fff; }
+    .small.black { bottom: 0; background: #000; }
+
+    /* 两个“鱼眼”小点 */
+    .dot {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .dot.white { bottom: 75px; background: #fff; }
+    .dot.black { top: 75px;    background: #000; }
+  </style>
+</head>
+<body>
+  <div class="bagua" id="bagua">
+    <div class="half left"></div>
+    <div class="half right"></div>
+    <div class="small white"></div>
+    <div class="small black"></div>
+    <div class="dot white"></div>
+    <div class="dot black"></div>
+  </div>
+
+  <script>
+    const bagua = document.getElementById('bagua');
+
+    // 状态
+    let rotation = 0;            // 当前角度（度）
+    let rotationSpeed = 0;       // 旋转角速度（度/秒），正顺时针、负逆时针
+    let scale = 1;               // 当前缩放
+    let targetScale = 1;         // 目标缩放：1 或 maxScale
+    let lastTime = 0;            // RAF 时间戳
+    let maxScale = 1;            // 触边的最大缩放
+    let isHover = false;         // 鼠标是否在图内
+
+    // 常量
+    const ROT_SPEED = 360 / 10;  // 10秒/圈
+    const SCALE_SPEED = 0.1;     // 每秒缩放 1 倍（可调）
+
+    // 计算最大缩放（让圆直径等于视口较短边）
+    function calcMaxScale() {
+      const baseSize = bagua.clientWidth; // 基准直径
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      return Math.min(vw, vh) / baseSize;
+    }
+    maxScale = calcMaxScale();
+
+    window.addEventListener('resize', () => {
+      maxScale = calcMaxScale();
+      // 若当前目标是 maxScale，且当前 scale 超过新上限，夹回上限
+      if (targetScale === maxScale && scale > maxScale) {
+        scale = maxScale;
+      }
+      applyTransform();
+    });
+
+    // 应用样式
+    function applyTransform() {
+      bagua.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+    }
+
+    // 每帧逻辑
+    function tick(ts) {
+      if (!lastTime) lastTime = ts;
+      const dt = (ts - lastTime) / 1000; // 秒
+      lastTime = ts;
+
+      // 先推进缩放到目标
+      const diff = targetScale - scale;
+      if (Math.abs(diff) > 1e-4) {
+        const step = Math.sign(diff) * SCALE_SPEED * dt;
+        if (Math.abs(step) >= Math.abs(diff)) scale = targetScale;
+        else scale += step;
+      }
+
+      // 决定旋转速度（满足你的新规则）
+      if (scale <= 1 + 1e-4) {
+        // 初始大小：不转动
+        rotationSpeed = 0;
+      } else {
+        // 比初始大：根据是否悬停决定方向
+        rotationSpeed = isHover ? +ROT_SPEED : -ROT_SPEED;
+      }
+
+      // 再根据速度更新角度
+      if (rotationSpeed !== 0) {
+        rotation += rotationSpeed * dt;
+      }
+
+      applyTransform();
+
+      // 需要继续动画的条件：还没到目标尺度或正在旋转
+      const animating = (Math.abs(targetScale - scale) > 1e-4) || rotationSpeed !== 0;
+      if (animating) {
+        requestAnimationFrame(tick);
+      } else {
+        lastTime = 0; // 停止时重置，避免下次 dt 过大
+      }
+    }
+
+    // 交互：进入 → 放大到边界；离开 → 缩回原始
+    bagua.addEventListener('mouseenter', () => {
+      isHover = true;
+      targetScale = maxScale;
+      requestAnimationFrame(tick);
+    });
+
+    bagua.addEventListener('mouseleave', () => {
+      isHover = false;
+      targetScale = 1;
+      requestAnimationFrame(tick);
+    });
+
+    // 初始应用一次
+    applyTransform();
+  </script>
+</body>
+</html>
