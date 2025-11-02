@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>王海峰 - 八卦图作业</title>
+    <style>
+        :root {
+            --size: 300px;
+            /* 太极直径 */
+            --dot: 40px;
+            /* 鱼眼直径 */
+            --bg: #e9ecf1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            height: 100vh;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        }
+
+        /* 太极容器：承载旋转 */
+        .bagua {
+            position: relative;
+            width: var(--size);
+            height: var(--size);
+            transform-origin: center;
+            will-change: transform;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 10px 32px rgba(0, 0, 0, .18), inset 0 0 0 1px rgba(0, 0, 0, .08);
+            background: #0000;
+        }
+
+        /* 阴阳两极（左右半圆） */
+        .half {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+        }
+
+        .left {
+            left: 0;
+            background: #000
+        }
+
+        .right {
+            right: 0;
+            background: #fff
+        }
+
+        /* 上下半圆（“鱼身”） */
+        .small {
+            position: absolute;
+            left: 50%;
+            width: calc(var(--size)/2);
+            height: calc(var(--size)/2);
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .small.white {
+            top: 0;
+            background: #fff
+        }
+
+        .small.black {
+            bottom: 0;
+            background: #000
+        }
+
+        /* 鱼眼 */
+        .dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: var(--dot);
+            height: var(--dot);
+            border-radius: 50%;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, .12) inset;
+        }
+
+        .dot.white {
+            bottom: calc(var(--size)/4);
+            background: #fff
+        }
+
+        .dot.black {
+            top: calc(var(--size)/4);
+            background: #000
+        }
+
+        .tip {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, .9);
+            backdrop-filter: saturate(150%) blur(4px);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            color: #333;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bagua" id="bagua" aria-label="太极八卦图">
+        <div class="half left"></div>
+        <div class="half right"></div>
+        <div class="small white"></div>
+        <div class="small black"></div>
+        <div class="dot white"></div>
+        <div class="dot black"></div>
+    </div>
+
+    <div class="tip">鼠标：左=逆时针，右=顺时针；离圆心越远转得越快。</div>
+
+    <script>
+        const el = document.getElementById('bagua');
+
+        let rotation = 0;            // 当前角度（deg）
+        let speed = 0;               // 角速度（deg/s）
+        let lastTs = 0;
+        let inside = false;
+        let mouse = { x: 0, y: 0 };
+
+        const BASE_PERIOD = 10;      // 一圈10秒
+        const MAX_SPEED = 360 / 2;   // 最快2秒/圈
+
+        function apply() {
+            el.style.transform = `rotate(${rotation}deg)`;
+        }
+
+        function updateMouse(e) {
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            mouse.x = e.clientX - cx;
+            mouse.y = e.clientY - cy;
+        }
+
+        function computeSpeed() {
+            if (!inside) { speed = 0; return; }
+            const dir = Math.sign(mouse.x) || 1; // 右正左负
+            const r = Math.hypot(mouse.x, mouse.y);
+            const R = el.clientWidth / 2;
+            const k = Math.min(r / R, 1);
+            const base = 360 / BASE_PERIOD;
+            speed = dir * Math.min(base * (0.2 + 1.8 * k), MAX_SPEED);
+        }
+
+        function tick(ts) {
+            if (!lastTs) lastTs = ts;
+            const dt = (ts - lastTs) / 1000;
+            lastTs = ts;
+
+            rotation += speed * dt;
+            apply();
+
+            requestAnimationFrame(tick);
+        }
+
+        function onEnter(e) { inside = true; updateMouse(e); computeSpeed(); }
+        function onMove(e) { updateMouse(e); computeSpeed(); }
+        function onLeave() { inside = false; computeSpeed(); }
+
+        el.addEventListener('mouseenter', onEnter);
+        el.addEventListener('mousemove', onMove);
+        el.addEventListener('mouseleave', onLeave);
+
+        apply();
+        requestAnimationFrame(tick);
+    </script>
+</body>
+
+</html>
