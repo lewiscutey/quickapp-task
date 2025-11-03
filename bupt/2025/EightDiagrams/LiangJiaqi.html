@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太极图</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+        }
+
+        #app {
+            text-align: center;
+        }
+
+        .container {
+            padding: 40px;
+        }
+
+        .taiji-wrapper {
+            display: inline-block;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .taiji-wrapper:hover {
+            transform: scale(2);
+        }
+
+        .taiji {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #000 50%, #fff 50%);
+            position: relative;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .taiji::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #000;
+        }
+
+        .taiji::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        .white-dot {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #fff;
+            z-index: 2;
+        }
+
+        .black-dot {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #000;
+            z-index: 2;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        h3 {
+            color: white;
+            margin-top: 30px;
+            font-size: 15px;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <h1>{{ title }}</h1>
+            <div class="taiji-wrapper">
+                <div class="taiji">
+                    <div class="white-dot"></div>
+                    <div class="black-dot"></div>
+                </div>
+            </div>
+            <h3>{{ tip }}</h3>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    title: '太极图',
+                    tip: '鼠标放置有惊喜哦～'
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
