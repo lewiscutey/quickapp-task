@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Eight Diagrams (Ba Gua 八卦)</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 20px;
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                font-family: "Georgia", serif;
+                color: #fff;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .title {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+
+            .title h1 {
+                font-size: 2.5rem;
+                margin: 0;
+                color: #ffd700;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            }
+
+            .title .chinese {
+                font-size: 3rem;
+                margin: 10px 0;
+                color: #ff6b6b;
+            }
+
+            .bagua-container {
+                position: relative;
+                width: 600px;
+                height: 600px;
+                margin: 20px auto;
+            }
+
+            .center-circle {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 200px;
+                height: 200px;
+                border: 4px solid #ffd700;
+                border-radius: 50%;
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+                background-color: goldenrod;
+                overflow: hidden;
+            }
+
+            /* Yin-Yang implementation based on reference code */
+            #yuan1 {
+                width: 100px;
+                height: 200px;
+                background-color: black;
+                border-radius: 100px 0px 0px 100px;
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+
+            #yuan2 {
+                width: 100px;
+                height: 200px;
+                background-color: white;
+                border-radius: 0px 100px 100px 0px;
+                position: absolute;
+                left: 100px;
+                top: 0;
+            }
+
+            #wyuan1,
+            #byuan1 {
+                width: 100px;
+                height: 100px;
+                border-radius: 50px;
+                position: absolute;
+            }
+
+            #wyuan1 {
+                background-color: white;
+                left: 50px;
+                top: 0;
+            }
+
+            #byuan1 {
+                background-color: black;
+                left: -50px;
+                top: 100px;
+            }
+
+            #tbyuan,
+            #twyuan {
+                width: 10px;
+                height: 10px;
+                border-radius: 5px;
+                position: absolute;
+            }
+
+            #tbyuan {
+                background-color: black;
+                left: 50px;
+                top: 46px;
+                z-index: 200;
+            }
+
+            #twyuan {
+                background-color: white;
+                left: 45px;
+                top: 50px;
+                z-index: 300;
+            }
+
+            .trigram {
+                position: absolute;
+                width: 120px;
+                height: 120px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255, 255, 255, 0.1);
+                border: 2px solid #ffd700;
+                border-radius: 15px;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+            }
+
+            .trigram:hover {
+                transform: scale(1.1);
+                background: rgba(255, 215, 0, 0.2);
+                box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+            }
+
+            .trigram-lines {
+                margin: 8px 0;
+            }
+
+            .line {
+                width: 60px;
+                height: 6px;
+                margin: 3px 0;
+                border-radius: 3px;
+            }
+
+            .solid {
+                background: #ffd700;
+                box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            }
+
+            .broken {
+                background: linear-gradient(
+                    to right,
+                    #ffd700 35%,
+                    transparent 35%,
+                    transparent 65%,
+                    #ffd700 65%
+                );
+            }
+
+            .trigram-name {
+                text-align: center;
+                margin-top: 8px;
+            }
+
+            .chinese-name {
+                font-size: 18px;
+                font-weight: bold;
+                color: #ff6b6b;
+                margin: 2px 0;
+            }
+
+            .pinyin {
+                font-size: 14px;
+                color: #ffd700;
+                font-style: italic;
+                margin: 1px 0;
+            }
+
+            .english {
+                font-size: 12px;
+                color: #ccc;
+                margin: 1px 0;
+            }
+
+            /* Position trigrams in octagon */
+            .qian {
+                top: -60px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .dui {
+                top: 30px;
+                right: -60px;
+            }
+            .li {
+                right: -60px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .zhen {
+                bottom: 30px;
+                right: -60px;
+            }
+            .xun {
+                bottom: -60px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .kan {
+                bottom: 30px;
+                left: -60px;
+            }
+            .gen {
+                left: -60px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .kun {
+                top: 30px;
+                left: -60px;
+            }
+
+            .description {
+                text-align: center;
+                max-width: 800px;
+                margin: 40px auto;
+                padding: 20px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
+                backdrop-filter: blur(10px);
+                line-height: 1.6;
+            }
+
+            .attribution {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                font-size: 14px;
+                color: #ccc;
+                background: rgba(0, 0, 0, 0.3);
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+            @media (max-width: 768px) {
+                .bagua-container {
+                    width: 400px;
+                    height: 400px;
+                }
+
+                .trigram {
+                    width: 100px;
+                    height: 100px;
+                }
+
+                .center-circle {
+                    width: 150px;
+                    height: 150px;
+                }
+
+                /* Scale down yin-yang for mobile */
+                #yuan1 {
+                    width: 75px;
+                    height: 150px;
+                    border-radius: 75px 0px 0px 75px;
+                }
+
+                #yuan2 {
+                    width: 75px;
+                    height: 150px;
+                    border-radius: 0px 75px 75px 0px;
+                    left: 75px;
+                }
+
+                #wyuan1,
+                #byuan1 {
+                    width: 75px;
+                    height: 75px;
+                    border-radius: 37.5px;
+                }
+
+                #wyuan1 {
+                    left: 37.5px;
+                }
+
+                #byuan1 {
+                    left: -37.5px;
+                    top: 75px;
+                }
+
+                #tbyuan {
+                    left: 37.5px;
+                    top: 34px;
+                }
+
+                #twyuan {
+                    left: 33.5px;
+                    top: 37px;
+                }
+
+                .title h1 {
+                    font-size: 2rem;
+                }
+
+                .title .chinese {
+                    font-size: 2.5rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="attribution">
+            Ba Gua (八卦) - Eight Diagrams<br />
+            Traditional Chinese Philosophy
+        </div>
+
+        <div class="title">
+            <h1>Eight Diagrams</h1>
+            <div class="chinese">八卦</div>
+            <div style="font-size: 1.2rem; color: #ccc">Ba Gua</div>
+        </div>
+
+        <div class="bagua-container">
+            <div class="center-circle">
+                <div id="yuan1">
+                    <div id="wyuan1">
+                        <div id="tbyuan"></div>
+                    </div>
+                </div>
+                <div id="yuan2">
+                    <div id="byuan1">
+                        <div id="twyuan"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qián (乾) - Heaven -->
+            <div class="trigram qian">
+                <div class="trigram-lines">
+                    <div class="line solid"></div>
+                    <div class="line solid"></div>
+                    <div class="line solid"></div>
+                </div>
+                <div class="trigram-name">
+                    <div class="chinese-name">乾</div>
+                    <div class="pinyin">Qián</div>
+                    <div class="english">Heaven</div>
+                </div>
+            </div>
+
+            <!-- Duì (兌) - Lake -->
+            <div class="trigram dui">
+                <div class="trigram-lines">
+                    <div class="line broken"></div>
+                    <div class="line solid"></div>
+                    <div class="line solid"></div>
+                </div>
+                <div class="trigram-name">
+                    <div class="chinese-name">兌</div>
+                    <div class="pinyin">Duì</div>
+                    <div class="english">Lake</div>
+                </div>
+            </div>
+
+            <!-- Lí (離) - Fire -->
+            <div class="trigram li">
+                <div class="trigram-lines">
+                    <div class="line solid"></div>
+                    <div class="line broken"></div>
+                    <div class="line solid"></div>
+                </div>
+                <div class="trigram-name">
+                    <div class="chinese-name">離</div>
+                    <div class="pinyin">Lí</div>
+                    <div class="english">Fire</div>
+                </div>
+            </div>
+
+            <!-- Zhèn (震) - Thunder -->
+            <div class="trigram zhen">
+                <div class="trigram-lines">
+                    <div class="line broken"></div>
+                    <div class="line broken"></div>
+                    <div class="line solid"></div>
+                </div>
+                <div class="trigram-name">
+                    <div class="chinese-name">震</div>
+                    <div class="pinyin">Zhèn</div>
+                    <div class="english">Thunder</div>
+                </div>
+            </div>
+
+            <!-- Xùn (巽) - Wind -->
+            <div class="trigram xun">
+                <div class="trigram-lines">
+                    <div class="line broken"></div>
+                    <div class="line solid"></div>
+                    <div class="line solid"></div>
+                </div>
+                <div class="trigram-name">
+                    <div class="chinese-name">巽</div>
+                    <div class="pinyin">Xùn</div>
+                    <div class="english">Wind</div>
+                </div>
+            </div>
+
+            <!-- Kǎn (坎) - Water -->
+            <div class="trigram kan">
+                <div class="trigram-lines">
+                    <div class="line broken"></div>
+                    <div class="line solid"></div>
+                    <div class="line broken"></div>
+                </div>
+                <div class="trigram-name">
+                    <div class="chinese-name">坎</div>
+                    <div class="pinyin">Kǎn</div>
+                    <div class="english">Water</div>
+                </div>
+            </div>
+
+            <!-- Gèn (艮) - Mountain -->
+            <div class="trigram gen">
+                <div class="trigram-lines">
+                    <div class="line solid"></div>
+                    <div class="line broken"></div>
+                    <div class="line broken"></div>
+                </div>
+                <div class="trigram-name">
+                    <div class="chinese-name">艮</div>
+                    <div class="pinyin">Gèn</div>
+                    <div class="english">Mountain</div>
+                </div>
+            </div>
+
+            <!-- Kūn (坤) - Earth -->
+            <div class="trigram kun">
+                <div class="trigram-lines">
+                    <div class="line broken"></div>
+                    <div class="line broken"></div>
+                    <div class="line broken"></div>
+                </div>
+                <div class="trigram-name">
+                    <div class="chinese-name">坤</div>
+                    <div class="pinyin">Kūn</div>
+                    <div class="english">Earth</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="description">
+            <h3>About the Eight Diagrams (八卦)</h3>
+            <p>
+                The Eight Diagrams, known as <strong>Ba Gua</strong> (八卦) in
+                Chinese, are a fundamental concept in Chinese philosophy and
+                cosmology. Each trigram consists of three lines that can be
+                either solid (Yang ☰) or broken (Yin ☰), representing
+                different natural forces and phenomena.
+            </p>
+            <p>
+                At the center lies the <strong>Tai Chi</strong> (太極) symbol,
+                representing the balance and interaction between Yin and Yang
+                forces. The eight trigrams surrounding it form the basis of the
+                64 hexagrams found in the <strong>I Ching</strong> (易經), one
+                of the oldest Chinese classical texts.
+            </p>
+            <p>
+                <strong>Hover over each trigram</strong> to see it highlighted.
+                The traditional arrangement places Heaven (乾) at the top and
+                Earth (坤) at the bottom, with the other six elements positioned
+                around the octagon according to ancient cosmological principles.
+            </p>
+        </div>
+    </body>
+</html>
