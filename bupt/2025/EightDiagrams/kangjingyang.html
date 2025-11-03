@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>八卦图</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        overflow: hidden;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        font-family: "Arial", sans-serif;
+      }
+
+      #root {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .info {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        text-align: center;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div class="info">八卦图 - 3D Animated</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      // Scene setup
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000,
+      );
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000000, 0);
+      document.getElementById("root").appendChild(renderer.domElement);
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight1.position.set(5, 5, 5);
+      scene.add(directionalLight1);
+
+      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+      directionalLight2.position.set(-5, -5, -5);
+      scene.add(directionalLight2);
+
+      // Create central Yin-Yang symbol with an accurate S-curve
+      function createYinYang(radius) {
+        const group = new THREE.Group();
+        const segments = 160;
+        const depth = 0.15;
+        const topSurface = depth / 2;
+        const overlayDepth = depth * 0.18;
+        const swirlDepth = depth * 0.16;
+        const dotDepth = depth * 0.12;
+        const epsilon = 0.0008;
+
+        // Base white disk
+        const baseGeo = new THREE.CylinderGeometry(
+          radius,
+          radius,
+          depth,
+          segments,
+        );
+        const baseMaterial = new THREE.MeshPhongMaterial({
+          color: 0xffffff,
+          shininess: 80,
+          specular: 0x222222,
+        });
+        const base = new THREE.Mesh(baseGeo, baseMaterial);
+        base.rotation.x = Math.PI / 2;
+        group.add(base);
+
+        const yinMaterial = new THREE.MeshPhongMaterial({
+          color: 0x050505,
+          shininess: 90,
+        });
+
+        const yangMaterial = new THREE.MeshPhongMaterial({
+          color: 0xffffff,
+          shininess: 90,
+        });
+
+        // Black half-disk overlay (left side)
+        const blackHalfGeo = new THREE.CylinderGeometry(
+          radius,
+          radius,
+          overlayDepth,
+          segments,
+          1,
+          false,
+          Math.PI / 2,
+          Math.PI,
+        );
+        const blackHalf = new THREE.Mesh(blackHalfGeo, yinMaterial);
+        blackHalf.rotation.x = Math.PI / 2;
+        blackHalf.rotation.y = Math.PI / 2;
+        blackHalf.position.z = topSurface + overlayDepth / 2 + epsilon;
+        group.add(blackHalf);
+
+        const blackHalfBack = new THREE.Mesh(blackHalfGeo, yinMaterial);
+        blackHalfBack.rotation.x = Math.PI / 2;
+        blackHalfBack.rotation.y = -Math.PI / 2;
+        blackHalfBack.position.z = -(topSurface + overlayDepth / 2 + epsilon);
+        group.add(blackHalfBack);
+
+        // Black swirl on the top
+        const topSwirlGeo = new THREE.CylinderGeometry(
+          radius * 0.5,
+          radius * 0.5,
+          swirlDepth,
+          segments,
+        );
+        const topSwirl = new THREE.Mesh(topSwirlGeo, yinMaterial);
+        topSwirl.rotation.x = Math.PI / 2;
+        topSwirl.position.set(
+          0,
+          radius * 0.5,
+          topSurface + overlayDepth + swirlDepth / 2 + epsilon * 2,
+        );
+        group.add(topSwirl);
+
+        const topSwirlBack = new THREE.Mesh(topSwirlGeo, yinMaterial);
+        topSwirlBack.rotation.x = Math.PI / 2;
+        topSwirlBack.position.set(
+          0,
+          radius * 0.5,
+          -(topSurface + overlayDepth + swirlDepth / 2 + epsilon * 2),
+        );
+        group.add(topSwirlBack);
+
+        // White swirl on the bottom (covers part of the black half)
+        const bottomSwirlGeo = new THREE.CylinderGeometry(
+          radius * 0.5,
+          radius * 0.5,
+          swirlDepth,
+          segments,
+        );
+        const bottomSwirl = new THREE.Mesh(bottomSwirlGeo, yangMaterial);
+        bottomSwirl.rotation.x = Math.PI / 2;
+        bottomSwirl.position.set(
+          0,
+          -radius * 0.5,
+          topSurface + overlayDepth + swirlDepth / 2 + epsilon * 2,
+        );
+        group.add(bottomSwirl);
+
+        const bottomSwirlBack = new THREE.Mesh(bottomSwirlGeo, yangMaterial);
+        bottomSwirlBack.rotation.x = Math.PI / 2;
+        bottomSwirlBack.position.set(
+          0,
+          -radius * 0.5,
+          -(topSurface + overlayDepth + swirlDepth / 2 + epsilon * 2),
+        );
+        group.add(bottomSwirlBack);
+
+        // White dot inside the top (black) swirl
+        const whiteDotGeo = new THREE.CylinderGeometry(
+          radius * 0.14,
+          radius * 0.14,
+          dotDepth,
+          segments,
+        );
+        const whiteDot = new THREE.Mesh(whiteDotGeo, yangMaterial);
+        whiteDot.rotation.x = Math.PI / 2;
+        whiteDot.position.set(
+          0,
+          radius * 0.5,
+          topSurface + overlayDepth + swirlDepth + dotDepth / 2 + epsilon * 4,
+        );
+        group.add(whiteDot);
+
+        const whiteDotBack = new THREE.Mesh(whiteDotGeo, yangMaterial);
+        whiteDotBack.rotation.x = Math.PI / 2;
+        whiteDotBack.position.set(
+          0,
+          radius * 0.5,
+          -(
+            topSurface +
+            overlayDepth +
+            swirlDepth +
+            dotDepth / 2 +
+            epsilon * 4
+          ),
+        );
+        group.add(whiteDotBack);
+
+        // Black dot inside the bottom (white) swirl
+        const blackDotGeo = new THREE.CylinderGeometry(
+          radius * 0.14,
+          radius * 0.14,
+          dotDepth,
+          segments,
+        );
+        const blackDot = new THREE.Mesh(blackDotGeo, yinMaterial);
+        blackDot.rotation.x = Math.PI / 2;
+        blackDot.position.set(
+          0,
+          -radius * 0.5,
+          topSurface + overlayDepth + swirlDepth + dotDepth / 2 + epsilon * 4,
+        );
+        group.add(blackDot);
+
+        const blackDotBack = new THREE.Mesh(blackDotGeo, yinMaterial);
+        blackDotBack.rotation.x = Math.PI / 2;
+        blackDotBack.position.set(
+          0,
+          -radius * 0.5,
+          -(
+            topSurface +
+            overlayDepth +
+            swirlDepth +
+            dotDepth / 2 +
+            epsilon * 4
+          ),
+        );
+        group.add(blackDotBack);
+
+        return group;
+      }
+
+      // Create main group
+      const baGuaGroup = new THREE.Group();
+
+      // Create Yin-Yang in center
+      const yinYang = createYinYang(1.5);
+      baGuaGroup.add(yinYang);
+
+      // Create eight trigrams around the circle
+      const trigramRadius = 2.5;
+      const trigramAngleStep = (Math.PI * 2) / 8;
+
+      scene.add(baGuaGroup);
+
+      // Camera position
+      camera.position.z = 8;
+      camera.position.y = 2;
+      camera.lookAt(0, 0, 0);
+
+      const orbitRadius = Math.sqrt(
+        camera.position.x * camera.position.x +
+          camera.position.z * camera.position.z,
+      );
+      let orbitAngle = 0;
+
+      // Animation loop (static view for debugging)
+      function animate() {
+        requestAnimationFrame(animate);
+        orbitAngle += 0.01;
+        camera.position.x = Math.sin(orbitAngle) * orbitRadius;
+        camera.position.z = Math.cos(orbitAngle) * orbitRadius;
+        camera.position.y = 2;
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+      }
+
+      // Handle window resize
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // Start animation
+      animate();
+    </script>
+  </body>
+</html>
