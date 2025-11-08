@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太极八卦图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, 
+                #1a1a2e 0%, 
+                #16213e 40%, 
+                #0f3460 100%);
+            overflow: hidden;
+            font-family: 'STKaiti', 'KaiTi', '楷体', serif;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: drift 100s linear infinite;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle at center, 
+                rgba(120, 81, 169, 0.1) 0%,
+                rgba(75, 0, 130, 0.05) 40%,
+                transparent 70%);
+            animation: breathe 15s ease-in-out infinite;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-15px, -15px); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translateZ(0);
+            z-index: 1;
+        }
+
+        .glow-ring {
+            position: absolute;
+            width: 900px;
+            height: 900px;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(120, 81, 169, 0.1) 0%,
+                rgba(75, 0, 130, 0.08) 30%,
+                transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+            will-change: transform, opacity;
+            transform: translateZ(0);
+        }
+
+        .glow-ring:nth-child(2) {
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, 
+                rgba(120, 81, 169, 0.08) 0%,
+                rgba(75, 0, 130, 0.05) 30%,
+                transparent 70%);
+            animation: pulse 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        .taiji-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            transform: translateZ(0);
+            will-change: transform;
+            filter: drop-shadow(0 0 40px rgba(120, 81, 169, 0.4)) 
+                    drop-shadow(0 0 20px rgba(75, 0, 130, 0.3));
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes taiji-flash {
+            0%, 100% { 
+                filter: drop-shadow(0 0 40px rgba(120, 81, 169, 0.4)) 
+                        drop-shadow(0 0 20px rgba(75, 0, 130, 0.3));
+                transform: scale(1);
+            }
+            50% { 
+                filter: drop-shadow(0 0 60px rgba(224, 211, 255, 0.9)) 
+                        drop-shadow(0 0 40px rgba(186, 133, 255, 0.8))
+                        drop-shadow(0 0 20px rgba(153, 102, 255, 0.7));
+                transform: scale(1.05);
+            }
+        }
+
+        .taiji-flash {
+            animation: taiji-flash 0.6s ease-out forwards;
+        }
+
+        .taiji {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #000000 50%, #ffffff 50%);
+            animation: taiji-rotate 12s linear infinite;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        @keyframes taiji-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .eye {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-125px);
+            will-change: transform;
+        }
+
+        .yin-eye {
+            top: 0;
+            background: radial-gradient(circle, 
+                #000000 0%,
+                #000000 25%,
+                #ffffff 25%,
+                #ffffff 100%);
+        }
+
+        .yang-eye {
+            bottom: 0;
+            background: radial-gradient(circle, 
+                #ffffff 0%,
+                #ffffff 25%,
+                #000000 25%,
+                #000000 100%);
+        }
+
+        .title {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(224, 211, 255, 0.9);
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 10px;
+            z-index: 10;
+            text-shadow: 
+                0 0 15px rgba(120, 81, 169, 0.8),
+                0 0 30px rgba(75, 0, 130, 0.5);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, -10px); }
+        }
+
+        .trigram {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            color: rgba(224, 211, 255, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            text-shadow: 0 0 12px rgba(120, 81, 169, 0.7);
+            transform-origin: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .trigram:hover {
+            color: rgba(255, 255, 255, 1);
+            text-shadow: 
+                0 0 10px rgba(224, 211, 255, 0.9),
+                0 0 20px rgba(186, 133, 255, 0.8),
+                0 0 30px rgba(153, 102, 255, 0.7),
+                0 0 40px rgba(120, 81, 169, 0.6);
+            transform: scale(1.15) rotate(var(--rotate));
+        }
+
+        .trigram-1 { --rotate: 0deg; top: calc(50% - 400px); left: 50%; transform: translateX(-50%) rotate(var(--rotate)); }
+        .trigram-2 { --rotate: 45deg; top: calc(50% - 283px); right: calc(50% - 283px); transform: rotate(var(--rotate)); }
+        .trigram-3 { --rotate: 90deg; top: 50%; right: calc(50% - 400px); transform: translateY(-50%) rotate(var(--rotate)); }
+        .trigram-4 { --rotate: 135deg; bottom: calc(50% - 283px); right: calc(50% - 283px); transform: rotate(var(--rotate)); }
+        .trigram-5 { --rotate: 180deg; bottom: calc(50% - 400px); left: 50%; transform: translateX(-50%) rotate(var(--rotate)); }
+        .trigram-6 { --rotate: -135deg; bottom: calc(50% - 283px); left: calc(50% - 283px); transform: rotate(var(--rotate)); }
+        .trigram-7 { --rotate: -90deg; top: 50%; left: calc(50% - 400px); transform: translateY(-50%) rotate(var(--rotate)); }
+        .trigram-8 { --rotate: -45deg; top: calc(50% - 283px); left: calc(50% - 283px); transform: rotate(var(--rotate)); }
+
+        .taiji:hover {
+            animation-play-state: paused;
+        }
+
+        @media (max-width: 1024px) {
+            .trigram {
+                width: 60px;
+                height: 60px;
+                font-size: 45px;
+            }
+            
+            .trigram-1 { top: calc(50% - 300px); }
+            .trigram-2 { top: calc(50% - 212px); right: calc(50% - 212px); }
+            .trigram-3 { right: calc(50% - 300px); }
+            .trigram-4 { bottom: calc(50% - 212px); right: calc(50% - 212px); }
+            .trigram-5 { bottom: calc(50% - 300px); }
+            .trigram-6 { bottom: calc(50% - 212px); left: calc(50% - 212px); }
+            .trigram-7 { left: calc(50% - 300px); }
+            .trigram-8 { top: calc(50% - 212px); left: calc(50% - 212px); }
+            
+            .glow-ring { width: 700px; height: 700px; }
+            .glow-ring:nth-child(2) { width: 800px; height: 800px; }
+        }
+
+        @media (max-width: 768px) {
+            .taiji-container, .taiji {
+                width: 300px;
+                height: 300px;
+            }
+            
+            .eye {
+                width: 150px;
+                height: 150px;
+                transform: translateX(-75px);
+            }
+            
+            .glow-ring {
+                width: 500px;
+                height: 500px;
+            }
+            
+            .glow-ring:nth-child(2) {
+                width: 600px;
+                height: 600px;
+            }
+            
+            .title {
+                font-size: 32px;
+                top: 30px;
+            }
+            
+            .trigram {
+                width: 50px;
+                height: 50px;
+                font-size: 36px;
+            }
+
+            .trigram-1 { top: calc(50% - 220px); }
+            .trigram-2 { top: calc(50% - 155px); right: calc(50% - 155px); }
+            .trigram-3 { right: calc(50% - 220px); }
+            .trigram-4 { bottom: calc(50% - 155px); right: calc(50% - 155px); }
+            .trigram-5 { bottom: calc(50% - 220px); }
+            .trigram-6 { bottom: calc(50% - 155px); left: calc(50% - 155px); }
+            .trigram-7 { left: calc(50% - 220px); }
+            .trigram-8 { top: calc(50% - 155px); left: calc(50% - 155px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="title">太极八卦图</div>
+    <div class="container">
+        <div class="glow-ring"></div>
+        <div class="glow-ring"></div>
+        <div class="taiji-container" id="taijiContainer">
+            <div class="taiji">
+                <div class="eye yin-eye"></div>
+                <div class="eye yang-eye"></div>
+            </div>
+        </div>
+        <div class="trigram trigram-1">☰</div>   <!-- 乾卦（上） -->
+        <div class="trigram trigram-2">☲</div>   <!-- 离卦（右上） -->
+        <div class="trigram trigram-3">☴</div>   <!-- 巽卦（右） -->
+        <div class="trigram trigram-4">☱</div>   <!-- 兑卦（右下） -->
+        <div class="trigram trigram-5">☷</div>   <!-- 坤卦（下） -->
+        <div class="trigram trigram-6">☶</div>   <!-- 艮卦（左下） -->
+        <div class="trigram trigram-7">☵</div>   <!-- 坎卦（左） -->
+        <div class="trigram trigram-8">☳</div>   <!-- 震卦（左上） -->
+    </div>
+
+    <script>
+        const taijiContainer = document.getElementById('taijiContainer');
+        
+        taijiContainer.addEventListener('click', () => {
+            taijiContainer.classList.add('taiji-flash');
+            setTimeout(() => {
+                taijiContainer.classList.remove('taiji-flash');
+            }, 600);
+        });
+    </script>
+</body>
+</html>
