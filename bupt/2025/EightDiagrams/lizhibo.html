@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太极图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            overflow: hidden;
+            font-family: 'STKaiti', 'KaiTi', '楷体', serif;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                radial-gradient(circle, rgba(218, 165, 32, 0.08) 1px, transparent 1px),
+                radial-gradient(circle, rgba(255, 215, 0, 0.04) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px;
+            animation: drift 60s linear infinite;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-50px, -50px) rotate(360deg); }
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, 
+                rgba(218, 165, 32, 0.03) 0%,
+                transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translateZ(0);
+            z-index: 1;
+        }
+
+        .glow-ring {
+            position: absolute;
+            width: 650px;
+            height: 650px;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(218, 165, 32, 0.15) 0%,
+                rgba(200, 180, 150, 0.08) 40%,
+                transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+            will-change: transform, opacity;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) translateZ(0); opacity: 0.6; }
+            50% { transform: scale(1.08) translateZ(0); opacity: 1; }
+        }
+
+        .taiji-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            transform: translateZ(0);
+            will-change: transform;
+            filter: drop-shadow(0 0 80px rgba(218, 165, 32, 0.3)) 
+                    drop-shadow(0 0 40px rgba(255, 215, 0, 0.2));
+        }
+
+        .taiji {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #000000 50%, #ffffff 50%);
+            animation: taiji-rotate 8s linear infinite;
+            will-change: transform;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        @keyframes taiji-rotate {
+            from { transform: rotate(0deg) translateZ(0); }
+            to { transform: rotate(360deg) translateZ(0); }
+        }
+
+        .eye {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-125px) translateZ(0);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        .yin-eye {
+            top: 0;
+            background: radial-gradient(circle, 
+                #000000 0%,
+                #000000 25%,
+                #ffffff 25%,
+                #ffffff 100%);
+        }
+
+        .yang-eye {
+            bottom: 0;
+            background: radial-gradient(circle, 
+                #ffffff 0%,
+                #ffffff 25%,
+                #000000 25%,
+                #000000 100%);
+        }
+
+        .title {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(218, 165, 32, 0.9);
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            z-index: 10;
+            text-shadow: 
+                0 0 20px rgba(218, 165, 32, 0.6),
+                0 0 40px rgba(255, 215, 0, 0.3);
+        }
+
+        .taiji:hover {
+            animation-play-state: paused;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">太极图</div>
+    <div class="container">
+        <div class="glow-ring"></div>
+        <div class="taiji-container">
+            <div class="taiji">
+                <div class="eye yin-eye"></div>
+                <div class="eye yang-eye"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
