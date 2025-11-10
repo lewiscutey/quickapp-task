@@ -1,0 +1,232 @@
+<template>
+  <div class="page-wrapper">
+    <div class="clock-container">
+      <canvas id="analogClockCanvas" class="clock-canvas"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .page-wrapper {
+    /* 页面flex布局，使其居中 */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f2f5; /* 浅灰色背景 */
+  }
+  .clock-container {
+    width: 600px;
+    height: 600px;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff; /* 白色容器背景 */
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  .clock-canvas {
+    /* 画布尺寸 */
+    width: 500px;
+    height: 500px;
+    /* 样式在 <script> 中通过绘图实现 */
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      drawingCtx: null, // 绘图上下文
+      canvasSize: 500, // 画布尺寸
+      radius: 0, // 时钟半径
+      animationFrameId: null // 动画帧ID
+    },
+
+    /**
+     * 生命周期函数：组件初始化
+     */
+    onInit() {
+      this.$page.setTitleBar({
+        text: 'Canvas Analog Clock'
+      });
+      this.radius = this.canvasSize / 2;
+    },
+
+    /**
+     * 生命周期函数：页面显示
+     * 在这里获取 canvas 上下文并开始绘制
+     */
+    onShow() {
+      const canvas = this.$element('analogClockCanvas');
+      this.drawingCtx = canvas.getContext('2d');
+      
+      // 将坐标原点移动到画布中心
+      this.drawingCtx.translate(this.radius, this.radius);
+      
+      // 开始循环绘制
+      this.startClock();
+    },
+
+    /**
+     * 生命周期函数：页面销毁
+     * 停止动画循环，防止内存泄漏
+     */
+    onDestroy() {
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+      }
+    },
+
+    /**
+     * 开始时钟循环
+     */
+    startClock() {
+      const loop = () => {
+        this.drawClock();
+        // 请求下一帧动画
+        this.animationFrameId = requestAnimationFrame(loop);
+      };
+      loop();
+    },
+
+    /**
+     * 绘制时钟（每帧调用）
+     */
+    drawClock() {
+      const ctx = this.drawingCtx;
+      
+      // 1. 清除画布 (半径向外扩展一点以清除边缘)
+      ctx.clearRect(-this.radius, -this.radius, this.canvasSize, this.canvasSize);
+
+      // 2. 绘制表盘
+      this.drawFace(ctx, this.radius);
+
+      // 3. 绘制刻度
+      this.drawTicks(ctx, this.radius);
+
+      // 4. 绘制数字
+      this.drawNumbers(ctx, this.radius * 0.85);
+
+      // 5. 绘制指针
+      this.drawHands(ctx, this.radius);
+      
+      // 6. 绘制中心点
+      this.drawCenterPivot(ctx);
+    },
+
+    /**
+     * 绘制表盘背景
+     */
+    drawFace(ctx, radius) {
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * 0.98, 0, 2 * Math.PI);
+      ctx.fillStyle = '#ffffff'; // 纯白表盘
+      ctx.fill();
+
+      // 添加一个精致的外边框
+      ctx.strokeStyle = '#333333';
+      ctx.lineWidth = radius * 0.02;
+      ctx.stroke();
+    },
+
+    /**
+     * 绘制刻度
+     */
+    drawTicks(ctx, radius) {
+      const outerRadius = radius * 0.95;
+      for (let i = 0; i < 60; i++) {
+        const angle = (i / 60) * 2 * Math.PI;
+        ctx.beginPath();
+        ctx.strokeStyle = '#555555';
+        
+        // 小时刻度和分钟刻度
+        if (i % 5 === 0) {
+          ctx.lineWidth = 4;
+          ctx.moveTo(outerRadius * 0.9, 0);
+        } else {
+          ctx.lineWidth = 2;
+          ctx.moveTo(outerRadius * 0.95, 0);
+        }
+        ctx.lineTo(outerRadius, 0);
+        
+        // 旋转坐标系来绘制刻度，而不是计算sin/cos
+        ctx.save(); // 保存当前状态
+        ctx.rotate(angle);
+        ctx.stroke();
+        ctx.restore(); // 恢复到旋转前
+      }
+    },
+
+    /**
+     * 绘制数字 1-12
+     */
+    drawNumbers(ctx, numberRadius) {
+      ctx.fillStyle = '#000000';
+      ctx.font = this.radius * 0.15 + "px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      for (let num = 1; num <= 12; num++) {
+        // 角度计算：(num / 12) * 2 * PI，并旋转 -PI/2 (90度) 使12点在顶部
+        const angle = (num / 12) * 2 * Math.PI - Math.PI / 2;
+        const x = numberRadius * Math.cos(angle);
+        const y = numberRadius * Math.sin(angle);
+        ctx.fillText(num.toString(), x, y);
+      }
+    },
+
+    /**
+     * 绘制时、分、秒针
+     */
+    drawHands(ctx, radius) {
+      const now = new Date();
+      let hour = now.getHours();
+      const minute = now.getMinutes();
+      const second = now.getSeconds();
+      const millisecond = now.getMilliseconds();
+      
+      hour = hour % 12; // 转为12小时制
+
+      // 秒针角度 (包含毫秒，实现平滑移动)
+      const secAngle = ((second + millisecond / 1000) / 60) * 2 * Math.PI - Math.PI / 2;
+      // 分针角度 (包含秒)
+      const minAngle = ((minute + second / 60) / 60) * 2 * Math.PI - Math.PI / 2;
+      // 时针角度 (包含分)
+      const hourAngle = ((hour + minute / 60) / 12) * 2 * Math.PI - Math.PI / 2;
+
+      // 绘制指针
+      // 时针 (短而粗)
+      this.drawHand(ctx, hourAngle, radius * 0.5, radius * 0.07, '#333333');
+      // 分针 (中等)
+      this.drawHand(ctx, minAngle, radius * 0.75, radius * 0.05, '#333333');
+      // 秒针 (细长，红色)
+      this.drawHand(ctx, secAngle, radius * 0.9, radius * 0.02, '#FF0000');
+    },
+
+    /**
+     * 绘制单个指针的辅助函数
+     */
+    drawHand(ctx, angle, length, lineWidth, color) {
+      ctx.beginPath();
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = 'round'; // 圆形末端
+      ctx.strokeStyle = color;
+      ctx.moveTo(0, 0); // 从中心开始
+      
+      // 计算末端位置
+      const x = length * Math.cos(angle);
+      const y = length * Math.sin(angle);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    },
+    
+    /**
+     * 绘制中心枢轴点
+     */
+    drawCenterPivot(ctx) {
+      // 绘制一个覆盖指针根部的点
+      ctx.beginPath();
+      ctx.arc(0, 0, this.radius * 0.03, 0, 2 * Math.PI);
+      ctx.fillStyle = '#FF0000'; // 与秒针同色
+      ctx.fill();
+    }
+  }
+</script>
