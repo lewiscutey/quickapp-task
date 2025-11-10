@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>八卦图</title>
+<style>
+  * { margin: 0; padding: 0; }
+
+  body {
+    padding: 200px;
+    background: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 400px);
+    margin: 0;
+  }
+  @property --angSlow { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+  @property --angFast { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+  div {
+    width: 200px;
+    height: 400px;
+    background-color: #fff;
+    border-left: 200px solid #000;
+    border-radius: 50%;
+    color: blue;
+    position: relative;
+    transition: all 4s;
+    transform: rotate(calc(var(--angSlow) + var(--angFast)));
+    will-change: transform;
+    cursor: grab;
+    animation-name: spinSlow, spinFast;
+    animation-duration: 10s, 2.5s;       /* 慢速一圈10s；快速一圈2.5s */
+    animation-timing-function: linear, linear;
+    animation-iteration-count: infinite, infinite;
+    animation-play-state: paused, paused; /* 默认暂停：移出时停在当前位置 */
+  }
+
+  div::after,
+  div::before {
+    content: "";
+    display: block;
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    margin-left: -100px;
+  }
+  div::after {
+    background: black;
+    border: 75px solid #fff;
+  }
+  div::before {
+    background: #fff;
+    border: 75px solid #000;
+  }
+
+  /* 变量动画：把角度变量线性推进到 360deg */
+  @keyframes spinSlow { to { --angSlow: 360deg; } }
+  @keyframes spinFast { to { --angFast: 360deg; } }
+
+
+  /* 悬停：播放慢速 + 强光效 */
+div:hover {
+  animation-play-state: running, paused;
+  box-shadow:
+    0 0 0 12px rgba(255,255,255,0.28),
+    0 0 40px 18px rgba(255,255,255,0.50),
+    0 0 90px 32px rgba(0,170,255,0.45),
+    0 0 160px 64px rgba(0,170,255,0.35),
+    0 0 260px 110px rgba(0,170,255,0.25);
+}
+
+/* 长按：在慢速上叠加快速 + 光效更强 */
+div:active {
+  animation-play-state: running, running;
+  cursor: grabbing;
+  box-shadow:
+    0 0 0 14px rgba(255,255,255,0.34),
+    0 0 52px 22px rgba(255,255,255,0.60),
+    0 0 120px 46px rgba(0,170,255,0.55),
+    0 0 200px 90px rgba(0,170,255,0.42),
+    0 0 320px 150px rgba(0,170,255,0.30);
+}
+
+  @keyframes rotate{
+    0%   { transform: rotate(0); }
+    25%  { transform: rotate(90deg); }
+    50%  { transform: rotate(180deg); }
+    75%  { transform: rotate(270deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    div, div:hover, div:active {
+      animation: none !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+</style>
+
+
+</head>
+<body>
+<div></div>
+</body>
+</html>
