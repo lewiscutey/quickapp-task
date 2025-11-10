@@ -1,0 +1,261 @@
+<template>
+  <div class="page">
+    <!-- 时钟容器 -->
+    <div class="clock-wrapper">
+      <!-- 画布组件 -->
+      <canvas
+        id="myxclock"
+        width="300px"
+        height="300px"
+        class="clock-canvas"
+      ></canvas>
+
+      <!-- 数字时间显示 -->
+      <text class="time-display">{{ timeStr }}</text>
+    </div>
+  </div>
+</template>
+
+<style>
+.page {
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+}
+
+.clock-wrapper {
+  flex-direction: column;
+  align-items: center;
+}
+
+.clock-canvas {
+  background-color: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 300px;
+  height: 300px;
+}
+
+.time-display {
+  margin-top: 24px;
+  font-size: 30px;
+  color: #333333;
+  font-family: sans-serif;
+}
+</style>
+
+<script>
+export default {
+  private: {
+    timeStr: "00:00:00",
+    timer: null,
+    canvasCtx: null,
+    centerX: 150,  // 画布中心X坐标
+    centerY: 150,  // 画布中心Y坐标
+    radius: 140    // 时钟半径
+  },
+
+  onInit() {
+    this.$page.setTitleBar({
+      text: 'myx Clock'
+    });
+  },
+
+  onShow() {
+    // 获取画布上下文
+    const canvas = document.getElementById('myxclock');
+    console.log(canvas);
+    this.canvasCtx = canvas.getContext('2d');
+    // 初始化绘制
+    this.drawClock();
+
+    // 启动定时器，每秒更新
+    this.timer = setInterval(() => {
+      this.drawClock();
+    }, 1000);
+  },
+
+  onDestroy() {
+    // 清除定时器
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  },
+
+  /**
+   * 绘制完整时钟
+   */
+  drawClock() {
+    const ctx = this.canvasCtx;
+    const now = new Date();
+
+    // 清除画布
+    ctx.clearRect(0, 0, 300, 300);
+
+    // 更新数字时间显示
+    this.updateTimeText(now);
+
+    // 绘制表盘
+    this.drawDial(ctx);
+
+    // 绘制刻度
+    this.drawMarkers(ctx);
+
+    // 绘制指针
+    this.drawHands(ctx, now);
+  },
+
+  /**
+   * 更新数字时间文本
+   */
+  updateTimeText(date) {
+    const hours = this.padZero(date.getHours());
+    const minutes = this.padZero(date.getMinutes());
+    const seconds = this.padZero(date.getSeconds());
+    this.timeStr = `${hours}:${minutes}:${seconds}`;
+  },
+
+  /**
+   * 绘制表盘
+   */
+  drawDial(ctx) {
+    // 外圆
+    ctx.beginPath();
+    ctx.arc(this.centerX, this.centerY, this.radius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 内圆装饰
+    ctx.beginPath();
+    ctx.arc(this.centerX, this.centerY, this.radius - 5, 0, 2 * Math.PI);
+    ctx.strokeStyle = '#eeeeee';
+    ctx.stroke();
+  },
+
+  /**
+   * 绘制刻度
+   */
+  drawMarkers(ctx) {
+    ctx.save();
+    ctx.translate(this.centerX, this.centerY);
+
+    // 绘制小时刻度
+    for (let i = 0; i < 12; i++) {
+      ctx.rotate(Math.PI / 6);  // 每小时30度
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius + 10);
+      ctx.lineTo(0, -this.radius + 25);
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#333333';
+      ctx.stroke();
+
+      // 绘制小时数字
+      ctx.save();
+      ctx.rotate(-Math.PI / 6 * (i + 1));  // 旋转回正向
+      ctx.font = '16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const hour = i === 0 ? 12 : i;
+      ctx.fillText(hour.toString(), 0, -this.radius + 45);
+      ctx.restore();
+    }
+
+    // 绘制分钟刻度
+    for (let i = 0; i < 60; i++) {
+      if (i % 5 !== 0) {  // 跳过小时刻度位置
+        ctx.rotate(Math.PI / 30);  // 每分钟6度
+        ctx.beginPath();
+        ctx.moveTo(0, -this.radius + 10);
+        ctx.lineTo(0, -this.radius + 18);
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#666666';
+        ctx.stroke();
+      } else {
+        ctx.rotate(Math.PI / 30);  // 小时刻度位置也要旋转
+      }
+    }
+
+    ctx.restore();
+  },
+
+  /**
+   * 绘制指针
+   */
+  drawHands(ctx, date) {
+    const hours = date.getHours() % 12;
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    // 计算各指针角度
+    const hourAngle = (hours * 30 + minutes * 0.5) * Math.PI / 180;
+    const minuteAngle = (minutes * 6 + seconds * 0.1) * Math.PI / 180;
+    const secondAngle = seconds * 6 * Math.PI / 180;
+
+    ctx.save();
+    ctx.translate(this.centerX, this.centerY);
+
+    // 绘制时针
+    ctx.save();
+    ctx.rotate(hourAngle);
+    ctx.beginPath();
+    ctx.moveTo(0, 20);
+    ctx.lineTo(0, -this.radius * 0.55);
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#333333';
+    ctx.stroke();
+    ctx.restore();
+
+    // 绘制分针
+    ctx.save();
+    ctx.rotate(minuteAngle);
+    ctx.beginPath();
+    ctx.moveTo(0, 25);
+    ctx.lineTo(0, -this.radius * 0.75);
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#555555';
+    ctx.stroke();
+    ctx.restore();
+
+    // 绘制秒针
+    ctx.save();
+    ctx.rotate(secondAngle);
+    ctx.beginPath();
+    ctx.moveTo(0, 30);
+    ctx.lineTo(0, -this.radius * 0.85);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#ff4d4f';
+    ctx.stroke();
+
+    // 秒针头部圆点
+    ctx.beginPath();
+    ctx.arc(0, -this.radius * 0.85, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ff4d4f';
+    ctx.fill();
+    ctx.restore();
+
+    // 中心圆点
+    ctx.beginPath();
+    ctx.arc(0, 0, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333333';
+    ctx.fill();
+
+    ctx.restore();
+  },
+
+  /**
+   * 数字补零
+   */
+  padZero(num) {
+    return num < 10 ? `0${num}` : num;
+  }
+}
+</script>
