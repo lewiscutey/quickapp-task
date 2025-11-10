@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>八卦图 - 鼠标控制旋转</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ccc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: sans-serif;
+      user-select: none;
+    }
+
+    .taiji {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #000 50%, #fff 50%);
+      position: relative;
+      border: 1px solid #333;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+
+    .taiji::before,
+    .taiji::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+    }
+
+    .taiji::before {
+      top: 0;
+      background: radial-gradient(circle at center, #000 0 25px, #fff 25.5px);
+    }
+
+    .taiji::after {
+      bottom: 0;
+      background: radial-gradient(circle at center, #fff 0 25px, #000 25.5px);
+    }
+
+    .info {
+      color: #333;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="taiji" id="taiji-diagram"></div>
+  <!-- <div class="info">鼠标移入图形内开始旋转，移出停止</div> -->
+
+  <script>
+    const taiji = document.getElementById('taiji-diagram');
+    let isRotating = false; // 旋转状态标记
+    let currentAngle = 0;   // 当前旋转角度
+    let rotationSpeed = 2;  // 旋转速度（度/帧），可调整
+    let animationId = null; // 动画帧ID
+
+    // 旋转动画函数
+    function rotate() {
+      // 每帧增加旋转角度
+      currentAngle = (currentAngle + rotationSpeed) % 360;
+      taiji.style.transform = `rotate(${currentAngle}deg)`;
+      // 继续下一帧动画
+      animationId = requestAnimationFrame(rotate);
+    }
+
+    // 鼠标移入：开始旋转
+    taiji.addEventListener('mouseenter', () => {
+      if (!isRotating) {
+        isRotating = true;
+        rotate(); // 启动动画
+      }
+    });
+
+    // 鼠标移出：停止旋转
+    taiji.addEventListener('mouseleave', () => {
+      if (isRotating) {
+        isRotating = false;
+        cancelAnimationFrame(animationId); // 取消动画帧
+      }
+    });
+
+    // 触摸设备支持
+    taiji.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (!isRotating) {
+        isRotating = true;
+        rotate();
+      }
+    });
+
+    taiji.addEventListener('touchend', (e) => {
+      // 检查触摸是否仍在元素内
+      const rect = taiji.getBoundingClientRect();
+      const touch = e.changedTouches[0];
+      const isInside = (
+        touch.clientX >= rect.left &&
+        touch.clientX <= rect.right &&
+        touch.clientY >= rect.top &&
+        touch.clientY <= rect.bottom
+      );
+
+      if (!isInside && isRotating) {
+        isRotating = false;
+        cancelAnimationFrame(animationId);
+      }
+    });
+
+    // 双击切换旋转方向
+    taiji.addEventListener('dblclick', () => {
+      rotationSpeed = -rotationSpeed; // 反转方向
+    });
+  </script>
+</body>
+</html>
