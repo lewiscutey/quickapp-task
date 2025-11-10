@@ -1,0 +1,163 @@
+<template>
+  <div class="page-wrapper">
+    <div class="clock-container">
+      <canvas ref="clockCanvas" class="clock-canvas"></canvas>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+
+const clockCanvas = ref(null);
+let ctx = null;
+let radius = 0;
+let animationFrameId = null;
+
+const canvasSize = 500;
+
+// 绘制循环
+const startClock = () => {
+  const loop = () => {
+    drawClock();
+    animationFrameId = requestAnimationFrame(loop);
+  };
+  loop();
+};
+
+// 主绘制函数
+const drawClock = () => {
+  ctx.clearRect(-radius, -radius, canvasSize, canvasSize);
+  drawFace();
+  drawTicks();
+  drawNumbers();
+  drawHands();
+  drawCenterPivot();
+};
+
+// 绘制表盘（渐变）
+const drawFace = () => {
+  const grad = ctx.createRadialGradient(0, 0, radius * 0.1, 0, 0, radius);
+  grad.addColorStop(0, '#2a3f54');   // 中心深蓝灰
+  grad.addColorStop(1, '#0d1b2a');   // 边缘更深蓝
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.98, 0, 2 * Math.PI);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // 外边框（金色）
+  ctx.strokeStyle = '#d4af37';
+  ctx.lineWidth = radius * 0.02;
+  ctx.stroke();
+};
+
+// 绘制刻度
+const drawTicks = () => {
+  const outer = radius * 0.95;
+  for (let i = 0; i < 60; i++) {
+    const angle = (i / 60) * 2 * Math.PI;
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.strokeStyle = i % 5 === 0 ? '#ffffff' : '#cccccc';
+    ctx.lineWidth = i % 5 === 0 ? 4 : 2;
+    ctx.moveTo(outer * (i % 5 === 0 ? 0.88 : 0.94), 0);
+    ctx.lineTo(outer, 0);
+    ctx.stroke();
+    ctx.restore();
+  }
+};
+
+// 绘制数字
+const drawNumbers = () => {
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `${radius * 0.15}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const numRadius = radius * 0.82;
+
+  for (let num = 1; num <= 12; num++) {
+    const angle = (num / 12) * 2 * Math.PI - Math.PI / 2;
+    ctx.fillText(num, numRadius * Math.cos(angle), numRadius * Math.sin(angle));
+  }
+};
+
+// 绘制指针
+const drawHands = () => {
+  const now = new Date();
+  const hour = now.getHours() % 12;
+  const minute = now.getMinutes();
+  const second = now.getSeconds();
+  const ms = now.getMilliseconds();
+
+  const secAngle = ((second + ms / 1000) / 60) * 2 * Math.PI - Math.PI / 2;
+  const minAngle = ((minute + second / 60) / 60) * 2 * Math.PI - Math.PI / 2;
+  const hourAngle = ((hour + minute / 60) / 12) * 2 * Math.PI - Math.PI / 2;
+
+  // 金色时分针，红色秒针
+  drawHand(hourAngle, radius * 0.5, radius * 0.07, '#d4af37');
+  drawHand(minAngle, radius * 0.75, radius * 0.05, '#f0c75e');
+  drawHand(secAngle, radius * 0.9, radius * 0.02, '#ff5252');
+};
+
+// 绘制单根指针
+const drawHand = (angle, length, width, color) => {
+  ctx.beginPath();
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = color;
+  ctx.moveTo(0, 0);
+  ctx.lineTo(length * Math.cos(angle), length * Math.sin(angle));
+  ctx.stroke();
+};
+
+// 绘制中心圆点
+const drawCenterPivot = () => {
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.04, 0, 2 * Math.PI);
+  ctx.fillStyle = '#ff5252';
+  ctx.fill();
+};
+
+onMounted(() => {
+  const canvas = clockCanvas.value;
+  canvas.width = canvasSize;
+  canvas.height = canvasSize;
+
+  ctx = canvas.getContext('2d');
+  radius = canvasSize / 2;
+  ctx.translate(radius, radius);
+
+  startClock();
+});
+
+onUnmounted(() => {
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+});
+</script>
+
+<style scoped>
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #101820;
+  height: 100vh;
+}
+
+.clock-container {
+  width: 600px;
+  height: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at center, #1b263b, #0d1b2a);
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.clock-canvas {
+  width: 500px;
+  height: 500px;
+}
+</style>
