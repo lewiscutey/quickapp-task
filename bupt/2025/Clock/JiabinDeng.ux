@@ -1,0 +1,156 @@
+<template>
+  <div class="wrapper">
+    <canvas id="clock" class="clock"></canvas>
+  </div>
+</template>
+
+<script>
+export default {
+  data: {
+    ctx: null,
+    timer: null,
+    radius: 200 
+  },
+
+  onShow() {
+    this.initClock()
+  },
+
+  onDestroy() {
+    if (this.timer) clearInterval(this.timer)
+  },
+
+  initClock() {
+    const canvas = this.$element('clock')
+    if (!canvas) {
+      console.warn('canvas element not found')
+      return
+    }
+
+    this.ctx = canvas.getContext('2d')
+
+    // 将坐标原点移到表盘中心
+    this.ctx.translate(this.radius + 30, this.radius + 30)
+
+    // 绘制一次并启动计时器
+    this.drawClock()
+    if (this.timer) clearInterval(this.timer)
+    this.timer = setInterval(() => this.drawClock(), 1000)
+  },
+
+  drawClock() {
+    const ctx = this.ctx
+    if (!ctx) return
+
+    const now = new Date()
+
+    // 清空画布
+    ctx.clearRect(-this.radius - 40, -this.radius - 40, this.radius * 2 + 80, this.radius * 2 + 80)
+
+    this.drawFace(ctx)
+    this.drawScales(ctx)
+    this.drawNumbers(ctx)
+    this.drawHands(ctx, now)
+  },
+
+  // 绘制表盘和中心点
+  drawFace(ctx) {
+    ctx.beginPath()
+    ctx.arc(0, 0, this.radius, 0, 2 * Math.PI)
+    ctx.fillStyle = '#fff'
+    ctx.fill()
+    ctx.lineWidth = 5
+    ctx.strokeStyle = '#000'
+    ctx.stroke()
+    ctx.closePath()
+
+    // 中心点
+    ctx.beginPath()
+    ctx.arc(0, 0, 8, 0, 2 * Math.PI)
+    ctx.fillStyle = '#000'
+    ctx.fill()
+    ctx.closePath()
+  },
+
+  // 绘制刻度线
+  drawScales(ctx) {
+    for (let i = 0; i < 60; i++) {
+      const angle = (i * Math.PI) / 30
+      ctx.save()
+      ctx.rotate(angle)
+      ctx.beginPath()
+      ctx.moveTo(0, -this.radius + (i % 5 === 0 ? 15 : 8))
+      ctx.lineTo(0, -this.radius + 2)
+      ctx.lineWidth = i % 5 === 0 ? 4 : 1.5
+      ctx.strokeStyle = '#000'
+      ctx.stroke()
+      ctx.closePath()
+      ctx.restore()
+    }
+  },
+
+  // 绘制数字1-12
+  drawNumbers(ctx) {
+    ctx.font = '24px Arial'
+    ctx.fillStyle = '#000'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+
+    for (let i = 1; i <= 12; i++) {
+      const angle = (i * Math.PI) / 6
+      const x = Math.sin(angle) * (this.radius - 35)
+      const y = -Math.cos(angle) * (this.radius - 35)
+      ctx.fillText(i.toString(), x, y)
+    }
+  },
+
+  // 绘制时、分、秒针
+  drawHands(ctx, now) {
+    const hour = now.getHours() % 12
+    const minute = now.getMinutes()
+    const second = now.getSeconds()
+
+    // 时针
+    const hourAngle = ((hour + minute / 60) * Math.PI) / 6
+    this.drawHand(ctx, hourAngle, this.radius * 0.5, 8, '#000')
+
+    // 分针
+    const minuteAngle = ((minute + second / 60) * Math.PI) / 30
+    this.drawHand(ctx, minuteAngle, this.radius * 0.75, 5, '#333')
+
+    // 秒针
+    const secondAngle = (second * Math.PI) / 30
+    this.drawHand(ctx, secondAngle, this.radius * 0.9, 2, 'red')
+  },
+
+  drawHand(ctx, angle, length, width, color) {
+    ctx.save()
+    ctx.rotate(angle)
+    ctx.beginPath()
+    ctx.moveTo(0, 15)
+    ctx.lineTo(0, -length)
+    ctx.lineWidth = width
+    ctx.lineCap = 'round'
+    ctx.strokeStyle = color
+    ctx.stroke()
+    ctx.closePath()
+    ctx.restore()
+  }
+}
+</script>
+
+<style>
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-color: #fff;
+}
+.clock {
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  background-color: #fff;
+}
+</style>
