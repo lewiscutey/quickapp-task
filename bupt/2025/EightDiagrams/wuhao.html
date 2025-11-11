@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太极八卦图</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Arial', '微软雅黑', sans-serif;
+        }
+        .bagua-container {
+            width: min(90vw, 500px);
+            height: min(90vw, 500px);
+            position: relative;
+        }
+        .bagua-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #f3eaea;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+        }
+        .taiji {
+            width: 60%;
+            height: 60%;
+            position: absolute;
+            top: 20%;
+            left: 20%;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .taiji {
+                animation: rotate 30s linear infinite;
+            }
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .gua {
+            position: absolute;
+            width: 80px;
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transform-origin: center;
+        }
+        .gua-line {
+            height: 8px;
+            background-color: #000;
+            border-radius: 2px;
+        }
+        .gua-line.broken {
+            background: linear-gradient(to right, #000 0%, #000 45%, transparent 45%, transparent 55%, #000 55%, #000 100%);
+        }
+        .gua-name {
+            position: absolute;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+            display: none;
+        }
+        /* 八卦位置 */
+        .gua-qian { top: 10px; left: 50%; transform: translateX(-50%); }
+        .gua-qian .gua-name { top: -25px; left: 50%; transform: translateX(-50%); }
+        
+        .gua-dui { top: 18%; right: 18%; transform: rotate(45deg); }
+        .gua-dui .gua-name { top: -25px; right: 0; transform: rotate(-45deg) translateX(50%); }
+        
+        .gua-li { right: 10px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+        .gua-li .gua-name { right: -25px; top: 50%; transform: rotate(-90deg) translateY(-50%); }
+        
+        .gua-zhen { bottom: 18%; right: 18%; transform: rotate(135deg); }
+        .gua-zhen .gua-name { bottom: -25px; right: 0; transform: rotate(-135deg) translateX(50%); }
+        
+        .gua-xun { bottom: 10px; left: 50%; transform: translateX(-50%) rotate(180deg); }
+        .gua-xun .gua-name { bottom: -25px; left: 50%; transform: rotate(-180deg) translateX(-50%); }
+        
+        .gua-kan { bottom: 18%; left: 18%; transform: rotate(225deg); }
+        .gua-kan .gua-name { bottom: -25px; left: 0; transform: rotate(-225deg) translateX(-50%); }
+        
+        .gua-gen { left: 10px; top: 50%; transform: translateY(-50%) rotate(270deg); }
+        .gua-gen .gua-name { left: -25px; top: 50%; transform: rotate(-270deg) translateY(-50%); }
+        
+        .gua-kun { top: 18%; left: 18%; transform: rotate(315deg); }
+        .gua-kun .gua-name { top: -25px; left: 0; transform: rotate(-315deg) translateX(-50%); }
+    </style>
+</head>
+<body>
+    <div class="bagua-container">
+        <div class="bagua-circle">
+            <!-- 中央太极图 -->
+            <svg class="taiji" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- 整个圆的黑色背景 -->
+                <circle cx="50" cy="50" r="49" fill="#000"/>
+                <!-- 白色的阴阳鱼形状 -->
+                <path d="M50 1 A49 49 0 0 1 50 99 A24.5 24.5 0 0 0 50 50 A24.5 24.5 0 0 1 50 1 Z" fill="#fff"/>
+                <!-- 白色区域的小黑圆（阳中有阴） -->
+                <circle cx="50" cy="25" r="8" fill="#000"/>
+                <!-- 黑色区域的小白圆（阴中有阳） -->
+                <circle cx="50" cy="75" r="8" fill="#fff"/>
+            </svg>
+            
+            <!-- 八个卦象 -->
+            <!-- 乾卦 (☰) - 上方 -->
+            <div class="gua gua-qian">
+                <div class="gua-line"></div>
+                <div class="gua-line"></div>
+                <div class="gua-line"></div>
+            </div>
+            
+            <!-- 兑卦 (☱) - 右上 -->
+            <div class="gua gua-dui">
+                <div class="gua-line broken"></div>
+                <div class="gua-line"></div>
+                <div class="gua-line"></div>
+            </div>
+            
+            <!-- 离卦 (☲) - 右方 -->
+            <div class="gua gua-li">
+                <div class="gua-line"></div>
+                <div class="gua-line broken"></div>
+                <div class="gua-line"></div>
+            </div>
+            
+            <!-- 震卦 (☳) - 右下 -->
+            <div class="gua gua-zhen">
+                <div class="gua-line broken"></div>
+                <div class="gua-line broken"></div>
+                <div class="gua-line"></div>
+            </div>
+            
+            <!-- 巽卦 (☴) - 下方 -->
+            <div class="gua gua-xun">
+                <div class="gua-line"></div>
+                <div class="gua-line"></div>
+                <div class="gua-line broken"></div>
+            </div>
+            
+            <!-- 坎卦 (☵) - 左下 -->
+            <div class="gua gua-kan">
+                <div class="gua-line broken"></div>
+                <div class="gua-line"></div>
+                <div class="gua-line broken"></div>
+            </div>
+            
+            <!-- 艮卦 (☶) - 左方 -->
+            <div class="gua gua-gen">
+                <div class="gua-line"></div>
+                <div class="gua-line broken"></div>
+                <div class="gua-line broken"></div>
+            </div>
+            
+            <!-- 坤卦 (☷) - 左上 -->
+            <div class="gua gua-kun">
+                <div class="gua-line broken"></div>
+                <div class="gua-line broken"></div>
+                <div class="gua-line broken"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
