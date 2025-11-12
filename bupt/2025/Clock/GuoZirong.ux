@@ -1,0 +1,145 @@
+<template>
+  <div class="wrapper">
+    <canvas id="clock" class="clock"></canvas>
+  </div>
+</template>
+
+<script>
+export default {
+  data: {
+    ctx: null,
+    timer: null,
+    radius: 200
+  },
+
+  onShow () { this.initClock() },
+  onDestroy () { if (this.timer) clearInterval(this.timer) },
+
+  initClock () {
+    const canvas = this.$element('clock')
+    if (!canvas) return
+
+    const rect = canvas.getBoundingClientRect?.() || { width: 460, height: 460 }
+    const size = Math.min(rect.width || 460, rect.height || 460)
+
+    const dpr = (typeof devicePixelRatio === 'number' && devicePixelRatio) ? devicePixelRatio : 1
+    canvas.width = Math.floor(size * dpr)
+    canvas.height = Math.floor(size * dpr)
+    canvas.style.width = size + 'px'
+    canvas.style.height = size + 'px'
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.scale(dpr, dpr)
+    ctx.translate(size / 2, size / 2)
+
+    this.ctx = ctx
+    this.radius = Math.floor(size / 2) - 12
+
+    this.drawClock()
+    if (this.timer) clearInterval(this.timer)
+    this.timer = setInterval(() => this.drawClock(), 1000)
+  },
+
+  drawClock () {
+    const ctx = this.ctx
+    if (!ctx) return
+
+    const R = this.radius
+    ctx.clearRect(-R - 20, -R - 20, (R + 20) * 2, (R + 20) * 2)
+
+    this.drawFace(ctx, R)
+    this.drawTicks(ctx, R)
+    this.drawNumbers(ctx, R)
+    this.drawHands(ctx, R, new Date())
+  },
+
+  drawFace (ctx, R) {
+    ctx.beginPath()
+    ctx.arc(0, 0, R, 0, Math.PI * 2)
+    ctx.fillStyle = '#ffffff'
+    ctx.fill()
+    ctx.lineWidth = 4
+    ctx.strokeStyle = '#111111'
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.arc(0, 0, 6, 0, Math.PI * 2)
+    ctx.fillStyle = '#111111'
+    ctx.fill()
+  },
+
+  drawTicks (ctx, R) {
+    for (let i = 0; i < 60; i++) {
+      const isMajor = i % 5 === 0
+      const ang = (i * Math.PI) / 30
+      ctx.save()
+      ctx.rotate(ang)
+      ctx.beginPath()
+      ctx.moveTo(0, -R + (isMajor ? 16 : 10))
+      ctx.lineTo(0, -R + 4)
+      ctx.lineWidth = isMajor ? 3 : 1.5
+      ctx.strokeStyle = '#333333'
+      ctx.lineCap = 'round'
+      ctx.stroke()
+      ctx.restore()
+    }
+  },
+
+  drawNumbers (ctx, R) {
+    ctx.font = Math.floor(R * 0.14) + 'px Arial'
+    ctx.fillStyle = '#111111'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    const rNum = R - 34
+    for (let i = 1; i <= 12; i++) {
+      const a = (i * Math.PI) / 6
+      ctx.fillText(String(i), Math.sin(a) * rNum, -Math.cos(a) * rNum)
+    }
+  },
+
+  drawHands (ctx, R, now) {
+    const h = now.getHours() % 12
+    const m = now.getMinutes()
+    const s = now.getSeconds()
+
+    const hourA = ((h + m / 60) * Math.PI) / 6
+    const minA  = ((m + s / 60) * Math.PI) / 30
+    const secA  = (s * Math.PI) / 30
+
+    this.drawHand(ctx, hourA, R * 0.52, 6, '#111111')
+    this.drawHand(ctx, minA,  R * 0.74, 4, '#555555)
+    this.drawHand(ctx, secA,  R * 0.86, 2, '#ee1111')
+  },
+
+  drawHand (ctx, angle, length, width, color) {
+    ctx.save()
+    ctx.rotate(angle)
+    ctx.beginPath()
+    ctx.moveTo(0, 10)
+    ctx.lineTo(0, -length)
+    ctx.lineWidth = width
+    ctx.lineCap = 'round'
+    ctx.strokeStyle = color
+    ctx.stroke()
+    ctx.restore()
+  }
+}
+</script>
+
+<style>
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-color: #ffffff;
+}
+.clock {
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  background-color: #ffffff;
+}
+</style>
