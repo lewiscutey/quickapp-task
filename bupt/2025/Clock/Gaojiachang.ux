@@ -1,0 +1,155 @@
+<template>
+  <div class="page">
+    <canvas id="clock" width="300px" height="300px" class="clock"></canvas>
+
+    <!-- 数字时间显示 -->
+    <text class="time-text">{{ timeStr }}</text>
+  </div>
+</template>
+
+<style>
+.page {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  flex-direction: column;
+}
+
+.clock {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background-color: #fff;
+}
+
+.time-text {
+  margin-top: 20px;
+  font-size: 28px;
+  color: #000;
+  font-family: sans-serif;
+}
+</style>
+
+<script>
+export default {
+  private: {
+    ctx: null,
+    timer: null,
+    timeStr: "00:00:00",
+    centerX: 150,
+    centerY: 150,
+    radius: 140
+  },
+
+  onShow() {
+    const canvas = document.getElementById("clock");
+    this.ctx = canvas.getContext("2d");
+
+    this.drawClock();
+    this.timer = setInterval(() => this.drawClock(), 1000);
+  },
+
+  onDestroy() {
+    if (this.timer) clearInterval(this.timer);
+  },
+
+  /** 主绘制入口 */
+  drawClock() {
+    const ctx = this.ctx;
+    const now = new Date();
+
+    ctx.clearRect(0, 0, 300, 300);
+
+    this.updateTimeText(now);  // ★ 更新 00:00:00 数字
+
+    this.drawDial(ctx);
+    this.drawNumbers(ctx);
+    this.drawHands(ctx, now);
+  },
+
+  /** 更新时间字符串 */
+  updateTimeText(date) {
+    const h = this.pad(date.getHours());
+    const m = this.pad(date.getMinutes());
+    const s = this.pad(date.getSeconds());
+    this.timeStr = `${h}:${m}:${s}`;
+  },
+
+  pad(num) {
+    return num < 10 ? "0" + num : num;
+  },
+
+  /** 绘制表盘外圈 */
+  drawDial(ctx) {
+    ctx.beginPath();
+    ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2);
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  },
+
+  /** 绘制数字 1–12 */
+  drawNumbers(ctx) {
+    ctx.font = "20px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#000";
+
+    for (let i = 1; i <= 12; i++) {
+      const angle = (i * Math.PI) / 6;
+      const x = this.centerX + Math.sin(angle) * (this.radius - 30);
+      const y = this.centerY - Math.cos(angle) * (this.radius - 30);
+      ctx.fillText(i.toString(), x, y);
+    }
+  },
+
+  /** 绘制指针 */
+  drawHands(ctx, date) {
+    const h = date.getHours() % 12;
+    const m = date.getMinutes();
+    const s = date.getSeconds();
+
+    const hourAngle = (h * 30 + m * 0.5) * Math.PI / 180;
+    const minuteAngle = (m * 6 + s * 0.1) * Math.PI / 180;
+    const secondAngle = s * 6 * Math.PI / 180;
+
+    ctx.save();
+    ctx.translate(this.centerX, this.centerY);
+
+    // 时针
+    ctx.save();
+    ctx.rotate(hourAngle);
+    ctx.beginPath();
+    ctx.moveTo(0, 10);
+    ctx.lineTo(0, -70);
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.restore();
+
+    // 分针
+    ctx.save();
+    ctx.rotate(minuteAngle);
+    ctx.beginPath();
+    ctx.moveTo(0, 15);
+    ctx.lineTo(0, -95);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+
+    // 秒针
+    ctx.save();
+    ctx.rotate(secondAngle);
+    ctx.beginPath();
+    ctx.moveTo(0, 20);
+    ctx.lineTo(0, -110);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "red";
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.restore();
+  }
+}
+</script>
