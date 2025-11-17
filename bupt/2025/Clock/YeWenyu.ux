@@ -1,0 +1,165 @@
+// clock homework of YeWenyu
+
+<template>
+  <div class="wrapper">
+    <canvas id="clock" class="clock"></canvas>
+  </div>
+</template>
+
+<script>
+export default {
+    data: {
+        ctx: null,
+        timer: null,
+        radius: 240
+    },
+
+    onShow() {
+        this.initClock()
+    },
+
+    onDestroy() {
+        if (this.timer) clearInterval(this.timer)
+    },
+
+    initClock() {
+        const canvas = this.$element('clock')
+        if (!canvas) {
+            console.warn('canvas element not found')
+            return
+        }
+
+        this.ctx = canvas.getContext('2d')
+
+        this.ctx.translate(this.radius + 30, this.radius + 30)
+
+        this.drawClock()
+        if (this.timer) clearInterval(this.timer)
+        this.timer = setInterval(() => this.drawClock(), 1000)
+    },
+
+    drawClock() {
+        const ctx = this.ctx
+        if (!ctx) return
+
+        const now = new Date()
+
+        ctx.clearRect(-this.radius - 40, -this.radius - 40, this.radius * 2 +
+            80, this.radius * 2 + 80)
+
+        this.drawFace(ctx)
+        this.drawScales(ctx)
+        this.drawNumbers(ctx)
+        this.drawHands(ctx, now)
+    },
+
+    drawFace(ctx) {
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, 2 * Math.PI)
+
+        ctx.fillStyle = '#e3f2fd'
+        ctx.fill()
+        ctx.lineWidth = 6
+
+        ctx.strokeStyle = '#1976d2'
+        ctx.stroke()
+        ctx.closePath()
+
+        ctx.beginPath()
+        ctx.arc(0, 0, 10, 0, 2 * Math.PI)
+
+        ctx.fillStyle = '#d32f2f'
+        ctx.fill()
+        ctx.closePath()
+    },
+
+    drawScales(ctx) {
+        for (let i = 0; i < 60; i++) {
+            const angle = (i * Math.PI) / 30
+            ctx.save()
+            ctx.rotate(angle)
+            ctx.beginPath()
+            ctx.moveTo(0, -this.radius + (i % 5 === 0 ? 18 : 10))
+            ctx.lineTo(0, -this.radius + 2)
+
+            if (i % 5 === 0) {
+                ctx.lineWidth = 5
+                ctx.strokeStyle = '#1565c0'
+            } else {
+                ctx.lineWidth = 2
+                ctx.strokeStyle = '#42a5f5'
+            }
+            ctx.stroke()
+            ctx.closePath()
+            ctx.restore()
+        }
+    },
+
+    drawNumbers(ctx) {
+
+        ctx.font = '32px Arial'
+
+        ctx.fillStyle = '#0d47a1'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+
+        for (let i = 1; i <= 12; i++) {
+            const angle = (i * Math.PI) / 6
+            const x = Math.sin(angle) * (this.radius - 45)
+            const y = -Math.cos(angle) * (this.radius - 45)
+            ctx.fillText(i.toString(), x, y)
+        }
+    },
+
+    drawHands(ctx, now) {
+        const hour = now.getHours() % 12
+        const minute = now.getMinutes()
+        const second = now.getSeconds()
+
+
+        const hourAngle = ((hour + minute / 60) * Math.PI) / 6
+        this.drawHand(ctx, hourAngle, this.radius * 0.5, 10, '#0d47a1')
+
+
+        const minuteAngle = ((minute + second / 60) * Math.PI) / 30
+        this.drawHand(ctx, minuteAngle, this.radius * 0.75, 6, '#7b1fa2')
+
+
+        const secondAngle = (second * Math.PI) / 30
+        this.drawHand(ctx, secondAngle, this.radius * 0.9, 3, '#c62828')
+    },
+
+    drawHand(ctx, angle, length, width, color) {
+        ctx.save()
+        ctx.rotate(angle)
+        ctx.beginPath()
+        ctx.moveTo(0, 18)
+        ctx.lineTo(0, -length)
+        ctx.lineWidth = width
+        ctx.lineCap = 'round'
+        ctx.strokeStyle = color
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
+    }
+}
+</script>
+
+
+
+<style>
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  background-color: #f5f5f5;
+}
+.clock {
+  width: 540px;
+  height: 540px;
+  border-radius: 50%;
+  background-color: #fff;
+}
+</style>
