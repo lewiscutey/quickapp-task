@@ -1,0 +1,369 @@
+<template>
+  <div class="doc-page">
+    <div class="ctx">
+      <canvas class="myClock" id="myClock" width="500" height="500"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .ctx {
+    display: flex;                
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    background-color: rgb(224, 230, 237);
+    border-radius: 15px;
+    padding: 10px;
+  }
+  .myClock {
+    height: 500px;
+    width: 500px;
+    border-radius: 50%;
+    background-color: rgba(0,0,0,0); 
+    border: 0;
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      flag: false,
+      wid: 500,
+      h: 500,
+      ctx: null,
+      canvas: null,
+      timer: null
+    },
+
+    onInit() {
+      this.$page.setTitleBar({ text: 'My Clock' });
+    },
+
+    onShow() {
+      if (!this.flag) this.drawMyClock();
+    },
+
+    onDestroy() {
+      if (this.timer != null) clearInterval(this.timer);
+    },
+
+
+    drawMyClock() {
+      this.canvas = this.$element('myClock');
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.translate(this.wid / 2, this.h / 2);
+      this.flag = true;
+
+      this.showMyClock();
+
+      if (this.timer != null) clearInterval(this.timer);
+      this.timer = setInterval(() => {
+        this.showMyClock();
+      }, 100);
+    },
+
+    showMyClock() {
+      const ctx = this.ctx;
+      const W = this.wid, H = this.h;
+      const R = W / 2;
+
+      ctx.clearRect(-W/2, -H/2, W, H);
+      this.drawDial(R);
+      this.drawTicks(R);
+      this.drawBigNumerals(R);
+      this.drawDigitalWindow(R);
+      this.drawDateWindow(R);
+
+      const now  = new Date();
+      const ms   = now.getMilliseconds();
+      const sec  = now.getSeconds() + ms / 1000;
+      const min  = now.getMinutes() + sec / 60;
+      const hour = (now.getHours() % 12) + min / 60;
+
+      const tau = Math.PI * 2;
+      const off = -Math.PI / 2;
+
+      const aH = (hour / 12) * tau + off;
+      const aM = (min  / 60) * tau + off;
+      const aS = (sec  / 60) * tau + off;
+
+      this.drawHand(aH, R * 0.48, 10, '#8bd4ff', R * 0.10);
+      this.drawHand(aM, R * 0.70,  6, '#e7f2ff', R * 0.12);
+      this.drawHand(aS, R * 0.80,  2, '#ff4d5a', R * 0.16); 
+
+      this.drawCenterCap();
+    },
+
+    drawDial(len) {
+      const ctx = this.ctx;
+
+      const g = ctx.createRadialGradient(0, 0, len * 0.05, 0, 0, len);
+      g.addColorStop(0.00, '#0b1120'); 
+      g.addColorStop(0.55, '#0a0f1a');
+      g.addColorStop(1.00, '#000000');
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, len - 6, 0, Math.PI * 2);
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      const rim = ctx.createLinearGradient(-len, 0, len, 0);
+      rim.addColorStop(0,   '#6ec8ff');
+      rim.addColorStop(0.5, '#7f8ea4');
+      rim.addColorStop(1,   '#6ec8ff');
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = rim;
+      ctx.shadowColor = 'rgba(0, 200, 255, 0.55)';
+      ctx.shadowBlur  = 24;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, len * 0.86, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0, 220, 255, 0.28)';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = 'rgba(0, 220, 255, 0.35)';
+      ctx.shadowBlur  = 12;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, len * 0.70, Math.PI * 0.05, Math.PI * 0.45);
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.lineWidth = 6;
+      ctx.shadowColor = 'rgba(255,255,255,0.25)';
+      ctx.shadowBlur  = 8;
+      ctx.stroke();
+
+      ctx.restore();
+    },
+
+    drawTicks(len) {
+      const ctx = this.ctx;
+      const outer = len * 0.90;
+      const innerMin = len * 0.84;
+      const innerHr  = len * 0.80;
+
+      for (let i = 0; i < 60; i++) {
+        const ang = (Math.PI * 2 * i) / 60 - Math.PI / 2;
+        const isHour    = i % 5  === 0;
+        const isQuarter = i % 15 === 0;
+        const r1 = isHour ? innerHr : innerMin;
+        const r2 = outer;
+
+        const x1 = r1 * Math.cos(ang);
+        const y1 = r1 * Math.sin(ang);
+        const x2 = r2 * Math.cos(ang);
+        const y2 = r2 * Math.sin(ang);
+
+        ctx.save();
+        if (isQuarter) {
+          ctx.strokeStyle = '#00eaff';
+          ctx.lineWidth   = 4.5;
+          ctx.shadowColor = 'rgba(0, 234, 255, 0.7)';
+          ctx.shadowBlur  = 16;
+        } else if (isHour) {
+          ctx.strokeStyle = '#bfe9ff';
+          ctx.lineWidth   = 3.5;
+          ctx.shadowColor = 'rgba(191, 233, 255, 0.45)';
+          ctx.shadowBlur  = 10;
+        } else {
+          ctx.strokeStyle = '#86a8c9';
+          ctx.lineWidth   = 1.6;
+          ctx.shadowColor = 'rgba(134, 168, 201, 0.25)';
+          ctx.shadowBlur  = 6;
+        }
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      const rDot = len * 0.76;
+      for (let i = 0; i < 60; i++) {
+        if (i % 5 === 0) continue;
+        const ang = (Math.PI * 2 * i) / 60 - Math.PI / 2;
+        const x = rDot * Math.cos(ang);
+        const y = rDot * Math.sin(ang);
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+        this.ctx.fillStyle   = 'rgba(155, 195, 230, 0.6)';
+        this.ctx.shadowColor = 'rgba(155, 195, 230, 0.5)';
+        this.ctx.shadowBlur  = 4;
+        this.ctx.fill();
+      }
+    },
+
+    drawBigNumerals(len) {
+      const ctx = this.ctx;
+      const labels = [
+        { txt: '12', idx: 0 },
+        { txt: '3',  idx: 3 },
+        { txt: '6',  idx: 6 },
+        { txt: '9',  idx: 9 }
+      ];
+      const r = len * 0.62;
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = "700 40px 'Arial'";
+
+      labels.forEach(({ txt, idx }) => {
+        const ang = (Math.PI * 2 * idx) / 12 - Math.PI / 2;
+        const x = r * Math.cos(ang);
+        const y = r * Math.sin(ang);
+
+        ctx.fillStyle   = '#00eaff';
+        ctx.shadowColor = 'rgba(0, 234, 255, 0.75)';
+        ctx.shadowBlur  = 18;
+        ctx.fillText(txt, x, y);
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle  = '#eaf6ff';
+        ctx.fillText(txt, x, y);
+      });
+      ctx.restore();
+    },
+
+    drawDigitalWindow(len) {
+      const ctx = this.ctx;
+      const now = new Date();
+      const hh = now.getHours().toString().padStart(2, '0');
+      const mm = now.getMinutes().toString().padStart(2, '0');
+      const ss = now.getSeconds().toString().padStart(2, '0');
+      const text = `${hh}:${mm}:${ss}`;
+
+      const w = 160, h = 40, r = 8;
+      const x = -w / 2;
+      const y = len * 0.45 - h; 
+
+      ctx.save();
+      this.roundRect(x, y, w, h, r);
+      ctx.fillStyle = 'rgba(10, 18, 32, 0.65)';
+      ctx.fill();
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(0, 200, 255, 0.45)';
+      ctx.shadowColor = 'rgba(0, 200, 255, 0.35)';
+      ctx.shadowBlur  = 8;
+      ctx.stroke();
+
+      // 文本
+      ctx.fillStyle = '#dff2ff';
+      ctx.font = "600 20px 'Arial'";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0, 180, 255, 0.5)';
+      ctx.shadowBlur = 10;
+      ctx.fillText(text, 0, y + h / 2 + 1);
+      ctx.restore();
+    },
+
+    drawDateWindow(len) {
+      const ctx = this.ctx;
+      const now = new Date();
+      const day = now.getDate().toString().padStart(2, '0');
+
+      const w = 54, h = 34, r = 6;
+      const x = len * 0.48 - w;  
+      const y = -h / 2;
+
+      ctx.save();
+      this.roundRect(x, y, w, h, r);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#b6c2d6';
+      ctx.stroke();
+
+      ctx.fillStyle = '#1a2436';
+      ctx.font = "bold 18px 'Arial'";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(day, x + w/2, y + h/2 + 1);
+      ctx.restore();
+    },
+
+    roundRect(x, y, w, h, r) {
+      const ctx = this.ctx;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    },
+
+    drawHand(ang, len, width, color, tail = 0) {
+      const ctx = this.ctx;
+
+      const x1 = -tail * Math.cos(ang);
+      const y1 = -tail * Math.sin(ang);
+      const x2 =  len  * Math.cos(ang);
+      const y2 =  len  * Math.sin(ang);
+
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineWidth = width;
+
+      ctx.strokeStyle = color;
+      ctx.shadowColor = (color === '#ff4d5a') ? 'rgba(255, 77, 90, 0.65)' : 'rgba(120, 210, 255, 0.55)';
+      ctx.shadowBlur  = (color === '#ff4d5a') ? 18 : 12;
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      ctx.shadowBlur   = 0;
+      ctx.globalAlpha  = 0.35;
+      ctx.lineWidth    = Math.max(1, width * 0.35);
+      ctx.strokeStyle  = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      if (tail > 0) {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = (color === '#ff4d5a') ? 'rgba(255, 77, 90, 0.9)' : 'rgba(200, 235, 255, 0.95)';
+        ctx.beginPath();
+        ctx.arc(-tail * 0.75 * Math.cos(ang), -tail * 0.75 * Math.sin(ang), Math.max(2, width * 0.6), 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    },
+
+    drawCenterCap() {
+      const ctx = this.ctx;
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      const ring = ctx.createLinearGradient(-12, 0, 12, 0);
+      ring.addColorStop(0, '#9ac7ff');
+      ring.addColorStop(1, '#5b82b1');
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = ring;
+      ctx.shadowColor = 'rgba(0, 180, 255, 0.5)';
+      ctx.shadowBlur  = 10;
+      ctx.stroke();
+
+      const cap = ctx.createRadialGradient(0, 0, 1, 0, 0, 8);
+      cap.addColorStop(0, '#ffffff');
+      cap.addColorStop(1, '#cde3ff');
+      ctx.beginPath();
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      ctx.fillStyle = cap;
+      ctx.fill();
+    }
+  }
+</script>
