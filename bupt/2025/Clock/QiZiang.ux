@@ -1,0 +1,239 @@
+<template>
+  <div class="doc-page">
+    <div class="ctx">
+      <canvas class="myClock" id="myClock"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .ctx {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    background-color: rgb(230, 234, 241);
+    border-radius: 15px;
+    padding: 10px;
+  }
+  .myClock {
+    height: 500px;
+    width: 500px;
+    border-radius: 50%;
+    background-color: transparent; /* 由脚本绘制渐变表盘 */
+    border: 0;
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      flag: false,
+      wid: 500,
+      h: 500,
+      ctx: null,
+      canvas: null,
+      timer: null
+    },
+    onInit() {
+      this.$page.setTitleBar({
+        text: 'myClock'
+      });
+    },
+    onShow() {
+      if (!this.flag) {
+        this.drawMyClock();
+      }
+    },
+    onDestroy() {
+      if (this.timer != null) clearInterval(this.timer);
+    },
+    drawMyClock() {
+      this.canvas = this.$element('myClock');
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.translate(250, 250);
+      this.flag = true;
+      // 首次绘制
+      this.showMyClock();
+      // 统一在此启动定时器，避免重复创建
+      if (this.timer != null) clearInterval(this.timer);
+      // 100ms 刷新，平滑秒针
+      this.timer = setInterval(() => {
+        this.showMyClock();
+      }, 100);
+    },
+    showMyClock() {
+      this.ctx.clearRect((-this.wid) / 2, (-this.h) / 2, this.wid, this.h);
+      const len = this.wid / 2;
+
+      // 表盘与外圈
+      this.drawDial(len);
+      // 刻度
+      this.drawTicks(len);
+      // 罗马数字
+      this.drawRomanNumbers(len);
+      // 日期窗
+      this.drawDateWindow(len);
+
+      // 当前时间（平滑秒针）
+      const now = new Date();
+      const ms = now.getMilliseconds();
+      const sec = now.getSeconds() + ms / 1000;
+      const min = now.getMinutes() + sec / 60;
+      const hour = (now.getHours() % 12) + min / 60;
+
+      const twoPi = Math.PI * 2;
+      const offset = -Math.PI / 2; // 12 点方向
+
+      const hourAng = (hour / 12) * twoPi + offset;
+      const minAng = (min / 60) * twoPi + offset;
+      const secAng = (sec / 60) * twoPi + offset;
+
+      // 指针（带尾锤）
+      this.showClockHand(hourAng, len * 0.5, 10, '#e8eefc', len * 0.08);
+      this.showClockHand(minAng, len * 0.72, 6, '#d0def7', len * 0.10);
+      this.showClockHand(secAng, len * 0.82, 2, '#ff5a5f', len * 0.14);
+
+      // 中心帽
+      this.drawCenterCap();
+    },
+
+    // 绘制指针，支持尾部反向延伸
+    showClockHand(angle, len, width, color, tail = 0) {
+      const x1 = (-tail) * Math.cos(angle);
+      const y1 = (-tail) * Math.sin(angle); // 采用屏幕坐标（y 向下）以实现顺时针
+      const x2 = len * Math.cos(angle);
+      const y2 = len * Math.sin(angle);
+
+      this.ctx.save();
+      this.ctx.strokeStyle = color;
+      this.ctx.lineWidth = width;
+      this.ctx.lineCap = 'round';
+      this.ctx.shadowColor = 'rgba(0,0,0,0.35)';
+      this.ctx.shadowBlur = 6;
+      this.ctx.beginPath();
+      this.ctx.moveTo(x1, y1);
+      this.ctx.lineTo(x2, y2);
+      this.ctx.stroke();
+      this.ctx.restore();
+      this.flag = true;
+    },
+    
+    // 渐变表盘与金属外圈
+    drawDial(len) {
+      this.ctx.save();
+      const grad = this.ctx.createRadialGradient(0, 0, len * 0.05, 0, 0, len);
+      grad.addColorStop(0, '#0e1523');
+      grad.addColorStop(0.6, '#0a0f1a');
+      grad.addColorStop(1, '#000000');
+
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, len - 3, 0, Math.PI * 2);
+      this.ctx.fillStyle = grad;
+      this.ctx.fill();
+
+      const rim = this.ctx.createLinearGradient(-len, 0, len, 0);
+      rim.addColorStop(0, '#c9d3e7');
+      rim.addColorStop(1, '#7f8ea4');
+      this.ctx.lineWidth = 6;
+      this.ctx.strokeStyle = rim;
+      this.ctx.stroke();
+      this.ctx.restore();
+    },
+    
+    // 刻度（5 分钟刻度加粗，四分刻度高亮）
+    drawTicks(len) {
+      const outer = len * 0.94;
+      const innerMinute = len * 0.88;
+      const innerHour = len * 0.84;
+      for (let i = 0; i < 60; i++) {
+        const ang = (Math.PI * 2 * i) / 60 - Math.PI / 2;
+        const isHour = i % 5 === 0;
+        const isQuarter = i % 15 === 0;
+        const r1 = isHour ? innerHour : innerMinute;
+        const r2 = outer;
+        const x1 = r1 * Math.cos(ang);
+        const y1 = r1 * Math.sin(ang);
+        const x2 = r2 * Math.cos(ang);
+        const y2 = r2 * Math.sin(ang);
+
+        this.ctx.save();
+        this.ctx.lineWidth = isHour ? 4 : 2;
+        this.ctx.strokeStyle = isQuarter ? '#00d1ff' : '#e6eefc';
+        this.ctx.beginPath();
+        this.ctx.moveTo(x1, y1);
+        this.ctx.lineTo(x2, y2);
+        this.ctx.stroke();
+        this.ctx.restore();
+      }
+    },
+
+    // 罗马数字
+    drawRomanNumbers(len) {
+      const romans = ['XII','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
+      const r = len * 0.7;
+      this.ctx.save();
+      this.ctx.fillStyle = '#eaf1ff';
+      this.ctx.font = "28px 'Arial'";
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'middle';
+      for (let i = 0; i < 12; i++) {
+        const ang = (Math.PI * 2 * i) / 12 - Math.PI / 2;
+        const x = r * Math.cos(ang);
+        const y = r * Math.sin(ang);
+        this.ctx.fillText(romans[i], x, y);
+      }
+      this.ctx.restore();
+    },
+
+    // 日期窗（简单圆角矩形）
+    drawDateWindow(len) {
+      const now = new Date();
+      const day = now.getDate();
+      const w = 58, h = 36, r = 6;
+      const x = -w / 2;
+      const y = len * 0.28;
+
+      this.ctx.save();
+      this.roundRect(x, y, w, h, r);
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.fill();
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = '#b6c2d6';
+      this.ctx.stroke();
+
+      this.ctx.fillStyle = '#1a2436';
+      this.ctx.font = "20px 'Arial'";
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'middle';
+      this.ctx.fillText(day.toString().padStart(2, '0'), 0, y + h / 2 + 1);
+      this.ctx.restore();
+    },
+
+    roundRect(x, y, w, h, r) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(x + r, y);
+      this.ctx.lineTo(x + w - r, y);
+      this.ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      this.ctx.lineTo(x + w, y + h - r);
+      this.ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      this.ctx.lineTo(x + r, y + h);
+      this.ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      this.ctx.lineTo(x, y + r);
+      this.ctx.quadraticCurveTo(x, y, x + r, y);
+      this.ctx.closePath();
+    },
+
+    // 中心帽（渐变圆）
+    drawCenterCap() {
+      const grad = this.ctx.createRadialGradient(0, 0, 1, 0, 0, 10);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(1, '#d7e1f2');
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      this.ctx.fillStyle = grad;
+      this.ctx.fill();
+      this.ctx.restore();
+    }
+  }
+</script>
