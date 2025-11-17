@@ -1,0 +1,286 @@
+<template>
+  <div class="doc-page">
+    <div class="toolbar">
+      <text class="digital-time {{ theme }}-mode">{{ currentTime }}</text>
+      <div class="theme-toggle {{ theme }}-mode" @click="toggleTheme">
+        <div class="toggle-indicator {{ theme }}"></div>
+        <text class="toggle-label {{ theme }}-mode">{{ theme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</text>
+      </div>
+    </div>
+    <div class="ctx {{ theme }}-mode">
+      <canvas class="myClock {{ theme }}-mode" id="myClock"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .doc-page {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+  }
+  .toolbar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .digital-time {
+    font-size: 40px;
+    font-weight: 600;
+  }
+  .digital-time.dark-mode {
+    color: #ffffff;
+  }
+  .digital-time.light-mode {
+    color: #20232a;
+  }
+  .theme-toggle {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 20px;
+  }
+  .theme-toggle.dark-mode {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+  .theme-toggle.light-mode {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+  .toggle-indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 12px;
+    margin-right: 12px;
+  }
+  .toggle-indicator.dark {
+    background-color: #ffffff;
+  }
+  .toggle-indicator.light {
+    background-color: #20232a;
+  }
+  .toggle-label {
+    font-size: 28px;
+  }
+  .toggle-label.dark-mode {
+    color: #ffffff;
+  }
+  .toggle-label.light-mode {
+    color: #20232a;
+  }
+  .ctx {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border-radius: 15px;
+    padding: 24px;
+    transition: background-color 0.3s;
+  }
+  .ctx.dark-mode {
+    background-color: rgb(24, 28, 35);
+  }
+  .ctx.light-mode {
+    background-color: rgb(240, 244, 250);
+  }
+  .myClock {
+    height: 500px;
+    width: 500px;
+    border-radius: 80%;
+    border-width: 3px;
+    border-style: solid;
+    transition: border-color 0.3s;
+  }
+  .myClock.dark-mode {
+    border-color: rgba(255, 255, 255, 0.5);
+    background-color: #000000;
+  }
+  .myClock.light-mode {
+    border-color: rgba(0, 0, 0, 0.2);
+    background-color: #ffffff;
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      flag: false,
+      wid: 500,
+      h: 500,
+      ctx: null,
+      canvas: null,
+      timer: null,
+      theme: 'dark',
+      currentTime: '',
+      themes: {
+        dark: {
+          tick: 'rgba(255, 255, 255, 0.6)',
+          text: '#ffffff',
+          accent: '#fa0101'
+        },
+        light: {
+          tick: 'rgba(0, 0, 0, 0.4)',
+          text: '#20232a',
+          accent: '#fa0101'
+        }
+      }
+    },
+    onInit() {
+      this.$page.setTitleBar({
+        text: 'Clock'
+      });
+    },
+    onShow() {
+      if (!this.flag) {
+        this.drawMyClock();
+      }
+    },
+    onDestroy() {
+      if (this.timer != null) {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+    },
+    toggleTheme() {
+      this.theme = this.theme === 'dark' ? 'light' : 'dark';
+      if (this.ctx) {
+        this.showMyClock();
+      }
+    },
+    drawMyClock() {
+      this.canvas = this.$element('myClock');
+      if (!this.canvas) {
+        return;
+      }
+      if (this.canvas.width !== this.wid || this.canvas.height !== this.h) {
+        this.canvas.width = this.wid;
+        this.canvas.height = this.h;
+      }
+      this.ctx = this.canvas.getContext('2d');
+      this.wid = this.canvas.width;
+      this.h = this.canvas.height;
+      this.flag = true;
+      this.showMyClock();
+      if (this.timer == null) {
+        this.timer = setInterval(() => {
+          this.showMyClock();
+        }, 1000);
+      }
+    },
+    showMyClock() {
+      if (!this.ctx) {
+        return;
+      }
+      const { radius: len } = this.prepareCanvas();
+      const themeConfig = this.themes[this.theme];
+      const tlen = len * 0.85;
+
+      this.drawTicks(len, themeConfig);
+
+      this.ctx.font = "32px";
+      this.ctx.fillStyle = themeConfig.text;
+      this.ctx.textAlign = "center";
+      this.ctx.textBaseline = "middle";
+
+      const twoPi = Math.PI * 2;
+      const totalTags = 12;
+
+      for (let i = 1; i <= totalTags; i++) {
+        const angle = twoPi * (3 - i) / totalTags;
+        const x = tlen * Math.cos(angle);
+        const y = -tlen * Math.sin(angle);
+        this.ctx.fillText(i, x, y);
+      }
+
+      const date = new Date();
+      let hour = date.getHours();
+      const min = date.getMinutes();
+      const sec = date.getSeconds();
+      this.currentTime = this.formatDigitalTime(date);
+      hour = hour > 12 ? hour - 12 : hour;
+
+      const hourAng = Math.PI * 2 * (3 - (hour + min / 60)) / 12;
+      const hourLen = len * 0.5;
+      this.showClockHand(hourAng, hourLen, 12, themeConfig.text);
+
+      const minAng = Math.PI * 2 * (15 - (min + sec / 60)) / 60;
+      const minLen = len * 0.7;
+      this.showClockHand(minAng, minLen, 8, themeConfig.text);
+
+      const secAng = Math.PI * 2 * (15 - sec) / 60;
+      const secLen = len * 0.85;
+      this.showClockHand(secAng, secLen, 2, themeConfig.accent);
+
+      this.drawCenterDot(themeConfig);
+    },
+
+    showClockHand(angle, len, width, color) {
+      const x = len * Math.cos(angle);
+      const y = -len * Math.sin(angle);
+      this.ctx.strokeStyle = color;
+      this.ctx.lineWidth = width;
+      this.ctx.lineCap = "round";
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, 0);
+      this.ctx.lineTo(x, y);
+      this.ctx.stroke();
+      this.flag = true;
+    },
+    
+    drawTicks(len, themeConfig) {
+      const tickLenHour = len * 0.1;
+      const tickLenMinute = len * 0.05;
+      const totalTicks = 60;
+      for (let i = 0; i < totalTicks; i++) {
+        const angle = (Math.PI * 2 * i) / totalTicks;
+        const xStart = (len - (i % 5 === 0 ? tickLenHour : tickLenMinute)) * Math.cos(angle);
+        const yStart = -(len - (i % 5 === 0 ? tickLenHour : tickLenMinute)) * Math.sin(angle);
+        const xEnd = len * Math.cos(angle);
+        const yEnd = -len * Math.sin(angle);
+        
+        this.ctx.lineWidth = i % 5 === 0 ? 4 : 2;
+        this.ctx.strokeStyle = themeConfig.tick;
+        this.ctx.beginPath();
+        this.ctx.moveTo(xStart, yStart);
+        this.ctx.lineTo(xEnd, yEnd);
+        this.ctx.stroke();
+      }
+    },
+
+    drawCenterDot(themeConfig) {
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, 6, 0, Math.PI * 2);
+      this.ctx.fillStyle = themeConfig.accent;
+      this.ctx.fill();
+    },
+
+    formatDigitalTime(date) {
+      const hour = this.padTime(date.getHours());
+      const minute = this.padTime(date.getMinutes());
+      const second = this.padTime(date.getSeconds());
+      return `${hour}:${minute}:${second}`;
+    },
+
+    padTime(value) {
+      return value < 10 ? `0${value}` : `${value}`;
+    },
+
+    prepareCanvas() {
+      const width = this.canvas.width || this.wid;
+      const height = this.canvas.height || this.h;
+      if (this.ctx.resetTransform) {
+        this.ctx.resetTransform();
+      } else if (this.ctx.setTransform) {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      }
+      this.ctx.clearRect(0, 0, width, height);
+      this.ctx.translate(width / 2, height / 2);
+      this.wid = width;
+      this.h = height;
+      const radius = Math.min(width, height) / 2;
+      return { width, height, radius };
+    }
+  }
+</script>
