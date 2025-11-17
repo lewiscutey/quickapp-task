@@ -1,0 +1,156 @@
+<template>
+  <div class="main-wrapper">
+    <div class="watch-box">
+      <canvas id="Clock" class="watch-surface"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .main-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #E9E2FF;
+  }
+  .watch-box {
+    width: 600px;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #E9E2FF;
+    border-radius: 18px;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.1);
+  }
+  .watch-surface {
+    width: 500px;
+    height: 500px;
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      ctx: null,
+      baseSize: 500,
+      clockRadius: 0,
+      rafId: null
+    },
+
+    onInit() {
+      this.$page.setTitleBar({
+        text: 'Canvas 机械表盘'
+      });
+      this.clockRadius = this.baseSize / 2;
+    },
+
+    onShow() {
+      const canvas = this.$element('watchCanvas');
+      this.ctx = canvas.getContext('2d');
+      this.ctx.translate(this.clockRadius, this.clockRadius);
+      this.renderClockLoop();
+    },
+
+    onDestroy() {
+      if (this.rafId) {
+        cancelAnimationFrame(this.rafId);
+      }
+    },
+
+    renderClockLoop() {
+      const animate = () => {
+        this.drawClockFace();
+        this.rafId = requestAnimationFrame(animate);
+      };
+      animate();
+    },
+
+    drawClockFace() {
+      const ctx = this.ctx;
+      ctx.clearRect(-this.clockRadius, -this.clockRadius, this.baseSize, this.baseSize);
+
+      this.drawBackground(ctx, this.clockRadius);
+      this.drawMarkers(ctx, this.clockRadius);
+      this.drawDigits(ctx, this.clockRadius * 0.78);
+      this.drawPointers(ctx, this.clockRadius);
+      this.drawPivot(ctx);
+    },
+
+    drawBackground(ctx, radius) {
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * 0.98, 0, Math.PI * 2);
+      ctx.fillStyle = '#E9E2FF';
+      ctx.fill();
+      ctx.lineWidth = radius * 0.02;
+      ctx.strokeStyle = '#5B2C90';
+      ctx.stroke();
+    },
+
+    drawMarkers(ctx, radius) {
+      const outer = radius * 0.95;
+      for (let i = 0; i < 60; i++) {
+        const rad = (i / 60) * 2 * Math.PI;
+        ctx.save();
+        ctx.rotate(rad);
+        ctx.beginPath();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = i % 5 === 0 ? 4 : 2;
+        ctx.moveTo(outer * (i % 5 === 0 ? 0.88 : 0.94), 0);
+        ctx.lineTo(outer, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+    },
+
+    drawDigits(ctx, r) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = this.clockRadius * 0.15 + 'px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let n = 1; n <= 12; n++) {
+        const angle = (n / 12) * 2 * Math.PI - Math.PI / 2;
+        const x = r * Math.cos(angle);
+        const y = r * Math.sin(angle);
+        ctx.fillText(n, x, y);
+      }
+    },
+
+    drawPointers(ctx, radius) {
+      const now = new Date();
+      let h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+      const ms = now.getMilliseconds();
+
+      h = h % 12;
+
+      const secA = ((s + ms / 1000) / 60) * 2 * Math.PI - Math.PI / 2;
+      const minA = ((m + s / 60) / 60) * 2 * Math.PI - Math.PI / 2;
+      const hourA = ((h + m / 60) / 12) * 2 * Math.PI - Math.PI / 2;
+
+      this.drawPointer(ctx, hourA, radius * 0.5, radius * 0.07, '#C2932F');
+      this.drawPointer(ctx, minA, radius * 0.75, radius * 0.05, '#E1B33B');
+      this.drawPointer(ctx, secA, radius * 0.9, radius * 0.02, '#FFFFFF');
+    },
+
+    drawPointer(ctx, angle, len, width, color) {
+      ctx.beginPath();
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = color;
+      ctx.moveTo(0, 0);
+      ctx.lineTo(len * Math.cos(angle), len * Math.sin(angle));
+      ctx.stroke();
+    },
+
+    drawPivot(ctx) {
+      ctx.beginPath();
+      ctx.arc(0, 0, this.clockRadius * 0.03, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fill();
+    }
+  };
+</script>
