@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太极图 - 纯 CSS 实现</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
+            background-image: linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%),
+                              linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+        }
+
+        .taiji-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #ffffff 50%, #000000 50%);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+            animation: rotate 15s linear infinite;
+            transition: all 0.5s ease;
+        }
+
+        .taiji-container:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 白色部分的黑色圆点 */
+        .taiji-black-dot {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #000000;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 黑色部分的白色圆点 */
+        .taiji-white-dot {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 中心小圆（黑色圆点里的白色小圆） */
+        .taiji-small-white {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ffffff;
+        }
+
+        /* 中心小圆（白色圆点里的黑色小圆） */
+        .taiji-small-black {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #000000;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .taiji-container {
+                width: 250px;
+                height: 250px;
+            }
+
+            .taiji-black-dot,
+            .taiji-white-dot {
+                width: 125px;
+                height: 125px;
+            }
+
+            .taiji-small-white,
+            .taiji-small-black {
+                width: 25px;
+                height: 25px;
+            }
+
+            .title {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .taiji-container {
+                width: 200px;
+                height: 200px;
+            }
+
+            .taiji-black-dot,
+            .taiji-white-dot {
+                width: 100px;
+                height: 100px;
+            }
+
+            .taiji-small-white,
+            .taiji-small-black {
+                width: 20px;
+                height: 20px;
+            }
+
+            .title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">太极图</h1>
+    <div class="taiji-container">
+        <!-- 黑色圆点 + 中心白色小圆 -->
+        <div class="taiji-black-dot">
+            <div class="taiji-small-white"></div>
+        </div>
+        <!-- 白色圆点 + 中心黑色小圆 -->
+        <div class="taiji-white-dot">
+            <div class="taiji-small-black"></div>
+        </div>
+    </div>
+</body>
+</html>
