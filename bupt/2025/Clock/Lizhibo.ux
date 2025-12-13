@@ -1,0 +1,529 @@
+<template>
+  <div class="doc-page">
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <text class="digital-time {{ theme }}-mode">{{ currentTime }}</text>
+      <div class="theme-toggle {{ theme }}-mode" @click="toggleTheme">
+        <div class="toggle-indicator {{ theme }}"></div>
+        <text class="toggle-label {{ theme }}-mode">{{ theme === 'dark' ? '浅色' : '深色' }}</text>
+      </div>
+    </div>
+
+    <!-- Clock main body -->
+    <div class="ctx {{ theme }}-mode">
+      <canvas class="myClock" id="myClock"></canvas>
+      
+      <!-- Date information -->
+      <div class="date-info {{ theme }}-mode">
+        <text class="date-text {{ theme }}-mode">{{ dateStr }}</text>
+      </div>
+
+      <!-- Number type toggle -->
+      <div class="number-toggle {{ theme }}-mode" @click="toggleNumberType">
+        <text class="toggle-text {{ theme }}-mode">{{ numberType === 'arabic' ? '罗马数字' : '阿拉伯数字' }}</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .doc-page {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .digital-time {
+    font-size: 42px;
+    font-weight: 600;
+    letter-spacing: 2px;
+  }
+  .digital-time.dark-mode {
+    color: #00eaff;
+    text-shadow: 0 0 20px rgba(0, 234, 255, 0.5);
+  }
+  .digital-time.light-mode {
+    color: #1a2436;
+  }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    flex-direction: row;
+    align-items: center;
+    padding: 14px 28px;
+    border-radius: 30px;
+    border-width: 2px;
+    border-style: solid;
+  }
+  .theme-toggle.dark-mode {
+    background-color: rgba(0, 234, 255, 0.15);
+    border-color: #00eaff;
+    box-shadow: 0 0 15px rgba(0, 234, 255, 0.4);
+  }
+  .theme-toggle.light-mode {
+    background-color: rgba(212, 175, 55, 0.2);
+    border-color: #d4af37;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  }
+  .toggle-indicator {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    margin-right: 14px;
+    border-width: 2px;
+    border-style: solid;
+  }
+  .toggle-indicator.dark {
+    background-color: #00eaff;
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 234, 255, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  .toggle-indicator.light {
+    background-color: #d4af37;
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  .toggle-label {
+    font-size: 32px;
+    font-weight: 600;
+  }
+  .toggle-label.dark-mode {
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(0, 234, 255, 0.5);
+  }
+  .toggle-label.light-mode {
+    color: #1a2436;
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+  }
+
+  /* Clock container */
+  .ctx {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border-radius: 20px;
+    padding: 30px;
+  }
+  .ctx.dark-mode {
+    background: linear-gradient(135deg, #1a1f2e 0%, #0a0f1a 100%);
+  }
+  .ctx.light-mode {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  }
+
+  /* Canvas */
+  .myClock {
+    height: 520px;
+    width: 520px;
+    border-radius: 50%;
+  }
+
+  /* Date information */
+  .date-info {
+    margin-top: 24px;
+    padding: 12px 32px;
+    border-radius: 30px;
+  }
+  .date-info.dark-mode {
+    background-color: rgba(0, 234, 255, 0.1);
+  }
+  .date-info.light-mode {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  .date-text {
+    font-size: 26px;
+    font-weight: 500;
+  }
+  .date-text.dark-mode {
+    color: #bfe9ff;
+  }
+  .date-text.light-mode {
+    color: #1a2436;
+  }
+
+  /* Number type toggle */
+  .number-toggle {
+    margin-top: 20px;
+    padding: 16px 36px;
+    border-radius: 30px;
+    border-width: 2px;
+    border-style: solid;
+    min-width: 200px;
+    justify-content: center;
+  }
+  .number-toggle.dark-mode {
+    background-color: rgba(0, 234, 255, 0.15);
+    border-color: #00eaff;
+    box-shadow: 0 0 15px rgba(0, 234, 255, 0.4);
+  }
+  .number-toggle.light-mode {
+    background-color: rgba(212, 175, 55, 0.2);
+    border-color: #d4af37;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  }
+  .toggle-text {
+    font-size: 30px;
+    font-weight: 600;
+  }
+  .toggle-text.dark-mode {
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(0, 234, 255, 0.5);
+  }
+  .toggle-text.light-mode {
+    color: #1a2436;
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+  }
+</style>
+
+<script>
+  export default {
+    private: {
+      wid: 520,
+      h: 520,
+      ctx: null,
+      canvas: null,
+      rafId: null,
+      theme: 'dark',
+      numberType: 'arabic', // 'arabic' or 'roman'
+      currentTime: '00:00:00',
+      dateStr: '',
+      themes: {
+        dark: {
+          dialGradient: ['#0e1523', '#0a0f1a', '#000000'],
+          rimGradient: ['#00eaff', '#7f8ea4', '#00eaff'],
+          tickColor: '#bfe9ff',
+          tickQuarter: '#00eaff',
+          numberColor: '#eaf6ff',
+          numberGlow: '#00eaff',
+          hourHand: '#8bd4ff',
+          minuteHand: '#e7f2ff',
+          secondHand: '#ff4d5a',
+          centerCap: ['#ffffff', '#cde3ff'],
+          shadowColor: 'rgba(0, 234, 255, 0.5)'
+        },
+        light: {
+          dialGradient: ['#ffffff', '#f5f7fa', '#e8eef5'],
+          rimGradient: ['#d4af37', '#c9a961', '#d4af37'],
+          tickColor: '#555555',
+          tickQuarter: '#d4af37',
+          numberColor: '#1a2436',
+          numberGlow: '#d4af37',
+          hourHand: '#333333',
+          minuteHand: '#555555',
+          secondHand: '#e63946',
+          centerCap: ['#ffffff', '#d4af37'],
+          shadowColor: 'rgba(212, 175, 55, 0.4)'
+        }
+      }
+    },
+
+    onInit() {
+      this.$page.setTitleBar({
+        text: 'Canvas Clock - Li Zhibo'
+      });
+    },
+
+    onShow() {
+      this.canvas = this.$element('myClock');
+      if (!this.canvas) return;
+
+      this.ctx = this.canvas.getContext('2d');
+      if (!this.ctx) return;
+
+      // Start animation loop
+      this.startClock();
+    },
+
+    onDestroy() {
+      if (this.rafId) {
+        cancelAnimationFrame(this.rafId);
+        this.rafId = null;
+      }
+    },
+
+    toggleTheme() {
+      this.theme = this.theme === 'dark' ? 'light' : 'dark';
+    },
+
+    toggleNumberType() {
+      this.numberType = this.numberType === 'arabic' ? 'roman' : 'arabic';
+    },
+
+    startClock() {
+      const animate = () => {
+        this.drawClock();
+        this.rafId = requestAnimationFrame(animate);
+      };
+      animate();
+    },
+
+    drawClock() {
+      if (!this.ctx) return;
+
+      const { radius } = this.prepareCanvas();
+      const themeConfig = this.themes[this.theme];
+
+      // Update time strings
+      this.updateTimeStrings();
+
+      // Draw all parts
+      this.drawDial(radius, themeConfig);
+      this.drawTicks(radius, themeConfig);
+      this.drawNumbers(radius, themeConfig);
+      this.drawHands(radius, themeConfig);
+      this.drawCenterCap(themeConfig);
+    },
+
+    prepareCanvas() {
+      const width = this.canvas.width || this.wid;
+      const height = this.canvas.height || this.h;
+
+      // Reset transform
+      if (this.ctx.resetTransform) {
+        this.ctx.resetTransform();
+      } else if (this.ctx.setTransform) {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      }
+
+      this.ctx.clearRect(0, 0, width, height);
+      this.ctx.translate(width / 2, height / 2);
+
+      const radius = Math.min(width, height) / 2 - 10;
+      return { width, height, radius };
+    },
+
+    updateTimeStrings() {
+      const now = new Date();
+      const h = this.pad(now.getHours());
+      const m = this.pad(now.getMinutes());
+      const s = this.pad(now.getSeconds());
+      this.currentTime = `${h}:${m}:${s}`;
+
+      const year = now.getFullYear();
+      const month = this.pad(now.getMonth() + 1);
+      const day = this.pad(now.getDate());
+      const weekMap = ['日', '一', '二', '三', '四', '五', '六'];
+      const week = weekMap[now.getDay()];
+      this.dateStr = `${year}年${month}月${day}日 星期${week}`;
+    },
+
+    pad(num) {
+      return num < 10 ? '0' + num : '' + num;
+    },
+
+    // Draw dial (gradient + glowing border)
+    drawDial(radius, theme) {
+      this.ctx.save();
+
+      // Gradient dial
+      const grad = this.ctx.createRadialGradient(0, 0, radius * 0.05, 0, 0, radius);
+      grad.addColorStop(0, theme.dialGradient[0]);
+      grad.addColorStop(0.6, theme.dialGradient[1]);
+      grad.addColorStop(1, theme.dialGradient[2]);
+
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, radius - 5, 0, Math.PI * 2);
+      this.ctx.fillStyle = grad;
+      this.ctx.fill();
+
+      // Glowing outer rim
+      const rim = this.ctx.createLinearGradient(-radius, 0, radius, 0);
+      rim.addColorStop(0, theme.rimGradient[0]);
+      rim.addColorStop(0.5, theme.rimGradient[1]);
+      rim.addColorStop(1, theme.rimGradient[2]);
+
+      this.ctx.lineWidth = 8;
+      this.ctx.strokeStyle = rim;
+      this.ctx.shadowColor = theme.shadowColor;
+      this.ctx.shadowBlur = 20;
+      this.ctx.stroke();
+
+      // Inner ring decoration
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, radius * 0.88, 0, Math.PI * 2);
+      this.ctx.strokeStyle = theme.tickColor;
+      this.ctx.lineWidth = 2;
+      this.ctx.globalAlpha = 0.3;
+      this.ctx.shadowBlur = 8;
+      this.ctx.stroke();
+
+      this.ctx.restore();
+    },
+
+    // Draw ticks (hour marks bold, quarter marks glowing)
+    drawTicks(radius, theme) {
+      const outer = radius * 0.92;
+      const innerMin = radius * 0.86;
+      const innerHr = radius * 0.82;
+
+      for (let i = 0; i < 60; i++) {
+        const ang = (Math.PI * 2 * i) / 60 - Math.PI / 2;
+        const isHour = i % 5 === 0;
+        const isQuarter = i % 15 === 0;
+        const r1 = isHour ? innerHr : innerMin;
+        const r2 = outer;
+
+        const x1 = r1 * Math.cos(ang);
+        const y1 = r1 * Math.sin(ang);
+        const x2 = r2 * Math.cos(ang);
+        const y2 = r2 * Math.sin(ang);
+
+        this.ctx.save();
+
+        if (isQuarter) {
+          this.ctx.strokeStyle = theme.tickQuarter;
+          this.ctx.lineWidth = 5;
+          this.ctx.shadowColor = theme.shadowColor;
+          this.ctx.shadowBlur = 15;
+        } else if (isHour) {
+          this.ctx.strokeStyle = theme.tickColor;
+          this.ctx.lineWidth = 4;
+          this.ctx.shadowBlur = 8;
+        } else {
+          this.ctx.strokeStyle = theme.tickColor;
+          this.ctx.lineWidth = 2;
+          this.ctx.globalAlpha = 0.6;
+          this.ctx.shadowBlur = 4;
+        }
+
+        this.ctx.lineCap = 'round';
+        this.ctx.beginPath();
+        this.ctx.moveTo(x1, y1);
+        this.ctx.lineTo(x2, y2);
+        this.ctx.stroke();
+        this.ctx.restore();
+      }
+    },
+
+    // Draw numbers (supports Arabic and Roman numerals)
+    drawNumbers(radius, theme) {
+      const numbers = this.numberType === 'arabic' 
+        ? ['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
+        : ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+      
+      const r = radius * 0.68;
+
+      this.ctx.save();
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'middle';
+      this.ctx.font = "bold " + (radius * 0.14) + "px Arial";
+
+      for (let i = 0; i < 12; i++) {
+        const ang = (Math.PI * 2 * i) / 12 - Math.PI / 2;
+        const x = r * Math.cos(ang);
+        const y = r * Math.sin(ang);
+
+        // Glow effect
+        this.ctx.fillStyle = theme.numberGlow;
+        this.ctx.shadowColor = theme.shadowColor;
+        this.ctx.shadowBlur = 15;
+        this.ctx.fillText(numbers[i], x, y);
+
+        // Main text
+        this.ctx.shadowBlur = 0;
+        this.ctx.fillStyle = theme.numberColor;
+        this.ctx.fillText(numbers[i], x, y);
+      }
+
+      this.ctx.restore();
+    },
+
+    // Draw hands (smooth animation with shadow)
+    drawHands(radius, theme) {
+      const now = new Date();
+      const ms = now.getMilliseconds();
+      const sec = now.getSeconds() + ms / 1000;
+      const min = now.getMinutes() + sec / 60;
+      const hour = (now.getHours() % 12) + min / 60;
+
+      const twoPi = Math.PI * 2;
+      const offset = -Math.PI / 2;
+
+      const hourAng = (hour / 12) * twoPi + offset;
+      const minAng = (min / 60) * twoPi + offset;
+      const secAng = (sec / 60) * twoPi + offset;
+
+      // Hour hand
+      this.drawHand(hourAng, radius * 0.5, radius * 0.08, theme.hourHand, radius * 0.08);
+      // Minute hand
+      this.drawHand(minAng, radius * 0.72, radius * 0.06, theme.minuteHand, radius * 0.10);
+      // Second hand
+      this.drawHand(secAng, radius * 0.85, radius * 0.025, theme.secondHand, radius * 0.14);
+    },
+
+    // Draw single hand (with tail and shadow)
+    drawHand(angle, length, width, color, tail = 0) {
+      const x1 = -tail * Math.cos(angle);
+      const y1 = -tail * Math.sin(angle);
+      const x2 = length * Math.cos(angle);
+      const y2 = length * Math.sin(angle);
+
+      this.ctx.save();
+      this.ctx.lineCap = 'round';
+      this.ctx.lineWidth = width;
+
+      // Shadow
+      this.ctx.strokeStyle = color;
+      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      this.ctx.shadowBlur = 8;
+      this.ctx.shadowOffsetX = 2;
+      this.ctx.shadowOffsetY = 2;
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(x1, y1);
+      this.ctx.lineTo(x2, y2);
+      this.ctx.stroke();
+
+      // Highlight
+      if (tail > 0) {
+        this.ctx.shadowBlur = 0;
+        this.ctx.shadowOffsetX = 0;
+        this.ctx.shadowOffsetY = 0;
+        this.ctx.globalAlpha = 0.8;
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath();
+        this.ctx.arc(-tail * 0.7 * Math.cos(angle), -tail * 0.7 * Math.sin(angle), Math.max(3, width * 0.7), 0, Math.PI * 2);
+        this.ctx.fill();
+      }
+
+      this.ctx.restore();
+    },
+
+    // Draw center pivot (gradient circle)
+    drawCenterCap(theme) {
+      this.ctx.save();
+
+      // Outer ring
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, 14, 0, Math.PI * 2);
+      this.ctx.strokeStyle = theme.centerCap[1];
+      this.ctx.lineWidth = 3;
+      this.ctx.shadowColor = theme.shadowColor;
+      this.ctx.shadowBlur = 12;
+      this.ctx.stroke();
+
+      // Inner ring gradient
+      const cap = this.ctx.createRadialGradient(0, 0, 1, 0, 0, 10);
+      cap.addColorStop(0, theme.centerCap[0]);
+      cap.addColorStop(1, theme.centerCap[1]);
+
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, 10, 0, Math.PI * 2);
+      this.ctx.fillStyle = cap;
+      this.ctx.fill();
+
+      this.ctx.restore();
+    }
+  }
+</script>
+
