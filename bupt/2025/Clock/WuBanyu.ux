@@ -1,0 +1,158 @@
+<template>
+  <div class="page-container">
+    <div class="clock-wrapper">
+      <canvas id="clockCanvas" class="clock-canvas"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+.page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.clock-wrapper {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.clock-canvas {
+  width: 500px;
+  height: 500px;
+}
+</style>
+
+<script>
+export default {
+  data: {
+    ctx: null,
+    canvasSize: 500,
+    radius: 0,
+    animationId: null
+  },
+
+  onShow() {
+    const canvas = this.$element('clockCanvas');
+    this.ctx = canvas.getContext('2d');
+    this.radius = this.canvasSize / 2;
+    this.ctx.translate(this.radius, this.radius);
+    this.startClock();
+  },
+
+  onDestroy() {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
+  },
+
+  startClock() {
+    const updateClock = () => {
+      this.drawClock();
+      this.animationId = requestAnimationFrame(updateClock);
+    };
+    updateClock();
+  },
+
+  drawClock() {
+    const ctx = this.ctx;
+    const radius = this.radius;
+    ctx.clearRect(-radius, -radius, this.canvasSize, this.canvasSize);
+    this.drawFace(ctx, radius);
+    this.drawScales(ctx, radius);
+    this.drawNumbers(ctx, radius);
+    this.drawHands(ctx, radius);
+    this.drawCenterDot(ctx);
+  },
+
+  drawFace(ctx, radius) {
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.95, 0, 2 * Math.PI);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.03, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333';
+    ctx.fill();
+    ctx.closePath();
+  },
+
+  drawScales(ctx, radius) {
+    for (let i = 0; i < 60; i++) {
+      const angle = (i * Math.PI) / 30;
+      ctx.save();
+      ctx.rotate(angle);
+      ctx.beginPath();
+      const start = i % 5 === 0 ? radius * 0.82 : radius * 0.88;
+      const end = radius * 0.92;
+      ctx.moveTo(0, -start);
+      ctx.lineTo(0, -end);
+      ctx.lineWidth = i % 5 === 0 ? 4 : 2;
+      ctx.strokeStyle = i % 5 === 0 ? '#222' : '#666';
+      ctx.stroke();
+      ctx.closePath();
+      ctx.restore();
+    }
+  },
+
+  drawNumbers(ctx, radius) {
+    ctx.font = `${radius * 0.12}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#222';
+    for (let num = 1; num <= 12; num++) {
+      const angle = (num * Math.PI) / 6;
+      const x = Math.sin(angle) * (radius * 0.75);
+      const y = -Math.cos(angle) * (radius * 0.75);
+      ctx.fillText(num.toString(), x, y);
+    }
+  },
+
+  drawHands(ctx, radius) {
+    const now = new Date();
+    let hour = now.getHours() % 12;
+    const minute = now.getMinutes();
+    const second = now.getSeconds();
+
+    const hourAngle = (hour * Math.PI / 6) + (minute * Math.PI / 360) + (second * Math.PI / 21600);
+    const minuteAngle = (minute * Math.PI / 30) + (second * Math.PI / 1800);
+    const secondAngle = second * Math.PI / 30;
+
+    this.drawHand(ctx, hourAngle, radius * 0.5, 8, '#333');
+    this.drawHand(ctx, minuteAngle, radius * 0.7, 5, '#555');
+    this.drawHand(ctx, secondAngle, radius * 0.85, 2, 'red');
+  },
+
+  drawHand(ctx, angle, length, width, color) {
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -length);
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+  },
+
+  drawCenterDot(ctx) {
+    ctx.beginPath();
+    ctx.arc(0, 0, 8, 0, 2 * Math.PI);
+    ctx.fillStyle = 'red';
+    ctx.fill();
+    ctx.closePath();
+  }
+}
+</script>
