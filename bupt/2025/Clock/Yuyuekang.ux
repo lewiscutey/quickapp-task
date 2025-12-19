@@ -1,0 +1,203 @@
+<template>
+  <div class="doc-page">
+    <div class="ctx">
+      <canvas id="myClock" width="500" height="500"></canvas>
+    </div>
+  </div>
+</template>
+
+<style>
+  .ctx {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    background-color: rgb(224, 230, 237);
+    border-radius: 15px;
+    padding: 10px;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 500px;
+    border-radius: 50%;
+    background: transparent;
+  }
+</style>
+
+<script>
+export default {
+  data() {
+    return {
+      ctx: null,
+      canvas: null,
+      timer: null,
+      width: 500,
+      height: 500,
+      initialized: false,
+    };
+  },
+  mounted() {
+    this.setupClock();
+  },
+  beforeDestroy() {
+    if (this.timer) clearInterval(this.timer);
+  },
+  methods: {
+    setupClock() {
+      this.canvas = this.$refs.myClock;
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.translate(this.width / 2, this.height / 2);
+      this.initialized = true;
+      this.startClock();
+    },
+    startClock() {
+      this.updateClock();
+      if (this.timer) clearInterval(this.timer);
+      this.timer = setInterval(this.updateClock, 1000);  // Update every second
+    },
+    updateClock() {
+      const now = new Date();
+      const ms = now.getMilliseconds();
+      const sec = now.getSeconds() + ms / 1000;
+      const min = now.getMinutes() + sec / 60;
+      const hour = (now.getHours() % 12) + min / 60;
+
+      const radius = this.width / 2;
+      const tau = Math.PI * 2;
+      const offset = -Math.PI / 2;
+
+      this.ctx.clearRect(-this.width / 2, -this.height / 2, this.width, this.height);
+
+      // Draw the clock face and tick marks
+      this.drawClockFace(radius);
+      this.drawTicks(radius);
+      this.drawNumerals(radius);
+
+      // Draw the hands
+      this.drawHand((hour / 12) * tau + offset, radius * 0.48, 10, '#8bd4ff', radius * 0.10);  // Hour hand
+      this.drawHand((min / 60) * tau + offset, radius * 0.70, 6, '#e7f2ff', radius * 0.12);  // Minute hand
+      this.drawHand((sec / 60) * tau + offset, radius * 0.80, 2, '#ff4d5a', radius * 0.16);  // Second hand
+
+      // Draw center cap and time/date windows
+      this.drawCenterCap();
+      this.drawDigitalTime(radius);
+      this.drawDate(radius);
+    },
+    drawClockFace(radius) {
+      const ctx = this.ctx;
+      const gradient = ctx.createRadialGradient(0, 0, radius * 0.05, 0, 0, radius);
+      gradient.addColorStop(0, '#0b1120');
+      gradient.addColorStop(0.55, '#0a0f1a');
+      gradient.addColorStop(1, '#000000');
+
+      ctx.beginPath();
+      ctx.arc(0, 0, radius - 6, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    },
+    drawTicks(radius) {
+      const ctx = this.ctx;
+      const outer = radius * 0.90;
+      const innerMin = radius * 0.84;
+      const innerHr = radius * 0.80;
+
+      for (let i = 0; i < 60; i++) {
+        const angle = (Math.PI * 2 * i) / 60 - Math.PI / 2;
+        const isHour = i % 5 === 0;
+        const r1 = isHour ? innerHr : innerMin;
+        const r2 = outer;
+        const x1 = r1 * Math.cos(angle);
+        const y1 = r1 * Math.sin(angle);
+        const x2 = r2 * Math.cos(angle);
+        const y2 = r2 * Math.sin(angle);
+
+        ctx.save();
+        ctx.strokeStyle = isHour ? '#bfe9ff' : '#86a8c9';
+        ctx.lineWidth = isHour ? 3.5 : 1.6;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    },
+    drawNumerals(radius) {
+      const ctx = this.ctx;
+      const numerals = ['12', '3', '6', '9'];
+      const numeralRadius = radius * 0.62;
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = "bold 40px Arial";
+      numerals.forEach((num, i) => {
+        const angle = (Math.PI * 2 * (i * 3)) / 12 - Math.PI / 2;
+        const x = numeralRadius * Math.cos(angle);
+        const y = numeralRadius * Math.sin(angle);
+        ctx.fillStyle = '#00eaff';
+        ctx.fillText(num, x, y);
+      });
+      ctx.restore();
+    },
+    drawDigitalTime(radius) {
+      const ctx = this.ctx;
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
+
+      const width = 160, height = 40;
+      const x = -width / 2, y = radius * 0.45 - height;
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(10, 18, 32, 0.65)';
+      ctx.fillRect(x, y, width, height, 8);
+      ctx.fillStyle = '#dff2ff';
+      ctx.font = '600 20px Arial';
+      ctx.fillText(timeStr, 0, y + height / 2);
+      ctx.restore();
+    },
+    drawDate(radius) {
+      const ctx = this.ctx;
+      const now = new Date();
+      const day = now.getDate().toString().padStart(2, '0');
+      const width = 54, height = 34;
+
+      const x = radius * 0.48 - width;
+      const y = -height / 2;
+
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x, y, width, height);
+      ctx.fillStyle = '#1a2436';
+      ctx.font = 'bold 18px Arial';
+      ctx.fillText(day, x + width / 2, y + height / 2);
+      ctx.restore();
+    },
+    drawHand(angle, length, width, color, tail = 0) {
+      const ctx = this.ctx;
+      const x1 = -tail * Math.cos(angle);
+      const y1 = -tail * Math.sin(angle);
+      const x2 = length * Math.cos(angle);
+      const y2 = length * Math.sin(angle);
+
+      ctx.save();
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    },
+    drawCenterCap() {
+      const ctx = this.ctx;
+      ctx.beginPath();
+      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+    }
+  }
+};
+</script>
