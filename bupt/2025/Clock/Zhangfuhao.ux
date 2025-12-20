@@ -1,0 +1,119 @@
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="content">
+    <canvas id='lyxclock' class="clock"></canvas>
+  </div>
+
+</template>
+
+<style>
+  /* Setting the background colour and border */
+  .content {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #a9e2b2; 
+    border-radius: 20px; 
+    padding: 20px; 
+
+  }
+  /* Setting clock colours and borders */
+  .clock { 
+    width: 500px;
+    height: 500px;
+    border-radius: 30%; 
+    background-color: #1ad194; 
+  }
+
+</style>
+
+<script>
+
+export default {
+  onInit() {
+    this.$page.setTitleBar({ text: 'LYX-Clock' })
+  },
+  onShow() {
+    //Display once a second
+    setInterval(this.drawClock, 1000)
+  },
+
+  drawClock() {
+    var clockRadius = 250;
+
+    var now = new Date();
+    const canvas = document.getElementById('lyxclock');
+    const ctx = canvas.getContext('2d'); 
+    ctx.clearRect(0, 0, clockRadius * 2, clockRadius * 2);
+    ctx.save();
+
+    //Move the origin to the centre of the canvas element
+    ctx.translate(clockRadius, clockRadius);
+    ctx.strokeStyle = "white";
+    ctx.fillStyle = "white";
+    ctx.lineCap = "round";
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    //Generate 12 Roman numeral dials
+      ctx.font = '48px STheiti,SimHei';
+        for (let i = 0; i < 12; i++) {
+            let numbers = ['Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ','Ⅶ','Ⅷ','Ⅸ','Ⅹ','Ⅺ','Ⅻ'];
+            ctx.rotate(30 * Math.PI / 180)
+            ctx.fillText(numbers[i], 0, -200)
+        }
+
+
+    //Generate 12 Roman numeral dials
+    ctx.save();
+    ctx.lineWidth = 15;
+    for(var i = 1; i <= 12; i++){
+      ctx.beginPath();
+      ctx.moveTo(clockRadius * 0.55, 0);
+      ctx.lineTo(clockRadius * 0.6, 0);
+      ctx.stroke();
+      ctx.rotate(Math.PI/6);
+    }
+    ctx.restore();
+
+    //Get current time
+    var sec = now.getSeconds();
+    var min = now.getMinutes();
+    var hr  = now.getHours() % 12;
+
+    // hour hands
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate( (Math.PI/6)*hr + (Math.PI/360)*min + (Math.PI/21600)*sec );
+    ctx.lineWidth = 8;
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(-clockRadius * 0.1, -3, clockRadius * 0.45, 6);
+    ctx.restore();
+
+
+    // minute hands
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate( (Math.PI/30)*min + (Math.PI/1800)*sec );
+    ctx.lineWidth = 4;
+    ctx.fillStyle = "orange";
+    ctx.fillRect(-clockRadius * 0.12, -2, clockRadius * 0.57, 4);
+    ctx.restore();
+
+
+    // second hands
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.rotate(sec * Math.PI/30);
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "purple";
+    ctx.fillRect(-clockRadius * 0.15, -1.5, clockRadius * 0.7, 3);
+    ctx.restore();
+    ctx.restore();
+
+  },
+
+}
+
+</script>
