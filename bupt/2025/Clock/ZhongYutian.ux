@@ -1,0 +1,156 @@
+<template>
+  <div class="page">
+    <canvas id="clock" class="clock"></canvas>
+    <!-- 数字时间显示 -->
+    <text class="time-text">{{ timeStr }}</text>
+  </div>
+</template>
+
+<script>
+export default {
+  data: {
+    ctx: null,
+    timer: null,
+    timeStr: '00:00:00',
+    size: 460,
+    radius: 200,
+    dpr: 1
+  },
+
+  onShow() {
+    this.initClock()
+  },
+
+  onDestroy() {
+    if (this.timer) clearInterval(this.timer)
+  },
+
+  initClock() {
+    // 兼容：有些运行时用 this.$element，有些可直接 document.getElementById
+    const canvas =
+      (this.$element && this.$element('clock')) || document.getElementById('clock')
+    if (!canvas) return
+
+    // 按实际布局尺寸自适应（取宽高中较小值）
+    const rect =
+      (canvas.getBoundingClientRect && canvas.getBoundingClientRect()) || {
+        width: 460,
+        height: 460
+      }
+    const cssSize = Math.min(rect.width || 460, rect.height || 460)
+    this.size = cssSize
+
+    // DPR 适配，避免高清屏发虚
+    const dpr =
+      typeof devicePixelRatio === 'number' && devicePixelRatio ? devicePixelRatio : 1
+    this.dpr = dpr
+
+    canvas.width = Math.floor(cssSize * dpr)
+    canvas.height = Math.floor(cssSize * dpr)
+    canvas.style.width = cssSize + 'px'
+    canvas.style.height = cssSize + 'px'
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    // 重置坐标系 -> scale -> 移动到中心
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.scale(dpr, dpr)
+    ctx.translate(cssSize / 2, cssSize / 2)
+
+    this.ctx = ctx
+    this.radius = Math.floor(cssSize / 2) - 12
+
+    this.drawClock()
+    if (this.timer) clearInterval(this.timer)
+    this.timer = setInterval(() => this.drawClock(), 1000)
+  },
+
+  drawClock() {
+    const ctx = this.ctx
+    if (!ctx) return
+
+    const now = new Date()
+    this.updateTimeText(now)
+
+    const R = this.radius
+    ctx.clearRect(-R - 30, -R - 30, (R + 30) * 2, (R + 30) * 2)
+
+    this.drawFace(ctx, R)
+    this.drawTicks(ctx, R)
+    this.drawNumbers(ctx, R)
+    this.drawHands(ctx, R, now)
+  },
+
+  updateTimeText(date) {
+    const h = this.pad(date.getHours())
+    const m = this.pad(date.getMinutes())
+    const s = this.pad(date.getSeconds())
+    this.timeStr = `${h}:${m}:${s}`
+  },
+
+  pad(n) {
+    return n < 10 ? '0' + n : String(n)
+  },
+
+  drawFace(ctx, R) {
+    // 外圈
+    ctx.beginPath()
+    ctx.arc(0, 0, R, 0, Math.PI * 2)
+    ctx.fillStyle = '#ffffff'
+    ctx.fill()
+    ctx.lineWidth = 6
+    ctx.strokeStyle = '#1976d2'
+    ctx.stroke()
+
+    // 内底色
+    ctx.beginPath()
+    ctx.arc(0, 0, R - 10, 0, Math.PI * 2)
+    ctx.fillStyle = '#e3f2fd'
+    ctx.fill()
+
+    // 圆心
+    ctx.beginPath()
+    ctx.arc(0, 0, 8, 0, Math.PI * 2)
+    ctx.fillStyle = '#111111'
+    ctx.fill()
+
+    ctx.beginPath()
+    ctx.arc(0, 0, 4, 0, Math.PI * 2)
+    ctx.fillStyle = '#d32f2f'
+    ctx.fill()
+  },
+
+  drawTicks(ctx, R) {
+    // 刻度
+    for (let i = 0; i < 60; i++) {
+      const isMajor = i % 5 === 0
+      const ang = (i * Math.PI) / 30
+
+      ctx.save()
+      ctx.rotate(ang)
+      ctx.beginPath()
+      ctx.moveTo(0, -R + (isMajor ? 18 : 12))
+      ctx.lineTo(0, -R + 4)
+      ctx.lineWidth = isMajor ? 4 : 2
+      ctx.strokeStyle = isMajor ? '#1565c0' : '#42a5f5'
+      ctx.lineCap = 'round'
+      ctx.stroke()
+      ctx.restore()
+    }
+  },
+
+  drawNumbers(ctx, R) {
+    // 数字
+    ctx.save()
+    ctx.font = Math.floor(R * 0.14) + 'px Arial'
+    ctx.fillStyle = '#0d47a1'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+
+    const rNum = R - 40
+    for (let i = 1; i <= 12; i++) {
+      const a = (i * Math.PI) / 6
+      ctx.fillText(String(i), Math.sin(a) * rNum, -Math.cos(a) * rNum)
+    }
+    ctx.restore()
