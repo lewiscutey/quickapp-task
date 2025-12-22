@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>八卦图 - 鼠标控制旋转</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body{
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ccc;
+      font-family: sans-serif;
+      user-select: none;
+      padding: 16px;
+      gap: 12px;
+    }
+
+    .taiji-wrap{
+      position: relative;
+      width: 420px;   /* 外圈留更大空间 */
+      height: 420px;
+      display: grid;
+      place-items: center;
+    }
+
+    .taiji{
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #000 50%, #fff 50%);
+      position: relative;
+      border: 1px solid #333;
+      cursor: pointer;
+      transform: rotate(0deg);
+    }
+
+    .taiji::before,
+    .taiji::after{
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+    }
+
+    .taiji::before{
+      top: 0;
+      background: radial-gradient(circle at center, #000 0 25px, #fff 25.5px);
+    }
+
+    .taiji::after{
+      bottom: 0;
+      background: radial-gradient(circle at center, #fff 0 25px, #000 25.5px);
+    }
+
+    /* —— 八卦文字：用“角度 + 半径”沿圆周均匀排布 —— */
+    .bagua-item{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 110px;
+      text-align: center;
+      font-size: 13px;
+      color: #222;
+      line-height: 1.2;
+      pointer-events: none;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.55);
+
+      /* 关键：先旋转到角度，再向外平移，再反向旋转让文字保持正 */
+      transform:
+        rotate(var(--a))
+        translateY(-200px)              /* 半径：可在 185~210 微调 */
+        rotate(calc(var(--a) * -1))
+        translate(-50%, -50%);          /* 让 item 自身以中心对齐 */
+      transform-origin: center;
+    }
+    .bagua-item .gua { font-weight: 700; }
+    .bagua-item .xiang {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    /* 后天八卦方位：北坎、东北艮、东震、东南巽、南离、西南坤、西兑、西北乾 */
+    .a0   { --a: 0deg; }     /* 北 */
+    .a45  { --a: 45deg; }    /* 东北 */
+    .a90  { --a: 90deg; }    /* 东 */
+    .a135 { --a: 135deg; }   /* 东南 */
+    .a180 { --a: 180deg; }   /* 南 */
+    .a225 { --a: 225deg; }   /* 西南 */
+    .a270 { --a: 270deg; }   /* 西 */
+    .a315 { --a: 315deg; }   /* 西北 */
+
+    .info{
+      max-width: 520px;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+      background: rgba(255,255,255,0.55);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .info b{ font-weight: 700; }
+    .info ul{ padding-left: 18px; }
+  </style>
+</head>
+<body>
+
+  <div class="taiji-wrap">
+    <!-- 后天八卦外圈分布（位置更合理：沿圆周均匀） -->
+    <div class="bagua-item a0">
+      <div class="gua">坎（北）</div><div class="xiang">☵</div>
+    </div>
+    <div class="bagua-item a45">
+      <div class="gua">艮（东北）</div><div class="xiang">☶</div>
+    </div>
+    <div class="bagua-item a90">
+      <div class="gua">震（东）</div><div class="xiang">☳</div>
+    </div>
+    <div class="bagua-item a135">
+      <div class="gua">巽（东南）</div><div class="xiang">☴</div>
+    </div>
+    <div class="bagua-item a180">
+      <div class="gua">离（南）</div><div class="xiang">☲</div>
+    </div>
+    <div class="bagua-item a225">
+      <div class="gua">坤（西南）</div><div class="xiang">☷</div>
+    </div>
+    <div class="bagua-item a270">
+      <div class="gua">兑（西）</div><div class="xiang">☱</div>
+    </div>
+    <div class="bagua-item a315">
+      <div class="gua">乾（西北）</div><div class="xiang">☰</div>
+    </div>
+
+    <!-- 太极图 -->
+    <div class="taiji" id="taiji"></div>
+  </div>
+
+  <div class="info">
+    <b>简单说明（后天八卦）</b>
+    <ul>
+      <li><b>八卦</b>由三条“爻”组成：阳爻（—）为实线，阴爻（– –）为断线，三爻组合成 8 种卦象。</li>
+      <li>本图使用常见<b>后天八卦方位</b>：北坎、东北艮、东震、东南巽、南离、西南坤、西兑、西北乾。</li>
+      <li>中间太极图表现阴阳相对相生：黑白两部分互含对方（黑中有白点、白中有黑点）。</li>
+      <li>交互：鼠标移入旋转、移出停止；触摸开始/结束控制；双击切换旋转方向。</li>
+    </ul>
+  </div>
+
+  <script>
+    const taijiEl = document.getElementById('taiji');
+
+    let running = false;
+    let angle = 0;
+    let speed = 2;
+    let rafId = 0;
+
+    function step() {
+      angle = (angle + speed) % 360;
+      taijiEl.style.transform = `rotate(${angle}deg)`;
+      rafId = requestAnimationFrame(step);
+    }
+
+    function startRotate() {
+      if (running) return;
+      running = true;
+      step();
+    }
+
+    function stopRotate() {
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(rafId);
+    }
+
+    taijiEl.addEventListener('mouseenter', startRotate);
+    taijiEl.addEventListener('mouseleave', stopRotate);
+
+    taijiEl.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startRotate();
+    }, { passive: false });
+
+    taijiEl.addEventListener('touchend', (e) => {
+      const rect = taijiEl.getBoundingClientRect();
+      const t = e.changedTouches[0];
+      const inside =
+        t.clientX >= rect.left && t.clientX <= rect.right &&
+        t.clientY >= rect.top  && t.clientY <= rect.bottom;
+      if (!inside) stopRotate();
+    });
+
+    taijiEl.addEventListener('dblclick', () => {
+      speed = -speed;
+    });
+  </script>
+</body>
+</html>
